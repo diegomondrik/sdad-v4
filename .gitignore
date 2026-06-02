@@ -1,0 +1,10 @@
+# MCP config — contains tokens, never commit
+mcp.json
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editor
+.vscode/
+.idea/
