@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDAD v4.0 — Installation Guide</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #FAFAFA;
+      color: #0F172A;
+      line-height: 1.6;
+      padding: 48px 24px;
+    }
+
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 2px solid #2563EB;
+      padding-bottom: 24px;
+      margin-bottom: 48px;
+    }
+
+    header .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #2563EB;
+      margin-bottom: 8px;
+    }
+
+    header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 16px;
+      color: #475569;
+    }
+
+    /* ── Section headings ── */
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 28px 0 10px;
+    }
+
+    p {
+      margin-bottom: 14px;
+      font-size: 15px;
+      color: #1E293B;
+    }
+
+    /* ── Code blocks ── */
+    pre {
+      background: #1E1E2E;
+      color: #CDD6F4;
+      border-radius: 8px;
+      padding: 20px 24px;
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin: 12px 0 20px;
+    }
+
+    code {
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      background: #E2E8F0;
+      color: #1E293B;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 28px;
+      font-size: 14px;
+    }
+
+    thead th {
+      background: #1E293B;
+      color: #FFFFFF;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+    }
+
+    tbody tr:nth-child(odd) {
+      background: #F8FAFC;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #FFFFFF;
+    }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #E2E8F0;
+      vertical-align: top;
+    }
+
+    /* ── Alerts ── */
+    .alert {
+      border-left: 4px solid #2563EB;
+      background: #EFF6FF;
+      padding: 14px 18px;
+      border-radius: 0 6px 6px 0;
+      margin: 20px 0;
+      font-size: 14px;
+      color: #1E293B;
+    }
+
+    .alert.warn {
+      border-left-color: #D97706;
+      background: #FFFBEB;
+    }
+
+    .alert.success {
+      border-left-color: #16A34A;
+      background: #F0FDF4;
+    }
+
+    .alert strong {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    /* ── Step list ── */
+    .steps {
+      counter-reset: step-counter;
+      list-style: none;
+      margin: 20px 0;
+      padding: 0;
+    }
+
+    .steps li {
+      counter-increment: step-counter;
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      align-items: flex-start;
+    }
+
+    .steps li::before {
+      content: counter(step-counter);
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #2563EB;
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .steps li .content {
+      flex: 1;
+    }
+
+    .steps li .content strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .steps li .content p {
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #475569;
+    }
+
+    /* ── Tab switcher ── */
+    .os-tabs {
+      display: flex;
+      gap: 0;
+      margin: 24px 0 0;
+      border-bottom: 2px solid #E2E8F0;
+    }
+
+    .os-tab-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #64748B;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .os-tab-btn.active {
+      color: #2563EB;
+      border-bottom-color: #2563EB;
+    }
+
+    .os-panel { display: none; padding: 20px 0; }
+    .os-panel.active { display: block; }
+
+    /* ── File tree ── */
+    .file-tree {
+      background: #1E1E2E;
+      color: #CDD6F4;
+      border-radius: 8px;
+      padding: 20px 24px;
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      line-height: 1.9;
+      margin: 12px 0 20px;
+    }
+
+    .file-tree .dim { color: #6C7086; }
+    .file-tree .hi  { color: #89DCEB; }
+    .file-tree .ok  { color: #A6E3A1; }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid #E2E8F0;
+      font-size: 13px;
+      color: #94A3B8;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── HEADER ── -->
+  <header>
+    <p class="eyebrow">G7 AI Development Methodology</p>
+    <h1>SDAD v4.0 — Installation Guide</h1>
+    <p>How to install the methodology, verify prerequisites, and initialize your first project.</p>
+  </header>
+
+  <!-- ── OVERVIEW ── -->
+  <h2>What the installer does</h2>
+
+  <p>
+    The SDAD installer runs 6 steps inside the project repo where you want the methodology active.
+    It checks prerequisites, builds the <code>.claude/</code> folder, downloads skill files, installs
+    <code>CLAUDE.md</code>, and initializes <code>SPEC.md</code> and <code>LESSON_LIBRARY.md</code>.
+  </p>
+
+  <ol class="steps">
+    <li>
+      <div class="content">
+        <strong>Check prerequisites</strong>
+        <p>Verifies Node.js v18+, Claude Code, and git. Installs Claude Code automatically if missing.</p>
+      </div>
+    </li>
+    <li>
+      <div class="content">
+        <strong>Create <code>.claude/</code> folder structure</strong>
+        <p>Creates all required skill and hook directories under <code>.claude/</code>.</p>
+      </div>
+    </li>
+    <li>
+      <div class="content">
+        <strong>Download skill files</strong>
+        <p>Fetches all <code>SKILL.md</code> files from the SDAD repo into <code>.claude/skills/</code>.</p>
+      </div>
+    </li>
+    <li>
+      <div class="content">
+        <strong>Install CLAUDE.md</strong>
+        <p>Downloads the core instruction file to the repo root. If a <code>CLAUDE.md</code> already exists,
+        the SDAD block is appended — it is never overwritten.</p>
+      </div>
+    </li>
+    <li>
+      <div class="content">
+        <strong>Initialize project files</strong>
+        <p>Creates <code>SPEC.md</code> (blank template) and <code>LESSON_LIBRARY.md</code> if they don't exist.
+        Updates <code>.gitignore</code> with SDAD entries.</p>
+      </div>
+    </li>
+    <li>
+      <div class="content">
+        <strong>Summary</strong>
+        <p>Prints installed files and the exact next step to start working.</p>
+      </div>
+    </li>
+  </ol>
+
+  <!-- ── PREREQUISITES ── -->
+  <h2>Prerequisites</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Requirement</th>
+        <th>Minimum version</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Node.js</td>
+        <td>v18 or higher</td>
+        <td>Download from <strong>nodejs.org</strong>. The installer checks and will stop if missing.</td>
+      </tr>
+      <tr>
+        <td>Claude Code</td>
+        <td>Latest</td>
+        <td>Installed automatically by the installer if not found (<code>npm install -g @anthropic-ai/claude-code</code>).</td>
+      </tr>
+      <tr>
+        <td>git</td>
+        <td>Any recent version</td>
+        <td>Run the installer from inside a git repo. If no repo is detected, it runs <code>git init</code> automatically.</td>
+      </tr>
+      <tr>
+        <td>Internet connection</td>
+        <td>—</td>
+        <td>Required to download skill files from GitHub during installation.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert warn">
+    <strong>Run the installer from the correct folder</strong>
+    Navigate to the project repo root before running. SDAD installs into the current working directory.
+  </div>
+
+  <!-- ── INSTALL ── -->
+  <h2>Run the installer</h2>
+
+  <div class="os-tabs">
+    <button class="os-tab-btn active" onclick="switchTab(event, 'mac')">Mac / Linux</button>
+    <button class="os-tab-btn" onclick="switchTab(event, 'win')">Windows (PowerShell)</button>
+  </div>
+
+  <div id="mac" class="os-panel active">
+    <p>Open a terminal, navigate to your project folder, and run:</p>
+    <pre><code>bash &lt;(curl -fsSL https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/install.sh)</code></pre>
+    <p>The script downloads and executes in a single step. No file is saved to your repo.</p>
+  </div>
+
+  <div id="win" class="os-panel">
+    <h3>Option A — paste directly (recommended)</h3>
+    <p>Open PowerShell, navigate to your project folder, and run:</p>
+    <pre><code>$install = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/install.ps1" -UseBasicParsing).Content
+Invoke-Expression $install</code></pre>
+
+    <h3>Option B — download first, then run</h3>
+    <p>If you prefer to inspect the script before executing:</p>
+    <pre><code>Invoke-WebRequest -Uri "https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/install.ps1" -OutFile "install-sdad.ps1"
+powershell -ExecutionPolicy Bypass -File ".\install-sdad.ps1"</code></pre>
+  </div>
+
+  <!-- ── WHAT GETS INSTALLED ── -->
+  <h2>Files installed</h2>
+
+  <div class="file-tree">
+    <span class="hi">your-project/</span><br>
+    ├── <span class="ok">CLAUDE.md</span>                              <span class="dim">← core methodology instructions</span><br>
+    ├── <span class="ok">SPEC.md</span>                                <span class="dim">← blank spec template (if new)</span><br>
+    ├── <span class="ok">LESSON_LIBRARY.md</span>                      <span class="dim">← blank lesson library (if new)</span><br>
+    ├── <span class="ok">.gitignore</span>                             <span class="dim">← SDAD entries added</span><br>
+    └── <span class="hi">.claude/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;├── <span class="hi">skills/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="ok">ai-architect/SKILL.md</span>          <span class="dim">← always active</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="ok">ai-engineer/SKILL.md</span>           <span class="dim">← always active</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="ok">decision-architecture/SKILL.md</span> <span class="dim">← transversal</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="ok">data-discovery/SKILL.md</span>        <span class="dim">← transversal</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="hi">pyplan/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="ok">diagram/SKILL.md</span>           <span class="dim">← Pyplan projects only</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="ok">interfaces/SKILL.md</span>        <span class="dim">← Pyplan projects only</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="ok">qa-platform/SKILL.md</span>       <span class="dim">← Pyplan projects only</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="ok">spec-context/SKILL.md</span>      <span class="dim">← Pyplan projects only</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;└── <span class="hi">hooks/</span>                             <span class="dim">← inactive in v4.0</span>
+  </div>
+
+  <div class="alert">
+    <strong>Existing files are never overwritten</strong>
+    If <code>CLAUDE.md</code> already exists, the SDAD block is appended. If <code>SPEC.md</code> or
+    <code>LESSON_LIBRARY.md</code> already exist, they are left untouched.
+  </div>
+
+  <!-- ── PROJECT INIT ── -->
+  <h2>Initialize a project</h2>
+
+  <p>
+    After the methodology installer runs once, use the <strong>project initializer</strong> at the start
+    of each new project. It collects project name, developer name, client name, and compliance tier,
+    then writes all scaffolding files.
+  </p>
+
+  <div class="os-tabs">
+    <button class="os-tab-btn active" onclick="switchTab(event, 'mac2')">Mac / Linux</button>
+    <button class="os-tab-btn" onclick="switchTab(event, 'win2')">Windows (PowerShell)</button>
+  </div>
+
+  <div id="mac2" class="os-panel active">
+    <pre><code>bash &lt;(curl -fsSL https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/project-init.sh)</code></pre>
+  </div>
+
+  <div id="win2" class="os-panel">
+    <pre><code>$init = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/project-init.ps1" -UseBasicParsing).Content
+Invoke-Expression $init</code></pre>
+  </div>
+
+  <p>The initializer creates:</p>
+
+  <table>
+    <thead>
+      <tr><th>File / Folder</th><th>Purpose</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>SPEC.md</code></td><td>Pre-filled with project name, developer, date, and compliance tier</td></tr>
+      <tr><td><code>LESSON_LIBRARY.md</code></td><td>Blank lesson library for this project</td></tr>
+      <tr><td><code>DECISIONS.md</code></td><td>Design decisions log — appended automatically by <code>$build</code></td></tr>
+      <tr><td><code>.sdad/project.md</code></td><td>Project registry: name, developer, client, tier, session log</td></tr>
+      <tr><td><code>.sdad/flows/</code></td><td>Empty directory for saved <code>$flow</code> definitions</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Compliance tiers</h3>
+
+  <table>
+    <thead>
+      <tr><th>Option</th><th>Tier</th><th>For</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>1</code> (default)</td><td>Tier 1 — Standard</td><td>Internal tools, POCs, scripts</td></tr>
+      <tr><td><code>2</code></td><td>Tier 2 — Business</td><td>SaaS, customer-facing apps, user data</td></tr>
+      <tr><td><code>3</code></td><td>Tier 3 — Enterprise</td><td>Regulated environments, corporate IT</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ── STATUS LINE ── -->
+  <h2>Context budget monitor</h2>
+
+  <p>
+    Before every Claude Code session, run <code>cc-status-line</code> in a separate terminal window.
+    It displays the current model, context usage percentage, session cost, and git branch in real time.
+    SDAD uses context percentages at 50% and 65% as thresholds for session warnings.
+  </p>
+
+  <pre><code>npx ccstatusline@latest</code></pre>
+
+  <div class="alert">
+    <strong>Keep it open in a separate terminal</strong>
+    Run <code>ccstatusline</code> in one terminal tab, then start <code>claude</code> in a second tab.
+    The status line updates automatically as you work.
+  </div>
+
+  <!-- ── VERIFICATION ── -->
+  <h2>Verify the installation</h2>
+
+  <p>Start Claude Code (<code>claude</code>) and run these commands to confirm everything is active:</p>
+
+  <table>
+    <thead>
+      <tr><th>Command</th><th>Expected result</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>$sdad</code></td><td>Methodology overview: all phases and commands listed</td></tr>
+      <tr><td><code>$skills</code></td><td>AI Architect and AI Engineer shown as always active</td></tr>
+      <tr><td><code>$spec</code></td><td>First requirements question with a proposed default</td></tr>
+      <tr><td><code>$pause</code></td><td>Session state including context budget percentage</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert success">
+    <strong>Installation successful when all four commands respond correctly</strong>
+    If any command is not recognized, verify that <code>CLAUDE.md</code> is present in the repo root
+    and that the <code>.claude/skills/</code> folder contains the SKILL.md files.
+  </div>
+
+  <!-- ── TROUBLESHOOTING ── -->
+  <h2>Troubleshooting</h2>
+
+  <table>
+    <thead>
+      <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Installer stops at Node.js check</td>
+        <td>Node.js not installed or version below 18</td>
+        <td>Install Node.js v18+ from <strong>nodejs.org</strong> and re-run</td>
+      </tr>
+      <tr>
+        <td>Skill file download fails</td>
+        <td>No internet access or GitHub unreachable</td>
+        <td>Check connection; download files manually from the repo and place them in <code>.claude/skills/</code></td>
+      </tr>
+      <tr>
+        <td><code>$sdad</code> not recognized in Claude Code</td>
+        <td><code>CLAUDE.md</code> missing from repo root</td>
+        <td>Re-run the installer; check that the file landed at the repo root, not in a subfolder</td>
+      </tr>
+      <tr>
+        <td>PowerShell execution policy error</td>
+        <td>Script execution blocked by system policy</td>
+        <td>Use Option A (paste + <code>Invoke-Expression</code>) instead of running the <code>.ps1</code> file directly</td>
+      </tr>
+      <tr>
+        <td><code>SPEC.md</code> not created</td>
+        <td>File already exists in the repo</td>
+        <td>This is intentional — existing <code>SPEC.md</code> files are never overwritten</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── NEXT STEPS ── -->
+  <h2>Next steps</h2>
+
+  <p>After installation and project initialization, start a Claude Code session and run:</p>
+
+  <pre><code>claude</code></pre>
+
+  <p>Then use one of these entry points:</p>
+
+  <table>
+    <thead>
+      <tr><th>Command</th><th>Use when</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>$spec</code></td><td>Starting a new project — guided requirements, one question at a time</td></tr>
+      <tr><td><code>$docfinal</code></td><td>Project already built without SDAD — generates retroactive Spec and QA report</td></tr>
+    </tbody>
+  </table>
+
+  <footer>
+    G7 AI Development Methodology &nbsp;·&nbsp; SDAD v4.0 &nbsp;·&nbsp; INSTALL_GUIDE_v4.html
+  </footer>
+
+</div>
+
+<script>
+  function switchTab(e, panelId) {
+    const container = e.target.closest('.page');
+    const allBtns = e.target.parentElement.querySelectorAll('.os-tab-btn');
+    allBtns.forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+
+    // find sibling panels (next sibling divs with class os-panel)
+    let el = e.target.parentElement.nextElementSibling;
+    while (el && el.classList.contains('os-panel')) {
+      el.classList.remove('active');
+      el = el.nextElementSibling;
+    }
+    document.getElementById(panelId).classList.add('active');
+  }
+</script>
+</body>
+</html>

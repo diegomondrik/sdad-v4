@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDAD v4.0 — Usage &amp; Shortcuts</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #FAFAFA;
+      color: #0F172A;
+      line-height: 1.6;
+      padding: 48px 24px;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 2px solid #2563EB;
+      padding-bottom: 24px;
+      margin-bottom: 48px;
+    }
+
+    header .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #2563EB;
+      margin-bottom: 8px;
+    }
+
+    header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 16px;
+      color: #475569;
+    }
+
+    /* ── Nav ── */
+    nav {
+      background: #F1F5F9;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 48px;
+    }
+
+    nav p {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #64748B;
+      margin-bottom: 10px;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+    }
+
+    nav ul li a {
+      font-size: 14px;
+      color: #2563EB;
+      text-decoration: none;
+    }
+
+    nav ul li a:hover { text-decoration: underline; }
+
+    /* ── Section ── */
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 56px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 28px 0 10px;
+    }
+
+    p {
+      margin-bottom: 14px;
+      font-size: 15px;
+      color: #1E293B;
+    }
+
+    /* ── Code ── */
+    pre {
+      background: #1E1E2E;
+      color: #CDD6F4;
+      border-radius: 8px;
+      padding: 18px 22px;
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin: 12px 0 20px;
+    }
+
+    code {
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      background: #E2E8F0;
+      color: #1E293B;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 28px;
+      font-size: 14px;
+    }
+
+    thead th {
+      background: #1E293B;
+      color: #FFFFFF;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+    }
+
+    tbody tr:nth-child(odd)  { background: #F8FAFC; }
+    tbody tr:nth-child(even) { background: #FFFFFF; }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #E2E8F0;
+      vertical-align: top;
+    }
+
+    tbody td:first-child {
+      white-space: nowrap;
+    }
+
+    /* ── Command pill ── */
+    .cmd {
+      display: inline-block;
+      background: #0F172A;
+      color: #93C5FD;
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    /* ── Phase badge ── */
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+
+    .badge-0 { background: #E2E8F0; color: #475569; }
+    .badge-1 { background: #DBEAFE; color: #1D4ED8; }
+    .badge-2 { background: #EDE9FE; color: #6D28D9; }
+    .badge-3 { background: #D1FAE5; color: #065F46; }
+    .badge-4 { background: #FEF3C7; color: #92400E; }
+    .badge-any { background: #F1F5F9; color: #334155; }
+
+    /* ── Alerts ── */
+    .alert {
+      border-left: 4px solid #2563EB;
+      background: #EFF6FF;
+      padding: 14px 18px;
+      border-radius: 0 6px 6px 0;
+      margin: 20px 0;
+      font-size: 14px;
+      color: #1E293B;
+    }
+
+    .alert.warn   { border-left-color: #D97706; background: #FFFBEB; }
+    .alert.tip    { border-left-color: #6366F1; background: #EEF2FF; }
+
+    .alert strong {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    /* ── Phase flow ── */
+    .phase-flow {
+      display: flex;
+      gap: 0;
+      margin: 20px 0 32px;
+      overflow-x: auto;
+    }
+
+    .phase-box {
+      flex: 1;
+      min-width: 110px;
+      border: 1px solid #E2E8F0;
+      padding: 14px 16px;
+      text-align: center;
+      position: relative;
+    }
+
+    .phase-box:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94A3B8;
+      font-size: 16px;
+      z-index: 1;
+    }
+
+    .phase-box:first-child { border-radius: 8px 0 0 8px; }
+    .phase-box:last-child  { border-radius: 0 8px 8px 0; }
+
+    .phase-box .num {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #94A3B8;
+      margin-bottom: 4px;
+    }
+
+    .phase-box .label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 4px;
+    }
+
+    .phase-box .cmd-small {
+      font-size: 12px;
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      color: #2563EB;
+    }
+
+    /* ── Context budget bar ── */
+    .budget-bar {
+      background: #E2E8F0;
+      border-radius: 999px;
+      height: 10px;
+      overflow: hidden;
+      margin: 8px 0 4px;
+      position: relative;
+    }
+
+    .budget-bar .fill {
+      height: 100%;
+      border-radius: 999px;
+      background: #2563EB;
+    }
+
+    .budget-bar .mark {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: 2px;
+    }
+
+    .budget-bar .mark-50 { left: 50%; background: #D97706; }
+    .budget-bar .mark-65 { left: 65%; background: #DC2626; }
+
+    .budget-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #64748B;
+      margin-top: 4px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid #E2E8F0;
+      font-size: 13px;
+      color: #94A3B8;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── HEADER ── -->
+  <header>
+    <p class="eyebrow">G7 AI Development Methodology</p>
+    <h1>SDAD v4.0 — Usage &amp; Shortcuts</h1>
+    <p>All commands, phases, context budget rules, and session patterns in one reference.</p>
+  </header>
+
+  <!-- ── NAV ── -->
+  <nav>
+    <p>On this page</p>
+    <ul>
+      <li><a href="#phases">Development phases</a></li>
+      <li><a href="#commands">All commands</a></li>
+      <li><a href="#session">Session setup</a></li>
+      <li><a href="#budget">Context budget</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#compliance">Compliance tiers</a></li>
+      <li><a href="#agents">Sub-agent delegation</a></li>
+      <li><a href="#hub">HUB BLOCK</a></li>
+      <li><a href="#lessons">Lesson Library</a></li>
+      <li><a href="#flow">Flows</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── PHASES ── -->
+  <h2 id="phases">Development phases</h2>
+
+  <p>SDAD structures every project into five sequential phases. Each phase has a dedicated command.</p>
+
+  <div class="phase-flow">
+    <div class="phase-box">
+      <div class="num">Phase 0</div>
+      <div class="label">Context</div>
+      <div class="cmd-small">automatic</div>
+    </div>
+    <div class="phase-box">
+      <div class="num">Phase 1</div>
+      <div class="label">Requirements</div>
+      <div class="cmd-small">$spec</div>
+    </div>
+    <div class="phase-box">
+      <div class="num">Phase 2</div>
+      <div class="label">Spec document</div>
+      <div class="cmd-small">$specout</div>
+    </div>
+    <div class="phase-box">
+      <div class="num">Phase 3</div>
+      <div class="label">Build</div>
+      <div class="cmd-small">$build</div>
+    </div>
+    <div class="phase-box">
+      <div class="num">Phase 4</div>
+      <div class="label">QA</div>
+      <div class="cmd-small">$qa</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Phase</th>
+        <th>Name</th>
+        <th>What happens</th>
+        <th>Output</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-0">Phase 0</span></td>
+        <td>Context Analysis</td>
+        <td>Claude reads the repo, detects platform, detects UI presence, recommends compliance tier</td>
+        <td>Tier recommendation, skill suggestions</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-1">Phase 1</span></td>
+        <td>Requirements</td>
+        <td>Guided discovery — one question at a time with proposed defaults. Covers scope, flows, data model, integrations, security, and compliance tier</td>
+        <td>Requirements captured in session</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-2">Phase 2</span></td>
+        <td>Spec Document</td>
+        <td>Generates the full 13-section SPEC.md and writes it to the repo root. Requires developer approval before build can proceed</td>
+        <td><code>SPEC.md</code> written to repo</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-3">Phase 3</span></td>
+        <td>Build</td>
+        <td>Vertical increments with tests. Each increment announced before coding, tests run after, QA and decisions logged automatically</td>
+        <td>Code, tests, <code>DECISIONS.md</code> entries</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-4">Phase 4</span></td>
+        <td>QA</td>
+        <td>Layered quality review across security, structure, efficiency, best practices, and platform (Pyplan). Findings numbered H-01, H-02…</td>
+        <td>QA report with findings and fixes</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── ALL COMMANDS ── -->
+  <h2 id="commands">All commands</h2>
+
+  <h3>Core workflow</h3>
+  <table>
+    <thead>
+      <tr><th>Command</th><th>Phase</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="cmd">$spec</span></td>
+        <td><span class="badge badge-1">Phase 1</span></td>
+        <td>Guided requirements — one question at a time with a proposed default. Reads existing files before asking. Use <code>$spec [section]</code> to jump to a specific section.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$specout</span></td>
+        <td><span class="badge badge-2">Phase 2</span></td>
+        <td>Generates the full Spec document from requirements gathered in <code>$spec</code>. Writes <code>SPEC.md</code> to the repo root. Requires approval before <code>$build</code> is allowed.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$build</span></td>
+        <td><span class="badge badge-3">Phase 3</span></td>
+        <td>Guided vertical increment. Announces files, tests, docs, and dependencies before writing code. Runs tests after. Use <code>$build [feature]</code> to specify a feature.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$qa</span></td>
+        <td><span class="badge badge-4">Phase 4</span></td>
+        <td>Auto QA on the last <code>$build</code> increment. All 4 layers (5 on Pyplan). Findings numbered H-01, H-02…</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$qa review</span></td>
+        <td><span class="badge badge-4">Phase 4</span></td>
+        <td>Manual QA — presents each finding individually and waits for approval before applying any fix.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$qa full</span></td>
+        <td><span class="badge badge-4">Phase 4</span></td>
+        <td>Full project audit across all files, not just the last increment.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Session management</h3>
+  <table>
+    <thead>
+      <tr><th>Command</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="cmd">$pause</span></td>
+        <td>Show current session state: phase, Spec status, compliance tier, platform, context budget %, decisions log count, open QA findings, active skills, flows, and next recommended step.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$pause compress</span></td>
+        <td>Generate a compact Session Snapshot. Paste it as the first message in the next session to fully restore state — no need to re-explain anything.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$sdad</span></td>
+        <td>Show the SDAD v4.0 methodology overview: all phases, descriptions, and command list.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Documentation and verification</h3>
+  <table>
+    <thead>
+      <tr><th>Command</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="cmd">$docfinal</span></td>
+        <td>Retroactive documentation for projects built without SDAD. Runs 4 steps: retroactive SPEC, AI Authorship Log, standalone QA audit, and lesson candidates. Use <code>$docfinal spec</code>, <code>$docfinal log</code>, <code>$docfinal qa</code>, or <code>$docfinal lessons</code> to run individual steps.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$verify</span></td>
+        <td>Check dependency documentation currency. Runs automatically when <code>$build</code> introduces a new external dependency. Uses Context 7 MCP when active.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$doc</span></td>
+        <td>Generate technical documentation via sub-agent. Variants: <code>$doc readme</code>, <code>$doc api</code>, <code>$doc arch</code>, <code>$doc compliance</code>. All outputs written to <code>/docs</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Sub-agent delegation</h3>
+  <table>
+    <thead>
+      <tr><th>Command</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="cmd">$agent review [module]</span></td>
+        <td>Architectural review of a module or the full project. Runs in isolated context via <code>.claude/agents/code-reviewer.md</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$agent test [module]</span></td>
+        <td>Generate a test suite for a module. Runs via <code>.claude/agents/test-generator.md</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$agent audit [path]</span></td>
+        <td>Security audit of a path. Runs via <code>.claude/agents/security-auditor.md</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Skills, lessons, and flows</h3>
+  <table>
+    <thead>
+      <tr><th>Command</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="cmd">$skills</span></td>
+        <td>Show active and available specialist skills. Lists always-on skills and on-demand skills that can be activated manually.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$skills [name]</span></td>
+        <td>Activate a specific skill. Example: <code>$skills brand-design</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$lesson</span></td>
+        <td>Show all Lesson Library entries grouped by category.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$lesson [keyword]</span></td>
+        <td>Filter lessons by keyword, category, or stack.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$lesson [L-XX]</span></td>
+        <td>Show a specific lesson entry in full.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$lesson new</span></td>
+        <td>Guided lesson creation. Writes the new entry to <code>LESSON_LIBRARY.md</code> on approval.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$flow [name]</span></td>
+        <td>Define a new named flow for this project. Saved to <code>.claude/flows/</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$flow list</span></td>
+        <td>List all saved flows.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$flow [name] run</span></td>
+        <td>Execute a saved flow.</td>
+      </tr>
+      <tr>
+        <td><span class="cmd">$flow [name] edit</span></td>
+        <td>Update an existing flow definition.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── SESSION SETUP ── -->
+  <h2 id="session">Session setup</h2>
+
+  <p>Run these two commands at the start of every working session — in two separate terminal tabs.</p>
+
+  <h3>Terminal 1 — context monitor</h3>
+  <pre><code>npx ccstatusline@latest</code></pre>
+  <p>Displays model, context usage %, session cost, and git branch. Keep it visible while working.</p>
+
+  <h3>Terminal 2 — Claude Code</h3>
+  <pre><code>claude</code></pre>
+
+  <h3>Resuming a previous session</h3>
+  <p>
+    If the previous session ended with <code>$pause compress</code>, a Session Snapshot was generated.
+    Paste that block as the <strong>first message</strong> in the new session — Claude restores all
+    state (phase, Spec status, open findings, decisions, active skills) without any re-explanation.
+  </p>
+
+  <!-- ── CONTEXT BUDGET ── -->
+  <h2 id="budget">Context budget</h2>
+
+  <p>Claude monitors context usage throughout the session and emits warnings at two thresholds.</p>
+
+  <div style="margin: 20px 0 32px;">
+    <div class="budget-bar">
+      <div class="fill" style="width: 45%;"></div>
+      <div class="mark mark-50"></div>
+      <div class="mark mark-65"></div>
+    </div>
+    <div class="budget-labels">
+      <span>0%</span>
+      <span style="color: #D97706; font-weight: 600;">50% — soft warning</span>
+      <span style="color: #DC2626; font-weight: 600;">65% — hard warning</span>
+      <span>100%</span>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Threshold</th><th>Action</th><th>What to do</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="color: #D97706; font-weight: 700;">⚠️ 50%</td>
+        <td>Soft warning — session continues normally</td>
+        <td>Consider finishing the current increment and starting a new session. No action required yet.</td>
+      </tr>
+      <tr>
+        <td style="color: #DC2626; font-weight: 700;">🔴 65%</td>
+        <td>Hard warning — <code>$build</code> blocked after current increment</td>
+        <td>Finish the current increment completely (including tests and <code>$qa</code>). Then run <code>$pause compress</code>, save the snapshot, and start a new session.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert warn">
+    <strong>Hard warning never interrupts mid-increment</strong>
+    The 65% block activates after the current increment is fully closed, including tests and QA.
+    Commands <code>$pause</code>, <code>$spec</code>, <code>$verify</code>, <code>$lesson</code>,
+    <code>$doc</code>, and <code>$flow</code> remain available even after the hard warning.
+  </div>
+
+  <!-- ── SKILLS ── -->
+  <h2 id="skills">Skills</h2>
+
+  <h3>Always active</h3>
+  <table>
+    <thead>
+      <tr><th>Skill</th><th>Role</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>🏗️ AI Solutions Architect</td>
+        <td>Architecture decisions, LLM integration patterns, cost modeling, red flags. Active in all phases.</td>
+      </tr>
+      <tr>
+        <td>🔧 AI Engineer</td>
+        <td>Implementation quality, tooling setup, developer experience, UI detection, docs standards. Active in all phases.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>On-demand (activate with trigger or <code>$skills [name]</code>)</h3>
+  <table>
+    <thead>
+      <tr><th>Skill</th><th>Activation trigger</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>🔐 Security Reviewer</td>
+        <td>Keywords: security, API keys, PII, auth, vulnerabilities. Phases 3–4.</td>
+      </tr>
+      <tr>
+        <td>✅ QA Engineer</td>
+        <td>Keywords: QA, testing, code review, coverage. Phase 4.</td>
+      </tr>
+      <tr>
+        <td>🔒 Compliance Reviewer</td>
+        <td>Auto-activated on Tier 2 or Tier 3 confirmation.</td>
+      </tr>
+      <tr>
+        <td>🎨 Frontend / UI</td>
+        <td>Keywords: user interface, components, React, Vue, dashboard, screen design.</td>
+      </tr>
+      <tr>
+        <td>🎨 Brand Design</td>
+        <td>Auto-activated when SPEC.md §C is populated. Manual: <code>$skills brand-design</code>.</td>
+      </tr>
+      <tr>
+        <td>🗄️ Decision Architecture</td>
+        <td>Keywords: data architecture, DW, staging, data sources, §A.</td>
+      </tr>
+      <tr>
+        <td>🔍 Data Discovery</td>
+        <td>Keywords: data delta, field mismatch, source discrepancy, data gap.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Pyplan skills (activate when <code>PROJECT_PLATFORM: pyplan</code> is set)</h3>
+  <table>
+    <thead>
+      <tr><th>Skill</th><th>Activation trigger</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Pyplan Diagram</td>
+        <td>Keywords: nodes, influence diagram, result=, module, wizard, xarray</td>
+      </tr>
+      <tr>
+        <td>Pyplan Interfaces</td>
+        <td>Keywords: interface, component, dashboard, filter, index, chart, KPI</td>
+      </tr>
+      <tr>
+        <td>Pyplan QA Platform</td>
+        <td>Auto-activated by <code>$qa</code> on Pyplan projects (Layer 5)</td>
+      </tr>
+      <tr>
+        <td>Pyplan Spec Context</td>
+        <td>Auto-activated by <code>$spec</code> / <code>$specout</code> on Pyplan projects</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── COMPLIANCE ── -->
+  <h2 id="compliance">Compliance tiers</h2>
+
+  <p>
+    Tier is detected automatically in Phase 0 based on repo context and confirmed by the developer
+    in Phase 1. Once confirmed, the tier activates additional skills and DoD requirements.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Tier</th><th>For</th><th>Auto-activates</th><th>Gates</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Tier 1 — Standard</strong></td>
+        <td>Internal tools, POCs, scripts, personal projects</td>
+        <td>Nothing additional</td>
+        <td>None</td>
+      </tr>
+      <tr>
+        <td><strong>Tier 2 — Business</strong></td>
+        <td>SaaS, customer-facing products, apps handling user data</td>
+        <td>Compliance Reviewer</td>
+        <td>§9 Security expanded (PII handling, auth review, audit logging)</td>
+      </tr>
+      <tr>
+        <td><strong>Tier 3 — Enterprise</strong></td>
+        <td>Regulated environments, cloud to corporate IT, healthcare, finance, government</td>
+        <td>Compliance Reviewer (full) + regulation-specific skill</td>
+        <td><code>$build</code> blocked until SPEC.md §9 is complete and approved</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── AGENTS ── -->
+  <h2 id="agents">Sub-agent delegation</h2>
+
+  <p>
+    Some commands delegate to sub-agents automatically — they run in isolated context and
+    do not consume the main session budget. You see only the final result.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Always delegated</th><th>Never delegated</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>$doc</code> (all variants) · <code>$agent review</code> · <code>$agent test</code> · <code>$agent audit</code></td>
+        <td><code>$qa</code> after <code>$build</code> · <code>$spec</code> / <code>$specout</code> · <code>$build</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert tip">
+    <strong>Sub-agent mechanics are silent</strong>
+    Agent delegation happens automatically when the conditions are met. You do not need to decide
+    which tasks to delegate — Claude handles it.
+  </div>
+
+  <!-- ── HUB BLOCK ── -->
+  <h2 id="hub">HUB BLOCK — decisions log</h2>
+
+  <p>
+    After every completed <code>$build</code> increment, Claude generates a HUB BLOCK and writes it
+    to <code>DECISIONS.md</code> in the repo root. It captures the key architectural decision made
+    in that increment for future reference.
+  </p>
+
+  <pre><code>════════════════════════════════════════════════════════
+📋 HUB BLOCK — DECISIONS_[PROJECT].md
+════════════════════════════════════════════════════════
+Date:                   [YYYY-MM-DD]
+Increment:              [N] — [feature name]
+Model:                  [model used]
+Decision:               [one-line summary]
+Rationale:              [one-line rationale]
+Alternatives:           [brief — or "none"]
+Impact:                 [files changed, dependencies added, patterns introduced]
+════════════════════════════════════════════════════════</code></pre>
+
+  <!-- ── LESSONS ── -->
+  <h2 id="lessons">Lesson Library</h2>
+
+  <p>
+    After every <code>$qa</code> run, Claude evaluates whether the increment revealed a pattern
+    worth capturing. If it did, one lesson candidate is proposed. You choose to add it, skip it,
+    or edit it. Approved entries are written directly to <code>LESSON_LIBRARY.md</code>.
+  </p>
+
+  <p>Lessons are triggered by:</p>
+
+  <ul style="margin: 0 0 16px 24px; font-size: 15px; color: #1E293B; line-height: 2;">
+    <li>A bug or failure pattern likely to recur in other projects</li>
+    <li>An integration quirk not documented in official docs</li>
+    <li>An architectural or prompt pattern that significantly simplified the solution</li>
+    <li>A Pyplan-specific pattern (node design, interface structure, data handling)</li>
+  </ul>
+
+  <div class="alert">
+    <strong>Lesson capture is silent when nothing is worth capturing</strong>
+    If no lesson-worthy finding is detected after a <code>$qa</code> run, nothing is proposed.
+    The absence of a proposal means the increment was clean — it is not an error.
+  </div>
+
+  <!-- ── FLOWS ── -->
+  <h2 id="flow">Flows</h2>
+
+  <p>
+    Flows are saved sequences of steps specific to this project. Define a flow once, then
+    run it by name in future sessions. Saved to <code>.claude/flows/</code>.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Command</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="cmd">$flow [name]</span></td><td>Define a new flow interactively</td></tr>
+      <tr><td><span class="cmd">$flow list</span></td><td>List all saved flows</td></tr>
+      <tr><td><span class="cmd">$flow [name] run</span></td><td>Execute a saved flow</td></tr>
+      <tr><td><span class="cmd">$flow [name] edit</span></td><td>Update an existing flow</td></tr>
+    </tbody>
+  </table>
+
+  <footer>
+    G7 AI Development Methodology &nbsp;·&nbsp; SDAD v4.0 &nbsp;·&nbsp; USAGE_AND_SHORTCUTS_v4.html
+  </footer>
+
+</div>
+</body>
+</html>

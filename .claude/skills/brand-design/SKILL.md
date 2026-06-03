@@ -1,5 +1,5 @@
 # Skill: Brand Design
-# Activation: automatic when §A-Brand is populated in SPEC.md
+# Activation: automatic when §C is populated in SPEC.md
 #             or when user runs $skills brand-design
 # Scope: Phase 1 (brand discovery) through Phase 3 (token application)
 # Version: 4.0 | 2026
@@ -21,7 +21,7 @@ it — they do not make independent color or typography decisions.
 
 ## Activation
 
-**Automatic:** when SPEC.md §A-Brand is populated (brandbook URL, file
+**Automatic:** when SPEC.md §C is populated (brandbook URL, file
 reference, or brand notes present).
 
 **Manual:** $skills brand-design
@@ -32,7 +32,7 @@ client is a named organization, ask:
 > "Does the client have a brandbook or visual identity guidelines?
 > (PDF, Figma link, loose files, or website only)"
 
-Record the answer in SPEC.md §A-Brand before proceeding.
+Record the answer in SPEC.md §C before proceeding.
 
 ---
 
@@ -214,11 +214,11 @@ Fix: [concrete correction]
 
 ---
 
-## SPEC.md §A-Brand Template
+## SPEC.md §C Template
 
-When $spec reaches the brand question, populate §A-Brand with:
+When $spec reaches the brand question, populate §C with:
 
-## §A-Brand — Visual Identity
+## §C — Visual Identity
 
 **Material available:** [Full brandbook / Partial / Logo + colors / Website only / None]
 **Source:** [filename / URL / "none"]
@@ -242,7 +242,7 @@ in the discovery sequence (after project type, before technical stack):
 > 4. No guidelines — I'll use their website
 > 5. No guidelines — propose a neutral professional theme"
 
-Based on the answer, set §A-Brand status and schedule Brand Token Sheet
+Based on the answer, set §C status and schedule Brand Token Sheet
 production as the first UI increment.
 
 ---

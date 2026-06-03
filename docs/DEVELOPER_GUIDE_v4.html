@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDAD v4.0 — Developer Guide</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #FAFAFA;
+      color: #0F172A;
+      line-height: 1.6;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: #F1F5F9;
+      border-right: 1px solid #E2E8F0;
+      padding: 32px 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar .logo {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid #E2E8F0;
+      margin-bottom: 16px;
+    }
+
+    .sidebar .logo .eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #2563EB;
+      margin-bottom: 4px;
+    }
+
+    .sidebar .logo .title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0F172A;
+    }
+
+    .sidebar nav ul { list-style: none; padding: 0; }
+
+    .sidebar nav li a {
+      display: block;
+      padding: 6px 20px;
+      font-size: 13px;
+      color: #475569;
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .sidebar nav li a:hover {
+      color: #2563EB;
+      background: #E2E8F0;
+      border-left-color: #2563EB;
+    }
+
+    .sidebar nav .group-label {
+      padding: 16px 20px 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94A3B8;
+    }
+
+    /* ── Main ── */
+    .main {
+      flex: 1;
+      padding: 48px 56px 80px;
+      max-width: 820px;
+    }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 2px solid #2563EB;
+      padding-bottom: 24px;
+      margin-bottom: 56px;
+    }
+
+    header .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #2563EB;
+      margin-bottom: 8px;
+    }
+
+    header h1 {
+      font-size: 34px;
+      font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 10px;
+    }
+
+    header p { font-size: 16px; color: #475569; }
+
+    /* ── Sections ── */
+    h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 64px 0 18px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #E2E8F0;
+      scroll-margin-top: 24px;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 32px 0 10px;
+      scroll-margin-top: 24px;
+    }
+
+    h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #334155;
+      margin: 20px 0 8px;
+    }
+
+    p {
+      margin-bottom: 14px;
+      font-size: 15px;
+      color: #1E293B;
+    }
+
+    ul, ol {
+      margin: 0 0 16px 24px;
+      font-size: 15px;
+      color: #1E293B;
+    }
+
+    li { padding: 3px 0; }
+
+    /* ── Code ── */
+    pre {
+      background: #1E1E2E;
+      color: #CDD6F4;
+      border-radius: 8px;
+      padding: 18px 22px;
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin: 12px 0 20px;
+    }
+
+    code {
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      background: #E2E8F0;
+      color: #1E293B;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    pre code { background: transparent; color: inherit; padding: 0; }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 26px;
+      font-size: 14px;
+    }
+
+    thead th {
+      background: #1E293B;
+      color: #FFFFFF;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+    }
+
+    tbody tr:nth-child(odd)  { background: #F8FAFC; }
+    tbody tr:nth-child(even) { background: #FFFFFF; }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #E2E8F0;
+      vertical-align: top;
+    }
+
+    /* ── Alerts ── */
+    .alert {
+      border-left: 4px solid #2563EB;
+      background: #EFF6FF;
+      padding: 14px 18px;
+      border-radius: 0 6px 6px 0;
+      margin: 18px 0;
+      font-size: 14px;
+      color: #1E293B;
+    }
+
+    .alert.warn    { border-left-color: #D97706; background: #FFFBEB; }
+    .alert.block   { border-left-color: #DC2626; background: #FEF2F2; }
+    .alert.success { border-left-color: #16A34A; background: #F0FDF4; }
+    .alert.tip     { border-left-color: #6366F1; background: #EEF2FF; }
+
+    .alert strong  { display: block; margin-bottom: 4px; font-weight: 700; }
+
+    /* ── Phase timeline ── */
+    .timeline {
+      position: relative;
+      padding-left: 40px;
+      margin: 24px 0 32px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 14px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: #E2E8F0;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 28px;
+    }
+
+    .timeline-item:last-child { margin-bottom: 0; }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -33px;
+      top: 6px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #2563EB;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 0 0 2px #2563EB;
+    }
+
+    .timeline-item .phase-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #2563EB;
+      margin-bottom: 2px;
+    }
+
+    .timeline-item h4 { margin: 0 0 4px; font-size: 15px; color: #0F172A; }
+
+    .timeline-item p { margin-bottom: 0; font-size: 14px; color: #475569; }
+
+    /* ── Cmd reference ── */
+    .cmd {
+      display: inline-block;
+      background: #0F172A;
+      color: #93C5FD;
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    /* ── Skill card grid ── */
+    .skill-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      margin: 16px 0 28px;
+    }
+
+    .skill-card {
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 16px;
+      background: #FFFFFF;
+    }
+
+    .skill-card .skill-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 4px;
+    }
+
+    .skill-card .skill-mode {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-bottom: 6px;
+    }
+
+    .mode-always { background: #DBEAFE; color: #1D4ED8; }
+    .mode-demand { background: #F1F5F9; color: #475569; }
+    .mode-auto   { background: #FEF3C7; color: #92400E; }
+    .mode-pyplan { background: #EDE9FE; color: #5B21B6; }
+
+    .skill-card .skill-desc {
+      font-size: 12px;
+      color: #64748B;
+      line-height: 1.5;
+    }
+
+    /* ── QA layer badges ── */
+    .qa-layer {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid #F1F5F9;
+    }
+
+    .qa-layer:last-child { border-bottom: none; }
+
+    .qa-layer .layer-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+      width: 32px;
+      text-align: center;
+      margin-top: 2px;
+    }
+
+    .qa-layer .layer-content h4 { margin: 0 0 4px; }
+
+    .qa-layer .layer-content p { margin-bottom: 0; font-size: 13px; color: #475569; }
+
+    /* ── SPEC section list ── */
+    .spec-list { margin: 16px 0 28px; }
+
+    .spec-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid #F1F5F9;
+      font-size: 14px;
+    }
+
+    .spec-row:last-child { border-bottom: none; }
+
+    .spec-tag {
+      flex-shrink: 0;
+      width: 44px;
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: #2563EB;
+    }
+
+    .spec-row .sec-title { font-weight: 700; color: #0F172A; }
+    .spec-row .sec-note  { font-size: 12px; color: #64748B; margin-top: 2px; }
+
+    .spec-row .badge-opt {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: #F0FDF4;
+      color: #166534;
+      margin-left: 6px;
+    }
+
+    .spec-row .badge-gate {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: #FEF3C7;
+      color: #92400E;
+      margin-left: 6px;
+    }
+
+    .spec-row .badge-pyplan {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: #EDE9FE;
+      color: #5B21B6;
+      margin-left: 6px;
+    }
+
+    /* ── Budget bar ── */
+    .budget-bar {
+      background: #E2E8F0;
+      border-radius: 999px;
+      height: 12px;
+      overflow: hidden;
+      margin: 12px 0 4px;
+      position: relative;
+    }
+
+    .budget-bar .fill { height: 100%; border-radius: 999px; background: #2563EB; }
+    .budget-bar .mark { position: absolute; top: 0; height: 100%; width: 3px; }
+    .budget-bar .mark-50 { left: 50%; background: #D97706; }
+    .budget-bar .mark-65 { left: 65%; background: #DC2626; }
+
+    .budget-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #64748B;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 80px;
+      padding-top: 24px;
+      border-top: 1px solid #E2E8F0;
+      font-size: 13px;
+      color: #94A3B8;
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="eyebrow">G7 Methodology</div>
+      <div class="title">SDAD v4.0<br>Developer Guide</div>
+    </div>
+    <nav>
+      <ul>
+        <li class="group-label">Introduction</li>
+        <li><a href="#what-is-sdad">What is SDAD?</a></li>
+        <li><a href="#core-principle">Core principle</a></li>
+        <li><a href="#session-setup">Session setup</a></li>
+
+        <li class="group-label">Phases</li>
+        <li><a href="#phase-overview">Phase overview</a></li>
+        <li><a href="#phase0">Phase 0 — Context</a></li>
+        <li><a href="#phase1">Phase 1 — Requirements</a></li>
+        <li><a href="#phase2">Phase 2 — Spec</a></li>
+        <li><a href="#phase3">Phase 3 — Build</a></li>
+        <li><a href="#phase4">Phase 4 — QA</a></li>
+
+        <li class="group-label">Spec</li>
+        <li><a href="#spec-structure">Spec structure</a></li>
+        <li><a href="#spec-approval">Spec approval</a></li>
+
+        <li class="group-label">Skills</li>
+        <li><a href="#skills-system">Skills system</a></li>
+        <li><a href="#always-on">Always-on skills</a></li>
+        <li><a href="#on-demand">On-demand skills</a></li>
+
+        <li class="group-label">Quality</li>
+        <li><a href="#qa-layers">QA layers</a></li>
+        <li><a href="#compliance">Compliance tiers</a></li>
+        <li><a href="#context-budget">Context budget</a></li>
+
+        <li class="group-label">Patterns</li>
+        <li><a href="#agents">Sub-agent delegation</a></li>
+        <li><a href="#hub-block">HUB BLOCK</a></li>
+        <li><a href="#lessons">Lesson Library</a></li>
+        <li><a href="#session-mgmt">Session management</a></li>
+        <li><a href="#brand">Brand design</a></li>
+        <li><a href="#pyplan">Pyplan projects</a></li>
+
+        <li class="group-label">Reference</li>
+        <li><a href="#all-commands">All commands</a></li>
+        <li><a href="#behavior-rules">Behavior rules</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+
+    <!-- ── HEADER ── -->
+    <header>
+      <p class="eyebrow">G7 AI Development Methodology</p>
+      <h1>SDAD v4.0 — Developer Guide</h1>
+      <p>Complete methodology reference for developers using Claude Code with SDAD.</p>
+    </header>
+
+    <!-- ── WHAT IS SDAD ── -->
+    <h2 id="what-is-sdad">What is SDAD?</h2>
+
+    <p>
+      <strong>SDAD</strong> (Spec-Driven AI Development) is G7's development methodology for teams
+      using Claude Code as their primary AI development tool. It structures AI-assisted development
+      into five sequential phases, enforces spec-first discipline, and provides a shared quality
+      framework across all project types.
+    </p>
+
+    <p>SDAD solves a specific problem with AI-assisted development: without structure, Claude Code
+    tends to write code immediately, make implicit decisions that conflict with later requirements,
+    and produce outputs that diverge from what the client actually needs. SDAD prevents this
+    by requiring an approved Spec before any code is written.</p>
+
+    <h3 id="core-principle">Core principle</h3>
+
+    <p>
+      <strong>Never write production code before the developer approves a Spec.</strong>
+    </p>
+
+    <p>
+      Every project follows: Context Analysis → Requirements → Spec → Build → QA.
+      Claude Code has direct filesystem and terminal access — it reads actual files,
+      runs actual tests, and writes directly to the repo. It never simulates what it can execute.
+    </p>
+
+    <!-- ── SESSION SETUP ── -->
+    <h2 id="session-setup">Session setup</h2>
+
+    <p>Before every Claude Code session, run two commands in separate terminal windows:</p>
+
+    <pre><code># Terminal 1 — context budget monitor
+npx ccstatusline@latest
+
+# Terminal 2 — Claude Code
+claude</code></pre>
+
+    <p>
+      <code>ccstatusline</code> shows the current model, context usage percentage, session cost,
+      and git branch in real time. Keep it visible — it is the primary indicator for context
+      budget warnings at 50% and 65%.
+    </p>
+
+    <!-- ── PHASE OVERVIEW ── -->
+    <h2 id="phase-overview">Phase overview</h2>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="phase-label">Phase 0</div>
+        <h4>Context Analysis — automatic</h4>
+        <p>Claude reads the repo, detects platform, detects UI presence, and recommends a compliance tier. No command needed — runs at session start.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="phase-label">Phase 1 — <code>$spec</code></div>
+        <h4>Requirements</h4>
+        <p>Guided discovery — one question at a time with a proposed default. Covers scope, user flows, data model, integrations, business rules, performance, security, and compliance tier.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="phase-label">Phase 2 — <code>$specout</code></div>
+        <h4>Spec Document</h4>
+        <p>Generates the full 13-section SPEC.md and writes it to the repo root. Requires developer approval before <code>$build</code> is allowed.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="phase-label">Phase 3 — <code>$build</code></div>
+        <h4>Guided Development</h4>
+        <p>Vertical increments with tests. Each increment announced before coding, tests run after writing, QA and decision log updated automatically.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="phase-label">Phase 4 — <code>$qa</code></div>
+        <h4>Quality Assurance</h4>
+        <p>Layered quality review across Security, Structure, Efficiency, and Best Practices. Pyplan projects add a 5th Platform layer. Findings numbered H-01, H-02…</p>
+      </div>
+    </div>
+
+    <!-- ── PHASE 0 ── -->
+    <h2 id="phase0">Phase 0 — Context Analysis</h2>
+
+    <p>
+      Phase 0 runs automatically at the start of every session. Claude reads the repo and produces
+      a Context Analysis block covering:
+    </p>
+
+    <ul>
+      <li>Detected tech stack and key dependencies</li>
+      <li>Platform declaration (Pyplan, generic, etc.) if present in SPEC.md §0</li>
+      <li>UI presence — if detected, the Frontend skill is suggested</li>
+      <li>Compliance tier recommendation based on project context</li>
+      <li>Architecture flags (<code>⚠️ ARCH:</code>) from the AI Architect skill</li>
+      <li>Tooling gaps (<code>⚠️ TOOLING:</code>) from the AI Engineer skill</li>
+    </ul>
+
+    <div class="alert">
+      <strong>Phase 0 never blocks</strong>
+      Flags surfaced in Phase 0 are informational. They do not prevent Phase 1 from starting.
+      Security and compliance flags are still surfaced — the developer decides what to act on.
+    </div>
+
+    <!-- ── PHASE 1 ── -->
+    <h2 id="phase1">Phase 1 — Requirements (<code>$spec</code>)</h2>
+
+    <p>
+      <code>$spec</code> runs guided requirements discovery. Claude reads existing files first,
+      then asks one question at a time with a proposed default — the developer confirms or overrides.
+    </p>
+
+    <p>Standard question sequence:</p>
+
+    <ol>
+      <li>Project scope and objective</li>
+      <li>User flows and main interactions</li>
+      <li>Data model and key entities</li>
+      <li>Integrations and external services</li>
+      <li>Business rules and constraints</li>
+      <li>Performance and scalability requirements</li>
+      <li>Security and credentials handling</li>
+      <li>Brand and visual identity (when UI is detected — see §C)</li>
+      <li>Compliance tier — always asked, never skipped</li>
+    </ol>
+
+    <h3>The compliance tier question</h3>
+
+    <p>Claude always asks:</p>
+
+    <pre><code>"What's the deployment context?
+ (1) Internal tool / POC — Tier 1 Standard
+ (2) Customer-facing product / SaaS — Tier 2 Business
+ (3) Regulated environment / corporate IT / cloud enterprise — Tier 3 Enterprise
+ Based on what I see in this repo, I recommend: [Tier N — reason]"</code></pre>
+
+    <p>
+      The tier is locked on confirmation. Tier-specific skills and Definition of Done additions
+      activate immediately.
+    </p>
+
+    <p>When all areas are covered, Claude suggests running <code>$specout</code>.</p>
+
+    <!-- ── PHASE 2 ── -->
+    <h2 id="phase2">Phase 2 — Spec Document (<code>$specout</code>)</h2>
+
+    <p>
+      <code>$specout</code> generates the full Spec document from Phase 1 requirements
+      and writes it directly to <code>SPEC.md</code> in the repo root. No manual paste step.
+    </p>
+
+    <p>
+      For Tier 2/3 projects, §9 (Security &amp; Compliance) is mandatory and must be complete
+      before the Spec is approved. For Tier 3 and Pyplan projects, the respective gate sections
+      (§9 / §A) block <code>$build</code> until approved.
+    </p>
+
+    <div class="alert warn">
+      <strong>Developer approval required before $build</strong>
+      After <code>$specout</code>, Claude asks for explicit approval. <code>$build</code> is
+      blocked until the Spec is approved. This is the primary quality gate in SDAD.
+    </div>
+
+    <!-- ── PHASE 3 ── -->
+    <h2 id="phase3">Phase 3 — Build (<code>$build</code>)</h2>
+
+    <p>
+      <code>$build</code> works in vertical increments — each increment is a self-contained
+      piece of working functionality with tests. Before writing any code, Claude announces
+      the increment and waits for approval.
+    </p>
+
+    <h3>Increment announcement format</h3>
+
+    <pre><code>🔨 INCREMENT [N]: [feature name]
+Files: [list of files to create or modify]
+Tests: [unit / integration / E2E — will be executed after writing]
+Docs: [README update / API doc / inline comments required]
+Dependencies: [what must be done first]
+──────────────────────────────────────────────────────
+[Wait for developer approval, then write code, then run tests immediately]</code></pre>
+
+    <h3>After each increment</h3>
+
+    <ol>
+      <li>Run the project's test command — report actual result (pass count, failures, errors)</li>
+      <li>Run <code>$qa</code> on the increment</li>
+      <li>Write DECISIONS.md entry and HUB BLOCK</li>
+      <li>Update SPEC.md §13 (AI Authorship Log)</li>
+    </ol>
+
+    <h3>$build gates</h3>
+
+    <table>
+      <thead>
+        <tr><th>Condition</th><th>Effect on $build</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>SPEC.md not found</td>
+          <td>Blocked. Claude reads the repo and offers <code>$spec</code> or <code>$docfinal</code>.</td>
+        </tr>
+        <tr>
+          <td>Spec not yet approved</td>
+          <td>Blocked until developer approves SPEC.md.</td>
+        </tr>
+        <tr>
+          <td>Context budget at 65%</td>
+          <td>Blocked after current increment. Finish cleanly, then run <code>$pause compress</code>.</td>
+        </tr>
+        <tr>
+          <td>Tier 3 — §9 incomplete</td>
+          <td>Blocked until §9 Security &amp; Compliance is complete and approved.</td>
+        </tr>
+        <tr>
+          <td>Pyplan — §A unchecked items</td>
+          <td>Blocked until all §A Build Gate items are checked.</td>
+        </tr>
+        <tr>
+          <td>No test command found</td>
+          <td>Flagged before writing code. Developer must define the test command.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ── PHASE 4 ── -->
+    <h2 id="phase4">Phase 4 — QA (<code>$qa</code>)</h2>
+
+    <p>
+      <code>$qa</code> runs a layered quality review. Findings are numbered H-01, H-02… and
+      classified as: <strong>must fix</strong>, <strong>should improve</strong>, or
+      <strong>style suggestion</strong>.
+    </p>
+
+    <p>QA modes:</p>
+
+    <table>
+      <thead>
+        <tr><th>Command</th><th>Scope</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>$qa</code></td><td>Incremental — last <code>$build</code> increment only (auto mode)</td></tr>
+        <tr><td><code>$qa review</code></td><td>Manual — per-finding approval before any fix is applied</td></tr>
+        <tr><td><code>$qa full</code></td><td>Full project audit across all files</td></tr>
+        <tr><td><code>$QA</code></td><td>Standalone audit — SDAD-Aware or Standalone mode</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ── QA LAYERS ── -->
+    <h2 id="qa-layers">QA layers</h2>
+
+    <p>Layers run in priority order. Security findings (P0) always surface first.</p>
+
+    <div>
+      <div class="qa-layer">
+        <div class="layer-icon">🔐</div>
+        <div class="layer-content">
+          <h4>Layer 1 — Security</h4>
+          <p>P0: API key exposure, unprotected endpoints, PII in logs. P1: missing input sanitization, weak auth. P2: rate limiting, missing security headers.</p>
+        </div>
+      </div>
+      <div class="qa-layer">
+        <div class="layer-icon">🏗️</div>
+        <div class="layer-content">
+          <h4>Layer 2 — Structure</h4>
+          <p>Architecture consistency, separation of concerns, error handling, context flow, tight coupling between components.</p>
+        </div>
+      </div>
+      <div class="qa-layer">
+        <div class="layer-icon">⚡</div>
+        <div class="layer-content">
+          <h4>Layer 3 — Efficiency</h4>
+          <p>Token usage, redundant LLM calls, conversation history management, unbounded loops, latency bottlenecks.</p>
+        </div>
+      </div>
+      <div class="qa-layer">
+        <div class="layer-icon">✅</div>
+        <div class="layer-content">
+          <h4>Layer 4 — Best Practices</h4>
+          <p>Readability, maintainability, code duplication, naming conventions, documentation gaps.</p>
+        </div>
+      </div>
+      <div class="qa-layer">
+        <div class="layer-icon">🟠</div>
+        <div class="layer-content">
+          <h4>Layer 5 — Platform (Pyplan only)</h4>
+          <p>Nodes missing result=, unsynchronized indexes, inputs without validations, circular dependencies, interface conventions. Findings numbered PP-01, PP-02…</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert">
+      <strong>$qa auto never applies security or compliance fixes without approval</strong>
+      Any finding in Layer 1 (Security) or compliance-related findings require explicit developer
+      approval before any change is made. This applies in all QA modes.
+    </div>
+
+    <!-- ── SPEC STRUCTURE ── -->
+    <h2 id="spec-structure">Spec structure</h2>
+
+    <p>
+      Standard SDAD projects use 13 numbered sections. Two lettered sections precede them
+      as operational metadata. Pyplan projects add three platform-specific sections at the front.
+    </p>
+
+    <h3>Standard sections (all projects)</h3>
+
+    <div class="spec-list">
+      <div class="spec-row">
+        <div class="spec-tag">§0</div>
+        <div>
+          <div class="sec-title">Platform &amp; Context</div>
+          <div class="sec-note">Declares PROJECT_PLATFORM. Activates Pyplan skill set when set to <code>pyplan</code>.</div>
+        </div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§A</div>
+        <div>
+          <div class="sec-title">Delta Log</div>
+          <div class="sec-note">Tracks meaningful scope or architecture changes after initial Spec approval.</div>
+        </div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§B</div>
+        <div>
+          <div class="sec-title">Open Questions</div>
+          <div class="sec-note">Unresolved questions. All must be closed before Spec is approved for <code>$build</code>.</div>
+        </div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§C</div>
+        <div>
+          <div class="sec-title">Brand &amp; Visual Identity <span class="badge-opt">optional</span></div>
+          <div class="sec-note">Client UI projects only. Auto-activates Brand Design skill. Omit for backend or internal tools.</div>
+        </div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§1</div>
+        <div>
+          <div class="sec-title">Vision &amp; Objective</div>
+          <div class="sec-note">Problem, solution, measurable success criteria.</div>
+        </div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§2</div>
+        <div><div class="sec-title">Users &amp; Roles</div></div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§3</div>
+        <div><div class="sec-title">Functional Flows</div></div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§4</div>
+        <div><div class="sec-title">Data Model</div></div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§5</div>
+        <div><div class="sec-title">Technical Architecture</div></div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§6</div>
+        <div><div class="sec-title">Business Rules</div></div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§7</div>
+        <div><div class="sec-title">Integrations &amp; APIs</div></div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§8</div>
+        <div><div class="sec-title">Testing Strategy</div></div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§9</div>
+        <div>
+          <div class="sec-title">Security &amp; Compliance <span class="badge-gate">gate on Tier 3</span></div>
+          <div class="sec-note">Depth depends on tier. Tier 3: blocks <code>$build</code> until §9 is complete and approved.</div>
+        </div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§10</div>
+        <div><div class="sec-title">Definition of Done</div></div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§11</div>
+        <div><div class="sec-title">Out of Scope</div></div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§12</div>
+        <div>
+          <div class="sec-title">Open Decisions</div>
+          <div class="sec-note">Unresolved choices. All must be closed before <code>$build</code>. Resolved decisions move to §A.</div>
+        </div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§13</div>
+        <div>
+          <div class="sec-title">AI Authorship Log</div>
+          <div class="sec-note">One row per increment: Increment / Feature / Model / Date / Notes. Updated automatically.</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 id="spec-approval">Pyplan additions (when PROJECT_PLATFORM: pyplan)</h3>
+
+    <div class="spec-list">
+      <div class="spec-row">
+        <div class="spec-tag">§0</div>
+        <div>
+          <div class="sec-title">Platform Declaration <span class="badge-pyplan">Pyplan</span></div>
+          <div class="sec-note">PROJECT_PLATFORM, PYPLAN_VERSION, DEPLOYMENT, CLIENT, COMPLIANCE_TIER. Never changes after approval.</div>
+        </div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§A</div>
+        <div>
+          <div class="sec-title">Build Gate <span class="badge-pyplan">Pyplan</span> <span class="badge-gate">blocks $build</span></div>
+          <div class="sec-note">Checklist: all items must be checked before any <code>$build</code> increment. Sealed after first build approval.</div>
+        </div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-tag">§B</div>
+        <div>
+          <div class="sec-title">Living Model State <span class="badge-pyplan">Pyplan</span></div>
+          <div class="sec-note">Tracks modules, data connections, open issues, next increment. Updated at every increment close. Claude reads this first at session start.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SKILLS ── -->
+    <h2 id="skills-system">Skills system</h2>
+
+    <p>
+      Skills are specialist knowledge layers loaded from <code>.claude/skills/</code> by Claude Code.
+      Two skills are always active. All others activate automatically by keyword trigger or
+      by tier confirmation — or manually with <code>$skills [name]</code>.
+    </p>
+
+    <h3 id="always-on">Always-on skills</h3>
+
+    <div class="skill-grid">
+      <div class="skill-card">
+        <div class="skill-name">🏗️ AI Solutions Architect</div>
+        <span class="skill-mode mode-always">Always active</span>
+        <div class="skill-desc">Architecture decisions, LLM integration patterns, cost modeling. Adds Architecture layer to QA. Surfaces red flags immediately regardless of phase.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">🔧 AI Engineer</div>
+        <span class="skill-mode mode-always">Always active</span>
+        <div class="skill-desc">Implementation quality, UI detection, documentation standards. Adds Best Practices and Documentation layers to QA. Detects credentials exposure (P0 block).</div>
+      </div>
+    </div>
+
+    <h3 id="on-demand">On-demand skills</h3>
+
+    <div class="skill-grid">
+      <div class="skill-card">
+        <div class="skill-name">🔐 Security Reviewer</div>
+        <span class="skill-mode mode-demand">On-demand</span>
+        <div class="skill-desc">Trigger: security, API keys, PII, auth, vulnerabilities. Phases 3–4.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">✅ QA Engineer</div>
+        <span class="skill-mode mode-demand">On-demand</span>
+        <div class="skill-desc">Trigger: QA, testing, code review, coverage. Phase 4.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">🔒 Compliance Reviewer</div>
+        <span class="skill-mode mode-auto">Auto on Tier 2/3</span>
+        <div class="skill-desc">Auto-activated on Tier 2 or Tier 3 confirmation. Full profile on Tier 3.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">🎨 Frontend / UI</div>
+        <span class="skill-mode mode-demand">On-demand</span>
+        <div class="skill-desc">Trigger: user interface, components, React, Vue, dashboard, screen design. Suggested in Phase 0 when UI is detected.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">🎨 Brand Design</div>
+        <span class="skill-mode mode-demand">On-demand</span>
+        <div class="skill-desc">Trigger: auto when §C is populated. Manual: <code>$skills brand-design</code>. Produces the Brand Token Sheet — the single source of truth for all visual decisions.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">🗄️ Decision Architecture</div>
+        <span class="skill-mode mode-demand">On-demand</span>
+        <div class="skill-desc">Trigger: data architecture, DW, staging, data sources, §A.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">🔍 Data Discovery</div>
+        <span class="skill-mode mode-demand">On-demand</span>
+        <div class="skill-desc">Trigger: data delta, field mismatch, source discrepancy, data gap.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">📊 Pyplan Diagram</div>
+        <span class="skill-mode mode-pyplan">Pyplan</span>
+        <div class="skill-desc">Trigger: nodes, influence diagram, result=, module, wizard, xarray.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">📋 Pyplan Interfaces</div>
+        <span class="skill-mode mode-pyplan">Pyplan</span>
+        <div class="skill-desc">Trigger: interface, component, dashboard, filter, index, chart, KPI.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">🟣 Pyplan QA Platform</div>
+        <span class="skill-mode mode-pyplan">Pyplan</span>
+        <div class="skill-desc">Auto-activated by <code>$qa</code> on Pyplan projects. Adds Layer 7 with PP-XX findings.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-name">📝 Pyplan Spec Context</div>
+        <span class="skill-mode mode-pyplan">Pyplan</span>
+        <div class="skill-desc">Auto-activated by <code>$spec</code> / <code>$specout</code> on Pyplan projects.</div>
+      </div>
+    </div>
+
+    <!-- ── COMPLIANCE ── -->
+    <h2 id="compliance">Compliance tiers</h2>
+
+    <p>
+      Tier is detected in Phase 0 and confirmed in Phase 1. Once confirmed, it is locked
+      for the project and activates additional skills and DoD requirements.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Tier</th><th>For</th><th>Auto-activates</th><th>DoD additions</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Tier 1 — Standard</strong></td>
+          <td>Internal tools, POCs, scripts, personal projects</td>
+          <td>Nothing additional</td>
+          <td>None</td>
+        </tr>
+        <tr>
+          <td><strong>Tier 2 — Business</strong></td>
+          <td>SaaS, customer-facing products, apps handling user data</td>
+          <td>Compliance Reviewer</td>
+          <td>Audit logging, PII handling documented, auth reviewed, sanitized errors</td>
+        </tr>
+        <tr>
+          <td><strong>Tier 3 — Enterprise</strong></td>
+          <td>Regulated environments, corporate IT, healthcare, finance, government</td>
+          <td>Compliance Reviewer (full) + regulation-specific skill</td>
+          <td>Threat model, data flow diagram, control matrix. <code>$build</code> blocked until §9 complete and approved.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Tier detection signals</h3>
+
+    <table>
+      <thead>
+        <tr><th>Signal</th><th>Recommended tier</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Payment integration, health data, government context</td><td>Tier 3</td></tr>
+        <tr><td>User accounts, external data exposure, client deployment</td><td>Tier 2</td></tr>
+        <tr><td>Internal script, no user data, no external exposure</td><td>Tier 1</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ── CONTEXT BUDGET ── -->
+    <h2 id="context-budget">Context budget</h2>
+
+    <p>
+      Claude monitors context usage throughout the session and emits warnings at two thresholds.
+      These are the only times context warnings appear — never in between.
+    </p>
+
+    <div style="margin: 20px 0 28px;">
+      <div class="budget-bar">
+        <div class="fill" style="width: 40%;"></div>
+        <div class="mark mark-50"></div>
+        <div class="mark mark-65"></div>
+      </div>
+      <div class="budget-labels">
+        <span>0%</span>
+        <span style="color: #D97706; font-weight: 700;">50% — soft warning</span>
+        <span style="color: #DC2626; font-weight: 700;">65% — hard warning</span>
+        <span>100%</span>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Threshold</th><th>Warning</th><th>Action required</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>50% — Soft</strong></td>
+          <td>⚠️ Extended session. Consider starting fresh after current increment.</td>
+          <td>Informational. Continue normally.</td>
+        </tr>
+        <tr>
+          <td><strong>65% — Hard</strong></td>
+          <td>🔴 Blocking <code>$build</code> after current increment.</td>
+          <td>Finish current increment cleanly (tests + QA). Then run <code>$pause compress</code>, save snapshot, start new session.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      Sub-agents run in isolated context — their usage does not consume the main session budget.
+      This is why expensive operations like <code>$doc</code> and <code>$agent review</code>
+      are always delegated.
+    </p>
+
+    <!-- ── AGENTS ── -->
+    <h2 id="agents">Sub-agent delegation</h2>
+
+    <p>
+      SDAD delegates automatically to sub-agents when all three conditions are met:
+      (1) the task operates on files already committed to the filesystem,
+      (2) the task does not require knowledge of decisions made in this session,
+      and (3) the task is expensive in context.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Always delegated</th><th>Never delegated</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>$doc</code> (all variants) · <code>$agent review</code> · <code>$agent test</code> · <code>$agent audit</code></td>
+          <td><code>$qa</code> after <code>$build</code> · <code>$spec</code> / <code>$specout</code> · <code>$build</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>Agent definitions live in <code>.claude/agents/</code>:</p>
+
+    <ul>
+      <li><code>code-reviewer.md</code> — architectural review</li>
+      <li><code>test-generator.md</code> — test suite generation</li>
+      <li><code>security-auditor.md</code> — security audit</li>
+    </ul>
+
+    <div class="alert tip">
+      <strong>Sub-agent mechanics are silent</strong>
+      Delegation is automatic. You see only the final result — not the agent execution.
+      If the agent output file (<code>.sdad/agent_output.tmp</code>) is empty or missing,
+      an error is surfaced before Claude proceeds.
+    </div>
+
+    <!-- ── HUB BLOCK ── -->
+    <h2 id="hub-block">HUB BLOCK — decisions log</h2>
+
+    <p>
+      After every completed <code>$build</code> increment, Claude generates a HUB BLOCK
+      and writes it directly to <code>DECISIONS.md</code> in the repo root. It captures the
+      key architectural or implementation decision made in that increment.
+    </p>
+
+    <pre><code>════════════════════════════════════════════════════════
+📋 HUB BLOCK — DECISIONS_[PROJECT].md
+════════════════════════════════════════════════════════
+Date:                   [YYYY-MM-DD]
+Increment:              [N] — [feature name]
+Model:                  [model used]
+Decision:               [one-line summary]
+Rationale:              [one-line rationale]
+Alternatives:           [brief — or "none"]
+Impact:                 [files changed, dependencies added, patterns introduced]
+════════════════════════════════════════════════════════</code></pre>
+
+    <p>
+      The HUB BLOCK is also shown in-session after each increment for the developer to copy
+      to the project hub file (<code>hub/DECISIONS_[PROJECT].md</code>) if using a shared hub.
+    </p>
+
+    <!-- ── LESSONS ── -->
+    <h2 id="lessons">Lesson Library</h2>
+
+    <p>
+      After every <code>$qa</code> run, Claude evaluates whether the increment revealed a pattern
+      worth capturing. If triggered, one candidate is proposed. The developer approves, skips,
+      or edits it. Approved entries are written directly to <code>LESSON_LIBRARY.md</code>.
+    </p>
+
+    <p>Lesson capture triggers:</p>
+
+    <ul>
+      <li>A bug or failure pattern likely to recur in other projects</li>
+      <li>An integration quirk not documented in official documentation</li>
+      <li>An architectural or prompt pattern that significantly simplified the solution</li>
+      <li>A Pyplan-specific pattern (node design, interface structure, data handling)</li>
+    </ul>
+
+    <p>If nothing is lesson-worthy, capture is silent — no proposal is made.</p>
+
+    <h3>Lesson commands</h3>
+
+    <table>
+      <thead>
+        <tr><th>Command</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>$lesson</code></td><td>Show all entries grouped by category</td></tr>
+        <tr><td><code>$lesson [keyword]</code></td><td>Filter by keyword, category, or stack</td></tr>
+        <tr><td><code>$lesson [L-XX]</code></td><td>Show a specific entry in full</td></tr>
+        <tr><td><code>$lesson new</code></td><td>Guided entry creation — writes to LESSON_LIBRARY.md on approval</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ── SESSION MGMT ── -->
+    <h2 id="session-mgmt">Session management</h2>
+
+    <h3>$pause — session state</h3>
+
+    <p><code>$pause</code> shows a full session state snapshot:</p>
+
+    <ul>
+      <li>Current Phase and Spec status per section</li>
+      <li>Compliance tier and platform</li>
+      <li>Context budget %</li>
+      <li>Last increment + test result</li>
+      <li>Open QA findings (H-XX) and PP findings (Pyplan)</li>
+      <li>Active skills</li>
+      <li>Decisions log count and last entry</li>
+      <li>Flows defined</li>
+      <li>Next step recommendation</li>
+    </ul>
+
+    <h3>$pause compress — cross-session continuity</h3>
+
+    <p>
+      <code>$pause compress</code> generates a compact Session Snapshot. Paste it as the first
+      message in the next session — Claude restores all state without any re-explanation.
+    </p>
+
+    <p>The snapshot includes: phase, spec status per section, compliance tier, platform,
+    completed increments summary, open QA findings, open decisions, AI Authorship Log summary,
+    Lesson Library summary, active skills, context budget %, flows defined, and exact next step.</p>
+
+    <div class="alert success">
+      <strong>Always run $pause compress before ending a session</strong>
+      Restoring state from a snapshot at the next session start takes seconds and ensures
+      no context is lost between sessions.
+    </div>
+
+    <!-- ── BRAND ── -->
+    <h2 id="brand">Brand design workflow</h2>
+
+    <p>
+      When a project has a client-facing UI for a named organization, the Brand Design skill
+      produces a <strong>Brand Token Sheet</strong> — a structured document that translates
+      brand identity into implementation-ready design tokens. It is the single source of truth
+      for all visual decisions.
+    </p>
+
+    <h3>Activation</h3>
+
+    <p>
+      During <code>$spec</code>, when a UI is detected and the client is a named organization,
+      Claude asks whether brand guidelines exist. The answer is recorded in SPEC.md §C.
+      The Brand Design skill activates automatically when §C is populated.
+    </p>
+
+    <h3>Three phases</h3>
+
+    <ol>
+      <li><strong>Phase 1 — Brand Discovery:</strong> Classify available material (full brandbook, partial, logo only, website only, or nothing). Extract color tokens, typography, logo rules, spacing, and shape. Flag gaps.</li>
+      <li><strong>Phase 2 — Brand Token Sheet:</strong> Produce the structured deliverable with all CSS custom properties. Mark each token as [explicit], [inferred], or [proposed]. Requires client approval.</li>
+      <li><strong>Phase 3 — Application Guidance:</strong> Hand off approved tokens to the Frontend skill or Pyplan Interfaces skill. These skills consume the tokens — they do not make independent color or typography decisions.</li>
+    </ol>
+
+    <div class="alert warn">
+      <strong>Once the Brand Token Sheet is approved, any deviation is a finding</strong>
+      BD-[N] findings are raised in QA for any hardcoded color or font that bypasses the token system.
+      Classified as 🚨 Must fix (logo misuse, wrong color family) down to 💡 Suggestion.
+    </div>
+
+    <!-- ── PYPLAN ── -->
+    <h2 id="pyplan">Pyplan projects</h2>
+
+    <p>
+      Pyplan projects use a superset of the standard SDAD flow with platform-specific additions.
+      Declare <code>PROJECT_PLATFORM: pyplan</code> in SPEC.md §0 to activate the full Pyplan layer.
+    </p>
+
+    <p>Key differences from standard projects:</p>
+
+    <ul>
+      <li>Three additional Spec sections: §0 (Platform), §A (Build Gate), §B (Living Model State)</li>
+      <li><code>$build</code> blocked until all §A items are checked</li>
+      <li>Pyplan increment close checklist runs before any increment is marked complete</li>
+      <li>Data delta handling rules: small deltas resolved inline, structural deltas pause <code>$build</code></li>
+      <li><code>$qa</code> adds Layer 7 with PP-XX findings (Node Design, Data Flow, Interface, Performance, Delivery)</li>
+      <li>§B (Living Model State) updated automatically at every increment close</li>
+    </ul>
+
+    <div class="alert tip">
+      <strong>See the full Pyplan guide</strong>
+      <code>docs/ONBOARDING_PYPLAN_v4.html</code> covers the Pyplan layer in depth:
+      the two surfaces, node types, the result= convention, data delta handling, and the QA
+      Layer 7 format.
+    </div>
+
+    <!-- ── ALL COMMANDS ── -->
+    <h2 id="all-commands">All commands</h2>
+
+    <table>
+      <thead>
+        <tr><th>Command</th><th>Phase</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="cmd">$sdad</span></td><td>Any</td><td>SDAD v4.0 methodology overview: phases, descriptions, command list</td></tr>
+        <tr><td><span class="cmd">$spec</span></td><td>1</td><td>Guided requirements — one question at a time with proposed defaults</td></tr>
+        <tr><td><span class="cmd">$spec [section]</span></td><td>1</td><td>Jump to a specific section of the requirements</td></tr>
+        <tr><td><span class="cmd">$specout</span></td><td>2</td><td>Generate full Spec document → write to SPEC.md</td></tr>
+        <tr><td><span class="cmd">$build</span></td><td>3</td><td>Next increment with announcement → code → tests → QA → decisions log</td></tr>
+        <tr><td><span class="cmd">$build [feature]</span></td><td>3</td><td>Build a specific named feature</td></tr>
+        <tr><td><span class="cmd">$qa</span></td><td>4</td><td>Incremental QA on last <code>$build</code> increment (auto mode)</td></tr>
+        <tr><td><span class="cmd">$qa review</span></td><td>4</td><td>Manual QA — per-finding approval before any fix</td></tr>
+        <tr><td><span class="cmd">$qa full</span></td><td>4</td><td>Full project audit across all files</td></tr>
+        <tr><td><span class="cmd">$verify</span></td><td>Any</td><td>Check dependency documentation currency. Auto-runs when $build adds a new dep.</td></tr>
+        <tr><td><span class="cmd">$pause</span></td><td>Any</td><td>Show current session state in full</td></tr>
+        <tr><td><span class="cmd">$pause compress</span></td><td>Any</td><td>Generate Session Snapshot for next session</td></tr>
+        <tr><td><span class="cmd">$docfinal</span></td><td>Any</td><td>Retroactive documentation for projects built without SDAD (4 steps)</td></tr>
+        <tr><td><span class="cmd">$doc</span></td><td>Any</td><td>Generate technical documentation via sub-agent (readme / api / arch / compliance)</td></tr>
+        <tr><td><span class="cmd">$agent review [module]</span></td><td>Any</td><td>Architectural review via isolated sub-agent</td></tr>
+        <tr><td><span class="cmd">$agent test [module]</span></td><td>Any</td><td>Test suite generation via isolated sub-agent</td></tr>
+        <tr><td><span class="cmd">$agent audit [path]</span></td><td>Any</td><td>Security audit via isolated sub-agent</td></tr>
+        <tr><td><span class="cmd">$skills</span></td><td>Any</td><td>Show active and available specialist skills</td></tr>
+        <tr><td><span class="cmd">$skills [name]</span></td><td>Any</td><td>Activate a specific skill manually</td></tr>
+        <tr><td><span class="cmd">$lesson</span></td><td>Any</td><td>Show all Lesson Library entries</td></tr>
+        <tr><td><span class="cmd">$lesson [keyword]</span></td><td>Any</td><td>Filter entries by keyword, category, or stack</td></tr>
+        <tr><td><span class="cmd">$lesson [L-XX]</span></td><td>Any</td><td>Show a specific entry in full</td></tr>
+        <tr><td><span class="cmd">$lesson new</span></td><td>Any</td><td>Guided lesson entry creation</td></tr>
+        <tr><td><span class="cmd">$flow [name]</span></td><td>Any</td><td>Define a new project flow</td></tr>
+        <tr><td><span class="cmd">$flow list</span></td><td>Any</td><td>List all saved flows</td></tr>
+        <tr><td><span class="cmd">$flow [name] run</span></td><td>Any</td><td>Execute a saved flow</td></tr>
+        <tr><td><span class="cmd">$flow [name] edit</span></td><td>Any</td><td>Update an existing flow</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ── BEHAVIOR RULES ── -->
+    <h2 id="behavior-rules">Behavior rules</h2>
+
+    <p>
+      These rules govern Claude Code's behavior in every SDAD session. They override default
+      behavior and are enforced unconditionally.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Rule</th><th>Why</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Read actual files before asking questions</td>
+          <td>Never ask what can be inferred from the repo</td>
+        </tr>
+        <tr>
+          <td>Run actual tests after every <code>$build</code> increment</td>
+          <td>Never simulate test execution</td>
+        </tr>
+        <tr>
+          <td>Write SPEC.md to the repo on <code>$specout</code></td>
+          <td>Spec must exist as a file — not just in the chat</td>
+        </tr>
+        <tr>
+          <td>Ask the compliance tier question in Phase 1</td>
+          <td>Never skip — tier affects DoD, skills, and gates</td>
+        </tr>
+        <tr>
+          <td>Announce increments before coding</td>
+          <td>Developer must approve what will be built</td>
+        </tr>
+        <tr>
+          <td>Include docs update in every increment announcement</td>
+          <td>Documentation is part of the DoD, not optional</td>
+        </tr>
+        <tr>
+          <td>Mark critical security issues with 🚨 regardless of phase</td>
+          <td>Security findings are never deferred</td>
+        </tr>
+        <tr>
+          <td>$qa auto never applies security or compliance fixes without approval</td>
+          <td>These changes require explicit developer confirmation</td>
+        </tr>
+        <tr>
+          <td>Update SPEC.md §13 after every increment</td>
+          <td>AI Authorship Log must be current</td>
+        </tr>
+        <tr>
+          <td>Write DECISIONS.md and HUB BLOCK after each increment</td>
+          <td>Decision record enables cross-session continuity</td>
+        </tr>
+        <tr>
+          <td>Lesson capture is silent when nothing is worth capturing</td>
+          <td>Never force an entry — quality over completeness</td>
+        </tr>
+        <tr>
+          <td>$agent delegation is automatic</td>
+          <td>Never ask the developer which tasks to delegate</td>
+        </tr>
+        <tr>
+          <td>$verify runs automatically when $build adds a new dependency</td>
+          <td>Dependency documentation must be current before coding</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <footer>
+      G7 AI Development Methodology &nbsp;·&nbsp; SDAD v4.0 &nbsp;·&nbsp; DEVELOPER_GUIDE_v4.html
+    </footer>
+
+  </main>
+</div>
+</body>
+</html>

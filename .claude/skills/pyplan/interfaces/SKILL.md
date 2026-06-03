@@ -435,7 +435,7 @@ Client approval sequence:
 1. Present homescreen first — it is the fastest way to get brand alignment
 2. Once homescreen is approved, apply the same tokens to all report screens
 3. Present report screens as a set — not one by one
-4. After final approval, lock the Brand Token Sheet (mark as Approved in SPEC.md §A-Brand)
+4. After final approval, lock the Brand Token Sheet (mark as Approved in SPEC.md §C)
 
 ---
 
@@ -466,7 +466,7 @@ Run these checks on every $qa for Pyplan projects (contributes to Layer 5):
 - [ ] Conditional formatting uses semantic color tokens, not hardcoded hex
 - [ ] No unapproved color deviations from Brand Token Sheet
 - [ ] Primary font loading verified in client Pyplan instance
-- [ ] Brand Token Sheet status is Approved in SPEC.md §A-Brand before delivery
+- [ ] Brand Token Sheet status is Approved in SPEC.md §C before delivery
 
 ---
 

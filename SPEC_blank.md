@@ -43,6 +43,19 @@
 
 ---
 
+## §C — Brand & Visual Identity
+**Applies to:** projects with a client-facing UI. Omit this section for backend-only projects or internal tools with no brand requirements.
+
+**Material available:** [Full brandbook (PDF/Figma) / Partial (colors + fonts) / Logo + basic colors / Website only / None]
+**Source:** [filename / URL / "none"]
+**Primary color:** [HEX or "TBD"]
+**Primary font:** [name or "TBD"]
+**Brand Token Sheet status:** [Not started / Draft / Approved]
+**Client approval date:** [date or "pending"]
+**Notes:** [any brand constraints or client preferences]
+
+---
+
 ## §1 — Vision & Objective
 
 **Problem:**

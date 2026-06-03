@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDAD v4.0 — Pyplan Project Onboarding</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #FAFAFA;
+      color: #0F172A;
+      line-height: 1.6;
+      padding: 48px 24px;
+    }
+
+    .page { max-width: 900px; margin: 0 auto; }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 2px solid #6366F1;
+      padding-bottom: 24px;
+      margin-bottom: 48px;
+    }
+
+    header .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #6366F1;
+      margin-bottom: 8px;
+    }
+
+    header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 8px;
+    }
+
+    header p { font-size: 16px; color: #475569; }
+
+    /* ── Nav ── */
+    nav {
+      background: #F1F5F9;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 48px;
+    }
+
+    nav p {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #64748B;
+      margin-bottom: 10px;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+    }
+
+    nav ul li a { font-size: 14px; color: #6366F1; text-decoration: none; }
+    nav ul li a:hover { text-decoration: underline; }
+
+    /* ── Headings ── */
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 56px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    h3 { font-size: 15px; font-weight: 700; color: #0F172A; margin: 28px 0 10px; }
+
+    p { margin-bottom: 14px; font-size: 15px; color: #1E293B; }
+
+    /* ── Code ── */
+    pre {
+      background: #1E1E2E;
+      color: #CDD6F4;
+      border-radius: 8px;
+      padding: 18px 22px;
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin: 12px 0 20px;
+    }
+
+    code {
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      background: #E2E8F0;
+      color: #1E293B;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    pre code { background: transparent; color: inherit; padding: 0; }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 28px;
+      font-size: 14px;
+    }
+
+    thead th {
+      background: #1E293B;
+      color: #FFFFFF;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+    }
+
+    tbody tr:nth-child(odd)  { background: #F8FAFC; }
+    tbody tr:nth-child(even) { background: #FFFFFF; }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #E2E8F0;
+      vertical-align: top;
+    }
+
+    /* ── Alerts ── */
+    .alert {
+      border-left: 4px solid #6366F1;
+      background: #EEF2FF;
+      padding: 14px 18px;
+      border-radius: 0 6px 6px 0;
+      margin: 20px 0;
+      font-size: 14px;
+      color: #1E293B;
+    }
+
+    .alert.warn    { border-left-color: #D97706; background: #FFFBEB; }
+    .alert.block   { border-left-color: #DC2626; background: #FEF2F2; }
+    .alert.success { border-left-color: #16A34A; background: #F0FDF4; }
+
+    .alert strong { display: block; margin-bottom: 4px; font-weight: 700; }
+
+    /* ── Section list ── */
+    .spec-section {
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .spec-section .sec-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #F8FAFC;
+    }
+
+    .spec-section .sec-tag {
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .sec-tag-pyplan { background: #EDE9FE; color: #5B21B6; }
+    .sec-tag-optional { background: #F0FDF4; color: #166534; }
+    .sec-tag-standard { background: #E2E8F0; color: #334155; }
+    .sec-tag-gate { background: #FEF3C7; color: #92400E; }
+
+    .spec-section .sec-name { font-weight: 700; font-size: 14px; color: #0F172A; }
+    .spec-section .sec-desc { font-size: 13px; color: #64748B; margin-top: 2px; }
+
+    .spec-section .sec-body {
+      padding: 12px 16px;
+      font-size: 14px;
+      color: #1E293B;
+      border-top: 1px solid #E2E8F0;
+    }
+
+    /* ── Two-surface diagram ── */
+    .two-surface {
+      display: flex;
+      gap: 16px;
+      margin: 20px 0 28px;
+    }
+
+    .surface-box {
+      flex: 1;
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid #E2E8F0;
+    }
+
+    .surface-box.code-surface   { background: #F0F9FF; border-color: #BAE6FD; }
+    .surface-box.iface-surface  { background: #FDF4FF; border-color: #E9D5FF; }
+
+    .surface-box .surface-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+
+    .code-surface .surface-title   { color: #0369A1; }
+    .iface-surface .surface-title  { color: #7E22CE; }
+
+    .surface-box ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .surface-box ul li {
+      font-size: 13px;
+      color: #1E293B;
+      padding: 3px 0;
+    }
+
+    .surface-box ul li::before {
+      content: '·';
+      margin-right: 6px;
+      color: #94A3B8;
+    }
+
+    .surface-box .skill-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      background: #1E293B;
+      color: #FFFFFF;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-top: 10px;
+    }
+
+    /* ── Checklist ── */
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 20px;
+    }
+
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 6px 0;
+      font-size: 14px;
+      color: #1E293B;
+      border-bottom: 1px solid #F1F5F9;
+    }
+
+    .checklist li:last-child { border-bottom: none; }
+
+    .checklist li .check-box {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #CBD5E1;
+      border-radius: 3px;
+      margin-top: 2px;
+    }
+
+    /* ── Node type grid ── */
+    .node-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin: 16px 0 28px;
+    }
+
+    .node-card {
+      border: 1px solid #E2E8F0;
+      border-radius: 6px;
+      padding: 12px 14px;
+      background: #FFFFFF;
+    }
+
+    .node-card .node-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 4px;
+    }
+
+    .node-card .node-desc {
+      font-size: 12px;
+      color: #64748B;
+    }
+
+    /* ── Delta cards ── */
+    .delta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0 28px;
+    }
+
+    .delta-card {
+      border-radius: 8px;
+      padding: 18px;
+      border: 1px solid;
+    }
+
+    .delta-card.small {
+      background: #F0FDF4;
+      border-color: #BBF7D0;
+    }
+
+    .delta-card.structural {
+      background: #FEF2F2;
+      border-color: #FECACA;
+    }
+
+    .delta-card .delta-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+
+    .small .delta-title      { color: #166534; }
+    .structural .delta-title { color: #991B1B; }
+
+    .delta-card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .delta-card ul li {
+      font-size: 13px;
+      color: #1E293B;
+      padding: 3px 0;
+    }
+
+    .delta-card ul li::before {
+      content: '→';
+      margin-right: 6px;
+      color: #94A3B8;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid #E2E8F0;
+      font-size: 13px;
+      color: #94A3B8;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── HEADER ── -->
+  <header>
+    <p class="eyebrow">G7 AI Development Methodology — Pyplan Layer</p>
+    <h1>SDAD v4.0 — Pyplan Project Onboarding</h1>
+    <p>Everything you need to start, structure, and deliver a Pyplan project using the SDAD methodology.</p>
+  </header>
+
+  <!-- ── NAV ── -->
+  <nav>
+    <p>On this page</p>
+    <ul>
+      <li><a href="#activate">Activating the Pyplan layer</a></li>
+      <li><a href="#spec">Pyplan SPEC structure</a></li>
+      <li><a href="#surfaces">Two surfaces</a></li>
+      <li><a href="#nodes">Node types</a></li>
+      <li><a href="#skills">Pyplan skills</a></li>
+      <li><a href="#build">Build flow</a></li>
+      <li><a href="#deltas">Data delta handling</a></li>
+      <li><a href="#qa">QA — Layer 7</a></li>
+      <li><a href="#commands">Commands reference</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── ACTIVATE ── -->
+  <h2 id="activate">Activating the Pyplan layer</h2>
+
+  <p>
+    SDAD activates Pyplan-specific behavior by reading one line in <code>SPEC.md</code>:
+  </p>
+
+  <pre><code>PROJECT_PLATFORM: pyplan</code></pre>
+
+  <p>
+    This declaration must appear in <strong>§0 — Platform Declaration</strong> at the top of
+    <code>SPEC.md</code>. Once present, four Pyplan skills load automatically and additional
+    sections are added to the Spec structure.
+  </p>
+
+  <div class="alert">
+    <strong>Declare the platform at project start — not mid-build</strong>
+    If <code>PROJECT_PLATFORM: pyplan</code> is missing from §0, Pyplan skills do not activate,
+    §A gate checks are skipped, and data delta handling rules are not enforced. Always set it
+    before running <code>$spec</code>.
+  </div>
+
+  <h3>What activates automatically</h3>
+
+  <table>
+    <thead>
+      <tr><th>Activation</th><th>What changes</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Pyplan skills (4)</td>
+        <td><code>pyplan-diagram</code>, <code>pyplan-interfaces</code>, <code>pyplan-qa-platform</code>, <code>pyplan-spec-context</code> load on-demand by trigger</td>
+      </tr>
+      <tr>
+        <td>SPEC additions</td>
+        <td>§0, §A (Build Gate), and §B (Living Model State) prepended to the standard 13-section structure</td>
+      </tr>
+      <tr>
+        <td>$build gate</td>
+        <td>All items in §A must be checked before any <code>$build</code> increment is allowed</td>
+      </tr>
+      <tr>
+        <td>$qa Layer 7</td>
+        <td>Pyplan Platform checks (PP-XX findings) appended to the standard QA run</td>
+      </tr>
+      <tr>
+        <td>$build checklist</td>
+        <td>Pyplan-specific increment close checklist runs before any increment is marked complete</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── SPEC ── -->
+  <h2 id="spec">Pyplan SPEC structure</h2>
+
+  <p>
+    A Pyplan <code>SPEC.md</code> has three additional sections at the front (§0, §A, §B),
+    followed by the standard 13 sections. §C (Brand &amp; Visual Identity) is optional —
+    include it when the project has a client-facing UI with brand requirements.
+  </p>
+
+  <!-- §0 -->
+  <div class="spec-section">
+    <div class="sec-header">
+      <span class="sec-tag sec-tag-pyplan">§0</span>
+      <div>
+        <div class="sec-name">Platform Declaration</div>
+        <div class="sec-desc">Declares PROJECT_PLATFORM: pyplan and locks Pyplan behavior for the session</div>
+      </div>
+    </div>
+    <div class="sec-body">
+      Required fields: <code>PROJECT_PLATFORM</code>, <code>PYPLAN_VERSION</code>, <code>DEPLOYMENT</code>,
+      <code>CLIENT</code>, <code>COMPLIANCE_TIER</code>. This section never changes after initial approval.
+    </div>
+  </div>
+
+  <!-- §A -->
+  <div class="spec-section">
+    <div class="sec-header">
+      <span class="sec-tag sec-tag-gate">§A</span>
+      <div>
+        <div class="sec-name">Build Gate</div>
+        <div class="sec-desc">Checklist — all items must be checked before $build is allowed</div>
+      </div>
+    </div>
+    <div class="sec-body">
+      Contains a checklist of conditions: §0 approved, §1 Vision agreed with client, roles defined,
+      at least one functional flow documented, data sources identified and accessible, compliance tier locked,
+      no blocking Open Decisions. Any unchecked item blocks <code>$build</code>. Sealed after first build approval.
+    </div>
+  </div>
+
+  <!-- §B -->
+  <div class="spec-section">
+    <div class="sec-header">
+      <span class="sec-tag sec-tag-pyplan">§B</span>
+      <div>
+        <div class="sec-name">Living Model State</div>
+        <div class="sec-desc">Updated automatically at every increment close — the fastest way to resume a session</div>
+      </div>
+    </div>
+    <div class="sec-body">
+      Tracks modules (complete / in-progress / not started), data connections (connected / pending / blocked),
+      open issues, and the next planned increment. Claude reads §B first at session start. If §B conflicts
+      with §13, §B takes precedence for current state — §13 is the historical record.
+    </div>
+  </div>
+
+  <!-- §C -->
+  <div class="spec-section">
+    <div class="sec-header">
+      <span class="sec-tag sec-tag-optional">§C</span>
+      <div>
+        <div class="sec-name">Brand &amp; Visual Identity <em style="font-weight: 400; color: #64748B;">(optional)</em></div>
+        <div class="sec-desc">Required only when the project has a client-facing UI with brand guidelines</div>
+      </div>
+    </div>
+    <div class="sec-body">
+      Populated during <code>$spec</code> when the project has a visible interface for a named client.
+      Activates the <strong>Brand Design</strong> skill automatically. Records brand material source,
+      primary color, primary font, Brand Token Sheet status, and client approval date.
+      Omit entirely for backend-only work or internal tools.
+    </div>
+  </div>
+
+  <!-- §1–§13 -->
+  <div class="spec-section">
+    <div class="sec-header">
+      <span class="sec-tag sec-tag-standard">§1–§13</span>
+      <div>
+        <div class="sec-name">Standard SDAD sections</div>
+        <div class="sec-desc">Vision, Users, Flows, Data Model, Architecture, Business Rules, Integrations, Testing, Security, DoD, Out of Scope, Open Decisions, AI Authorship Log</div>
+      </div>
+    </div>
+    <div class="sec-body">
+      §5 (Technical Architecture) and §7 (Integrations &amp; Data Sources) have Pyplan-specific
+      required additions: module structure, dimension catalog, driver nodes, and a structured
+      data source table with refresh cadence and owner.
+    </div>
+  </div>
+
+  <div class="alert warn">
+    <strong>$build is blocked until §A is fully checked</strong>
+    When <code>$build</code> is called, Claude reads §A first and reports status. Any unchecked
+    item triggers a block with a list of what needs to be resolved. No exceptions.
+  </div>
+
+  <!-- ── SURFACES ── -->
+  <h2 id="surfaces">Two surfaces</h2>
+
+  <p>
+    Every Pyplan application has two completely separate surfaces. Each has its own skill and its
+    own set of conventions. Understanding this split is the most important mental model for Pyplan development.
+  </p>
+
+  <div class="two-surface">
+    <div class="surface-box code-surface">
+      <div class="surface-title">Code Surface — Influence Diagram</div>
+      <ul>
+        <li>Nodes with Python logic</li>
+        <li>Dependency graph (arrows = data flow)</li>
+        <li>Data Reading, Variable, Input, Index nodes</li>
+        <li>All transformations and calculations</li>
+        <li>No visual output — pure data pipeline</li>
+      </ul>
+      <span class="skill-tag">Skill: pyplan-diagram</span>
+    </div>
+    <div class="surface-box iface-surface">
+      <div class="surface-title">Interface Surface — Dashboards</div>
+      <ul>
+        <li>Components placed in a grid (Tables, Charts, KPIs)</li>
+        <li>Reads from diagram nodes</li>
+        <li>Index components write selections back to diagram</li>
+        <li>Input components write user values back to Input nodes</li>
+        <li>Everything the end user sees and touches</li>
+      </ul>
+      <span class="skill-tag">Skill: pyplan-interfaces</span>
+    </div>
+  </div>
+
+  <p>
+    These two surfaces never overlap. When a task involves node code or data transformations,
+    use <code>pyplan-diagram</code>. When a task involves components, filters, layouts, or brand
+    application, use <code>pyplan-interfaces</code>.
+  </p>
+
+  <!-- ── NODES ── -->
+  <h2 id="nodes">Node types</h2>
+
+  <p>Every node in the influence diagram has a type. The type determines what it can store and how it connects to the interface.</p>
+
+  <div class="node-grid">
+    <div class="node-card">
+      <div class="node-name">Variable</div>
+      <div class="node-desc">Generic Python logic. Most common type. Returns any Python object.</div>
+    </div>
+    <div class="node-card">
+      <div class="node-name">Data Reading</div>
+      <div class="node-desc">Connects to CSV, DB, Excel, API. Returns DataFrame or xarray.</div>
+    </div>
+    <div class="node-card">
+      <div class="node-name">Index</div>
+      <div class="node-desc">Stores a dimension list (Product, Region, Year). Used for index sync.</div>
+    </div>
+    <div class="node-card">
+      <div class="node-name">Input — Scalar</div>
+      <div class="node-desc">Single user-editable value (rate, flag, threshold). Always needs validation rule.</div>
+    </div>
+    <div class="node-card">
+      <div class="node-name">Input — Form</div>
+      <div class="node-desc">Tabular editable data stored in DB. Used for budget entry tables.</div>
+    </div>
+    <div class="node-card">
+      <div class="node-name">Input — Cube</div>
+      <div class="node-desc">Multidimensional editable data (Product × Region × Month planning matrices).</div>
+    </div>
+    <div class="node-card">
+      <div class="node-name">Report</div>
+      <div class="node-desc">Combines multiple nodes into a structured output. Used for complex dashboard outputs.</div>
+    </div>
+    <div class="node-card">
+      <div class="node-name">Module</div>
+      <div class="node-desc">Container grouping related nodes hierarchically. Reduces diagram clutter.</div>
+    </div>
+  </div>
+
+  <h3>The result= convention</h3>
+
+  <p>
+    Every codable node must assign its output to <code>result</code> as the final line.
+    Pyplan uses this value as the node's output for downstream nodes and interface components.
+    Forgetting <code>result =</code> is the most common Pyplan error — the node evaluates but
+    returns <code>None</code>, and downstream nodes fail silently.
+  </p>
+
+  <pre><code># All local variables use _ prefix
+_df = pd.read_csv("data/sales.csv")
+_df["date"] = pd.to_datetime(_df["date"])
+_df = _df[_df["year"] == 2025]
+
+result = _df   # always the last meaningful line</code></pre>
+
+  <h3>Recommended module structure</h3>
+
+  <pre><code>App root
+├── 00_connections    ← DB connections, file paths, credentials
+├── 01_inputs         ← all Input nodes (scalar, selector, form, cube)
+├── 02_indexes        ← all Index nodes
+├── 03_data           ← Data Reading nodes and raw processing
+├── 04_calculations   ← business logic transformations
+├── 05_outputs        ← Report nodes and outputs for interfaces
+└── 99_utilities      ← helper functions, constants, shared logic</code></pre>
+
+  <p>
+    No node in <code>04_calculations</code> should connect directly to a DB or file — that belongs
+    in <code>03_data</code>. This separation makes debugging and data source changes significantly easier.
+  </p>
+
+  <!-- ── SKILLS ── -->
+  <h2 id="skills">Pyplan skills</h2>
+
+  <table>
+    <thead>
+      <tr><th>Skill</th><th>Covers</th><th>Trigger</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>pyplan-diagram</strong></td>
+        <td>Node design, result= convention, dependency graph, pandas/xarray patterns, wizards, module structure</td>
+        <td>Keywords: nodes, influence diagram, result=, module, wizard, xarray</td>
+      </tr>
+      <tr>
+        <td><strong>pyplan-interfaces</strong></td>
+        <td>Components, index sync, input components, charts, brand token application, homescreen design, QA checklist for interface surface</td>
+        <td>Keywords: interface, component, dashboard, filter, index, chart, KPI</td>
+      </tr>
+      <tr>
+        <td><strong>pyplan-qa-platform</strong></td>
+        <td>Layer 7 QA checks: node design, data flow, interface/presentation, performance, delivery conventions. PP-XX finding format.</td>
+        <td>Auto-activated by <code>$qa</code> on Pyplan projects</td>
+      </tr>
+      <tr>
+        <td><strong>pyplan-spec-context</strong></td>
+        <td>Pyplan SPEC structure (§0/§A/§B rules), reading order, <code>$spec</code> and <code>$build</code> behavior, delta handling rules</td>
+        <td>Auto-activated by <code>$spec</code> / <code>$specout</code> on Pyplan projects</td>
+      </tr>
+      <tr>
+        <td><strong>brand-design</strong></td>
+        <td>Brand Token Sheet production, token application for interfaces, homescreen design, client approval flow</td>
+        <td>Auto-activated when §C is populated. Manual: <code>$skills brand-design</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert">
+    <strong>SDAD does not depend on Pyplan's native Analyst Agent</strong>
+    The Analyst Agent is considered immature. All methodology features — QA, spec navigation,
+    data delta detection — work standalone without it.
+  </div>
+
+  <!-- ── BUILD ── -->
+  <h2 id="build">Build flow</h2>
+
+  <p>
+    The <code>$build</code> flow for Pyplan projects is identical to the standard SDAD flow,
+    with two additions: the §A gate check at the start, and a Pyplan-specific increment checklist
+    at the close.
+  </p>
+
+  <h3>Before each increment</h3>
+
+  <p>Claude announces the increment and waits for approval:</p>
+
+  <pre><code>🔨 INCREMENT [N]: [feature name]
+Files: [nodes and modules to create or modify]
+Tests: [how the increment will be verified]
+Docs: [SPEC.md sections to update]
+Dependencies: [what must be done first]
+──────────────────────────────────────────────────────
+[Waiting for approval]</code></pre>
+
+  <h3>Pyplan increment close checklist</h3>
+
+  <p>Before marking any increment complete, Claude runs this checklist:</p>
+
+  <ul class="checklist">
+    <li><div class="check-box"></div><strong>Diagram:</strong> All new nodes have <code>result =</code> assigned and calculate without error</li>
+    <li><div class="check-box"></div><strong>Diagram:</strong> No circular dependencies introduced</li>
+    <li><div class="check-box"></div><strong>Diagram:</strong> Data source of Data Reading nodes matches §A data contract</li>
+    <li><div class="check-box"></div><strong>Interface:</strong> All new indexes are synchronized</li>
+    <li><div class="check-box"></div><strong>Interface:</strong> Inputs have type and range validations configured</li>
+    <li><div class="check-box"></div><strong>Interface:</strong> Visualization components display calculated data (not empty)</li>
+    <li><div class="check-box"></div><strong>Discovery:</strong> Any data deltas found during this increment recorded in §B and DECISIONS.md</li>
+    <li><div class="check-box"></div><strong>Discovery:</strong> If structural delta found — $build paused, data gap report generated</li>
+  </ul>
+
+  <h3>After each increment</h3>
+
+  <ol style="margin: 12px 0 20px 24px; font-size: 14px; color: #1E293B; line-height: 2.2;">
+    <li>Run tests — report actual result</li>
+    <li>Run <code>$qa</code> (includes Pyplan Layer 7)</li>
+    <li>Write DECISIONS.md entry and HUB BLOCK</li>
+    <li>Update SPEC.md §13 (AI Authorship Log)</li>
+    <li>Update §B (Living Model State) — modules, data connections, open issues, next increment</li>
+  </ol>
+
+  <!-- ── DELTAS ── -->
+  <h2 id="deltas">Data delta handling</h2>
+
+  <p>
+    During <code>$build</code>, the actual data sources sometimes differ from what was specified
+    in §A. The response depends on the severity of the difference.
+  </p>
+
+  <div class="delta-grid">
+    <div class="delta-card small">
+      <div class="delta-title">Small delta — $build continues</div>
+      <ul>
+        <li>Format error, nulls, unexpected volume</li>
+        <li>Wrong field name (but data exists)</li>
+        <li>Resolve in the node</li>
+        <li>Record in §B: assumption, finding, resolution, impact</li>
+        <li>Note in §13: "Delta: [description]"</li>
+        <li>Continue to next step</li>
+      </ul>
+    </div>
+    <div class="delta-card structural">
+      <div class="delta-title">Structural delta — $build pauses</div>
+      <ul>
+        <li>Data does not exist at all</li>
+        <li>Wrong granularity</li>
+        <li>Source completely different than spec'd</li>
+        <li>$build paused immediately</li>
+        <li>Data gap report written to §12</li>
+        <li>Consultant takes report to client</li>
+        <li>$build resumes only when resolution is recorded in §B</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alert block">
+    <strong>Never improvise a workaround for a structural delta</strong>
+    If a data source does not exist or has the wrong granularity, <code>$build</code> stops.
+    The gap report goes to the consultant, who brings it to the client. Only an approved
+    resolution recorded in §B unlocks the build again.
+  </div>
+
+  <!-- ── QA ── -->
+  <h2 id="qa">QA — Layer 7 (Pyplan Platform)</h2>
+
+  <p>
+    When <code>$qa</code> runs on a Pyplan project, it adds a 7th layer to the standard 6-layer
+    SDAD QA. Findings from this layer are numbered <strong>PP-01, PP-02…</strong> independently
+    from the base H-XX findings.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Layer 7 section</th><th>What is checked</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>7.1 Node Design</strong></td>
+        <td>Single responsibility per node, naming conventions, no circular dependencies, no dead nodes, reusable nodes factored into utilities</td>
+      </tr>
+      <tr>
+        <td><strong>7.2 Data Flow</strong></td>
+        <td>Data sources isolated from transformations, currency/date assumptions explicit, dimension consistency, no silent NaN propagation</td>
+      </tr>
+      <tr>
+        <td><strong>7.3 Interface &amp; Presentation</strong></td>
+        <td>No raw data shown to end users, navigation follows §3 functional flows, selector nodes grouped, edge cases handled visually</td>
+      </tr>
+      <tr>
+        <td><strong>7.4 Performance</strong></td>
+        <td>Heavy nodes not downstream of volatile inputs, precomputable nodes separated, no vectorizable loops, no repeated file imports</td>
+      </tr>
+      <tr>
+        <td><strong>7.5 Delivery Conventions</strong></td>
+        <td>§A gate conditions met, client-visible text in correct language, no debug scaffolding, exports tested with real data, permissions match client roles</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>PP finding format</h3>
+
+  <pre><code>PP-01 🔴 [7.1 Node Design] — Node sales_by_region has multiple responsibilities
+What: The node both filters raw data and calculates variance in a single block.
+Where: Module 04_calculations → sales_by_region
+Fix: Split into two nodes: sales_filtered (filter) and sales_variance (calculation)</code></pre>
+
+  <h3>Delivery status</h3>
+
+  <p>
+    After all PP findings, the QA report emits a combined summary with delivery status.
+    Delivery is <strong>BLOCKED</strong> if any 🔴 finding is unresolved or the §A gate
+    has unchecked items. Delivery is <strong>READY</strong> only when both conditions are clear.
+  </p>
+
+  <!-- ── COMMANDS ── -->
+  <h2 id="commands">Commands reference — Pyplan</h2>
+
+  <table>
+    <thead>
+      <tr><th>Command</th><th>Pyplan behavior</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>$spec</code></td>
+        <td>Runs §0 (platform context) first, then asks Pyplan-specific questions about modules, data sources, user roles, and client conventions before the standard SDAD questions.</td>
+      </tr>
+      <tr>
+        <td><code>$specout</code></td>
+        <td>Generates the full Pyplan SPEC: §0, §A (Build Gate), §B (Living Model State), then §1–§13 with Pyplan additions to §5 and §7.</td>
+      </tr>
+      <tr>
+        <td><code>$build [feature]</code></td>
+        <td>Blocked if §A has unchecked items. Runs Pyplan increment checklist at close. Updates §B automatically.</td>
+      </tr>
+      <tr>
+        <td><code>$qa</code></td>
+        <td>Runs standard 6-layer QA plus Layer 7 (PP-XX findings). Emits combined delivery status.</td>
+      </tr>
+      <tr>
+        <td><code>$pause</code></td>
+        <td>Shows §A gate status, §B summary (modules complete/in-progress), open PP findings, and data connections status.</td>
+      </tr>
+      <tr>
+        <td><code>$skills brand-design</code></td>
+        <td>Activates Brand Design skill to produce the Brand Token Sheet. Required before building any client-facing interface. Auto-activates when §C is populated.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert success">
+    <strong>Quick start sequence for a new Pyplan project</strong>
+    <ol style="margin: 8px 0 0 20px; line-height: 2.2; font-size: 14px;">
+      <li>Run project initializer: <code>bash &lt;(curl …/project-init.sh)</code></li>
+      <li>Open <code>SPEC.md</code> and declare <code>PROJECT_PLATFORM: pyplan</code> in §0</li>
+      <li>Start Claude Code: <code>claude</code></li>
+      <li>Run <code>$spec</code> — Claude reads the repo and starts guided requirements</li>
+      <li>Run <code>$specout</code> — generates full Pyplan SPEC with §0/§A/§B</li>
+      <li>Review and approve §A gate — every item must be checked</li>
+      <li>Run <code>$build</code> — first increment unlocked</li>
+    </ol>
+  </div>
+
+  <footer>
+    G7 AI Development Methodology &nbsp;·&nbsp; SDAD v4.0 &nbsp;·&nbsp; ONBOARDING_PYPLAN_v4.html
+  </footer>
+
+</div>
+</body>
+</html>
