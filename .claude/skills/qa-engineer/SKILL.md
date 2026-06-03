@@ -87,6 +87,36 @@ active. If both are active, Security Reviewer owns all security findings.
 - ⚠️ Should improve — fix recommended before next increment; can ship with documented exception
 - 💡 Style suggestion — applies directly with no approval required
 
+Number findings sequentially within the session (QA-01, QA-02...).
+Continue numbering from the last used number in DECISIONS.md or prior
+QA log if available.
+
+## QA Modes
+
+**Auto mode (default — $qa)**
+- Run all layers silently
+- Must fix and Should improve: propose fix, ask for single confirmation
+- Style suggestions: apply directly
+- Security and compliance: always surface, never auto-apply
+- After all fixes: "Applied N changes. Confirm? (yes / revert all)"
+- Evaluate for lesson capture after confirmation
+
+**Manual mode ($qa review)**
+- Full report, nothing applied without per-finding approval
+- Use for complex increments, architectural changes, or pre-delivery audits
+
+**Full audit ($qa full)**
+- Full project audit across all files, not just current increment
+- Always manual review mode
+- Use before client deliveries, after large refactors, or at sprint end
+
+## Lesson Capture
+
+After each $qa run, evaluate whether a finding worth capturing exists.
+Criteria: a non-obvious pattern that would help a future developer
+avoid the same problem.
+
+If a candidate exists, propose it:
 Security and compliance findings are never classified as style suggestions.
 
 **Finding format:**
