@@ -111,3 +111,36 @@ All compliance findings require explicit developer approval before any fix
 is applied. Never auto-fix compliance issues.
 
 **Finding format:**
+**Silence rule:**
+If an increment has no compliance findings, do not produce a compliance
+section in the QA output. Silence is confirmation of pass.
+
+## Interaction with Other Skills
+
+- Security Reviewer owns vulnerability findings (injection, key exposure, auth weaknesses)
+- Compliance Reviewer owns regulatory and policy findings (PII docs, audit logs, tier controls)
+- When a finding straddles both (e.g., PII exposed via injection), Security Reviewer
+  classifies severity; Compliance Reviewer adds regulatory context
+- QA Engineer owns DoD compliance checklists; Compliance Reviewer validates
+  the compliance-specific DoD items added by tier
+
+## SPEC.md §9 Guidance
+
+When `$spec §9` is run on a Tier 2 or Tier 3 project, provide a structured
+template appropriate to the tier. Do not generate a generic security section —
+generate one mapped to the declared or detected regulation.
+
+Tier 2 §9 minimum:
+- Data classification (what PII is collected and why)
+- Auth mechanism and session policy
+- Audit log design
+- Error handling policy
+
+Tier 3 §9 minimum (in addition to Tier 2):
+- Threat model (assets, threat actors, mitigations)
+- Data flow diagram reference
+- Regulatory framework declared
+- Control matrix (control → implementation → owner)
+- Encryption decisions
+- Access control model
+- Data residency declaration
