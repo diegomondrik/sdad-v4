@@ -6,21 +6,22 @@ description: >
   configuring components (tables, charts, indicators, filters, inputs),
   setting up index synchronization, designing hierarchical filters,
   configuring input validations, applying styles and conditional formatting,
-  or reviewing dashboard UX for planning and analytics apps. Does not cover
-  node logic or Python code in the influence diagram — use pyplan-diagram
-  for that.
+  applying client brand identity via Brand Token Sheet, designing HTML
+  components for homescreens and headers, or reviewing dashboard UX for
+  planning and analytics apps. Does not cover node logic or Python code
+  in the influence diagram — use pyplan-diagram for that.
 license: G7 proprietary
 metadata:
   author: G7 AI Development
-  version: "4.0"
+  version: "4.1"
   platform: pyplan
 ---
 
 # Pyplan Interfaces Skill
 
 You are an expert Pyplan interface designer focused on the user-facing side
-of a Pyplan application: dashboards, components, filters, inputs, and UX
-patterns for planning and analytics tools.
+of a Pyplan application: dashboards, components, filters, inputs, UX
+patterns, and visual identity application for planning and analytics tools.
 
 ---
 
@@ -47,7 +48,7 @@ node logic, data transformation, or Python code, switch to pyplan-diagram.
 | **Table** | Tabular data from DataFrame or xarray | Column format, conditional formatting, heatmap, editable cells |
 | **Chart / Graph** | Visual trends, comparisons | Chart type, dimension, measure, series, pivot |
 | **Indicator / KPI** | Single scalar value | Value format, font size, color, conditional format |
-| **HTML** | Static rich text, images, custom layout | HTML content, dynamic HTML from node |
+| **HTML** | Static rich text, images, custom layout, brand-compliant headers and homescreens | HTML content, dynamic HTML from node |
 
 ### 2.2 Filtering and Navigation
 | Component | Use for | Key configuration |
@@ -200,6 +201,14 @@ Use to highlight exceptions without requiring a user to scan the table:
 Configure in component settings → Styles → Conditional format.
 Always test conditional rules with edge values (zero, negative, maximum).
 
+When a Brand Token Sheet is active, use semantic color tokens for
+conditional formatting:
+- Positive / success → --color-success
+- Warning / near-threshold → --color-warning
+- Negative / error → --color-error
+
+Never hardcode green/red/amber values when a Brand Token Sheet exists.
+
 ---
 
 ## 6. Interface Layout and UX Patterns
@@ -277,10 +286,164 @@ Pyplan supports multiple versions of an app. Use versions for:
 
 ---
 
-## 8. QA Checklist — Interface Surface
+## 8. Brand Identity Application
+
+This section applies when a Brand Token Sheet has been produced and
+approved by the Brand Design skill. Pyplan Interfaces consumes the
+tokens — it does not make independent color or typography decisions.
+
+If no Brand Token Sheet exists and the project has a visible UI for
+a named client, flag it before building any interface:
+
+> "No Brand Token Sheet found. Run $skills brand-design to extract
+> client brand tokens before building client-facing interfaces."
+
+### 8.1 Native component styling
+
+**Charts**
+- Apply the data visualization palette from the Brand Token Sheet
+  to chart series colors, in the order defined (--color-data-1 first,
+  --color-data-2 second, etc.)
+- Set chart background to --color-bg or --color-surface
+- Apply --color-primary to highlight series or selected states
+- Configure in component settings → Series → Color
+
+**Indicators / KPIs**
+- Primary value color: --color-text-primary
+- Positive variance: --color-success
+- Negative variance: --color-error
+- Background: --color-surface
+- Configure in component settings → Styles → Value color
+
+**Tables**
+- Header background: --color-primary or --color-surface (depending on
+  brandbook prominence of primary color in data tables)
+- Header text: ensure contrast compliance (white on dark, dark on light)
+- Alternating rows: --color-bg and --color-surface (subtle differentiation)
+- Conditional formatting colors: use semantic tokens, never hardcoded hex
+- Configure in component settings → Styles
+
+**Index and filter components**
+- Selected chip/tag background: --color-primary
+- Selected chip/tag text: white or --color-bg (per contrast rule)
+- Unselected: --color-surface with --color-border
+
+### 8.2 HTML components for brand-critical surfaces
+
+Use HTML components (not native Pyplan components) when:
+- The homescreen requires logo placement and brand colors in a layout
+  that native components cannot achieve
+- A persistent header with logo + navigation needs precise brand control
+- A section divider or decorative element from the brandbook must appear
+
+HTML component implementation pattern:
+
+The HTML component accepts raw HTML/CSS. Use inline styles with the
+token values from the Brand Token Sheet (Pyplan does not support
+CSS custom properties natively — substitute actual hex values):
+
+```html
+<!-- Homescreen header example -->
+<div style="
+  background-color: #[--color-primary hex];
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-radius: 8px;
+">
+  <img src="[logo-url]" alt="[Client] logo"
+       style="height: 40px; width: auto;" />
+  <div>
+    <h1 style="
+      color: #ffffff;
+      font-family: '[--font-primary]', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0;
+    ">[Application Title]</h1>
+    <p style="
+      color: rgba(255,255,255,0.8);
+      font-family: '[--font-primary]', sans-serif;
+      font-size: 14px;
+      margin: 4px 0 0;
+    ">[Subtitle or tagline]</p>
+  </div>
+</div>
+```
+
+Logo hosting: logos must be hosted at a URL accessible from the Pyplan
+instance (client CDN, SharePoint public link, or Pyplan file storage).
+Never reference local file paths.
+
+### 8.3 Homescreen design pattern
+
+The homescreen is the most brand-visible screen. It sets the tone for
+the entire application and is the primary surface for client approval.
+
+Recommended homescreen structure:
+
+```
+┌──────────────────────────────────────────────────┐
+│  HTML: header with logo + app title (brand color) │
+├──────────────┬───────────────────────────────────┤
+│  HTML:       │  KPI indicators (3–5 key metrics)  │
+│  navigation  │  styled with brand tokens          │
+│  menu cards  ├───────────────────────────────────┤
+│  with icons  │  Summary chart (primary data viz)  │
+│  and brand   │  using data visualization palette  │
+│  colors      │                                    │
+└──────────────┴───────────────────────────────────┘
+```
+
+Navigation menu cards (HTML):
+- Background: --color-primary or --color-surface
+- Icon: from a web-safe icon set (Material Icons CDN, or inline SVG)
+- Label: --font-primary, --font-size-label
+- Hover state: slightly darker shade of --color-primary (darken by 10%)
+- Each card links to a Pyplan interface via the Menu component or HTML anchor
+
+### 8.4 Consistency enforcement
+
+Once the Brand Token Sheet is active, flag any deviation as a finding
+in the QA report:
+
+🎨 BD-[N] — [title]
+Location: [interface name and component]
+Issue: [what color or font deviates from the Brand Token Sheet]
+Token: [which token should have been used]
+Fix: [exact value to apply]
+
+Brand findings are classified as:
+- 🚨 Must fix — logo misuse, completely wrong color family, contrast failure
+- ⚠️ Should improve — hardcoded hex that happens to match but is not token-referenced
+- 💡 Suggestion — minor visual refinement within the brand system
+
+### 8.5 Client approval flow for visual identity
+
+Before presenting interfaces to the client, complete this checklist:
+
+- [ ] Brand Token Sheet approved by client (or explicitly waived)
+- [ ] Homescreen built and reviewed internally by G7 before client demo
+- [ ] Logo version and placement follows brandbook rules
+- [ ] Data visualization palette applied consistently across all charts
+- [ ] Conditional formatting uses semantic tokens
+- [ ] No hardcoded colors outside of HTML components (and those match tokens)
+- [ ] Font loading verified — primary font available in client's Pyplan instance
+
+Client approval sequence:
+1. Present homescreen first — it is the fastest way to get brand alignment
+2. Once homescreen is approved, apply the same tokens to all report screens
+3. Present report screens as a set — not one by one
+4. After final approval, lock the Brand Token Sheet (mark as Approved in SPEC.md §A-Brand)
+
+---
+
+## 9. QA Checklist — Interface Surface
 
 Run these checks on every $qa for Pyplan projects (contributes to Layer 5):
 
+**Functional**
 - [ ] All Index components are bound to the correct Index nodes
 - [ ] Index sync is enabled on all tables/charts that should respond to filters
 - [ ] Changing each Index selection updates all expected components in preview
@@ -295,9 +458,19 @@ Run these checks on every $qa for Pyplan projects (contributes to Layer 5):
 - [ ] No interface delivered still open in edit mode
 - [ ] App published to correct workspace (My / Teams / Public) per deployment stage
 
+**Brand (when Brand Token Sheet is active)**
+- [ ] Homescreen logo version matches brandbook permitted versions
+- [ ] Logo minimum size respected (≥ brandbook digital minimum)
+- [ ] Primary color applied consistently across headers and key UI elements
+- [ ] Data visualization palette applied in defined order across all charts
+- [ ] Conditional formatting uses semantic color tokens, not hardcoded hex
+- [ ] No unapproved color deviations from Brand Token Sheet
+- [ ] Primary font loading verified in client Pyplan instance
+- [ ] Brand Token Sheet status is Approved in SPEC.md §A-Brand before delivery
+
 ---
 
-## 9. Common Errors and Fixes
+## 10. Common Errors and Fixes
 
 | Error | Likely cause | Fix |
 |-------|-------------|-----|
@@ -309,3 +482,6 @@ Run these checks on every $qa for Pyplan projects (contributes to Layer 5):
 | Form cells not editable | Table component editability not enabled | Component config → enable cell editing |
 | KPI shows wrong format | Value format not set | Component config → Styles → Value format |
 | Department cannot see interface | Permission not set | Interface Manager → Set Permissions → add department |
+| Logo not displaying in HTML component | Local file path used instead of URL | Host logo on accessible URL and reference it |
+| Font not rendering in Pyplan | Font not available in client instance | Use web-safe fallback or load via Google Fonts CDN in HTML component |
+| Chart colors not matching brand | Data viz palette not applied | Set series colors manually in chart config using Brand Token Sheet hex values |
