@@ -1,6 +1,6 @@
-# SDAD v4.0 — Installer for Windows (PowerShell)
+# SDAD v4.1 — Installer for Windows (PowerShell)
 # Spec-Driven AI Development — G7 AI Development Methodology
-# Version: 4.0 | 2026
+# Version: 4.1 | 2026
 #
 # Run from inside the project repo where you want SDAD installed:
 #
@@ -180,14 +180,14 @@ _No entries yet. Run `$`qa on your first completed increment._
 # .gitignore
 $gitignoreEntries = @(
     "",
-    "# SDAD v4.0",
+    "# SDAD v4.1",
     ".claude/.session_tmp",
     "*.tmp"
 )
 
 if (Test-Path ".gitignore") {
     $gitignoreContent = Get-Content ".gitignore" -Raw
-    if ($gitignoreContent -notmatch "SDAD v4.0") {
+    if ($gitignoreContent -notmatch "SDAD v4.1") {
         Add-Content ".gitignore" ($gitignoreEntries -join "`n")
         Write-Host "  OK     .gitignore updated" -ForegroundColor Green
     } else {

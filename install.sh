@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# SDAD v4.0 — Installer for Mac / Linux
+# SDAD v4.1 — Installer for Mac / Linux
 # Spec-Driven AI Development — G7 AI Development Methodology
-# Version: 4.0 | 2026
+# Version: 4.1 | 2026
 #
 # Run from inside the project repo where you want SDAD installed:
 #
@@ -167,14 +167,14 @@ fi
 
 # .gitignore
 if [ -f ".gitignore" ]; then
-    if ! grep -q "SDAD v4.0" .gitignore 2>/dev/null; then
-        printf "\n# SDAD v4.0\n.claude/.session_tmp\n*.tmp\n" >> .gitignore
+    if ! grep -q "SDAD v4.1" .gitignore 2>/dev/null; then
+        printf "\n# SDAD v4.1\n.claude/.session_tmp\n*.tmp\n" >> .gitignore
         echo -e "${GREEN}  OK     .gitignore updated${NC}"
     else
         echo -e "${CYAN}  SKIP   .gitignore already has SDAD entries${NC}"
     fi
 else
-    printf "# SDAD v4.0\n.claude/.session_tmp\n*.tmp\n" > .gitignore
+    printf "# SDAD v4.1\n.claude/.session_tmp\n*.tmp\n" > .gitignore
     echo -e "${GREEN}  OK     .gitignore created${NC}"
 fi
 

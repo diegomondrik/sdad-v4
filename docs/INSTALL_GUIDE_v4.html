@@ -274,9 +274,10 @@
   <h2>What the installer does</h2>
 
   <p>
-    The SDAD installer runs 6 steps inside the project repo where you want the methodology active.
+    The SDAD installer runs 7 steps inside the project repo where you want the methodology active.
     It checks prerequisites, builds the <code>.claude/</code> folder, downloads skill files, installs
-    <code>CLAUDE.md</code>, and initializes <code>SPEC.md</code> and <code>LESSON_LIBRARY.md</code>.
+    <code>CLAUDE.md</code>, initializes <code>SPEC.md</code> and <code>LESSON_LIBRARY.md</code>,
+    and registers the Pyplan MCP server globally in Claude Code.
   </p>
 
   <ol class="steps">
@@ -289,13 +290,13 @@
     <li>
       <div class="content">
         <strong>Create <code>.claude/</code> folder structure</strong>
-        <p>Creates all required skill and hook directories under <code>.claude/</code>.</p>
+        <p>Creates all required skill and hook directories under <code>.claude/</code>, including <code>pyplan/mcp/</code>.</p>
       </div>
     </li>
     <li>
       <div class="content">
         <strong>Download skill files</strong>
-        <p>Fetches all <code>SKILL.md</code> files from the SDAD repo into <code>.claude/skills/</code>.</p>
+        <p>Fetches all <code>SKILL.md</code> files from the SDAD repo into <code>.claude/skills/</code>, including the new <code>pyplan-mcp</code> skill.</p>
       </div>
     </li>
     <li>
@@ -310,6 +311,15 @@
         <strong>Initialize project files</strong>
         <p>Creates <code>SPEC.md</code> (blank template) and <code>LESSON_LIBRARY.md</code> if they don't exist.
         Updates <code>.gitignore</code> with SDAD entries.</p>
+      </div>
+    </li>
+    <li>
+      <div class="content">
+        <strong>Register Pyplan MCP server globally</strong>
+        <p>Runs <code>claude mcp add pyplan https://dev.pyplan.com/ai/mcp --transport http</code> to register
+        the Pyplan MCP server in Claude Code. Skipped automatically if already registered.
+        On first use, Claude Code will open the browser for Pyplan OAuth login.
+        If the registration fails, the installer prints the manual command to run.</p>
       </div>
     </li>
     <li>
