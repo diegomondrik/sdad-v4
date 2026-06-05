@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SDAD v4.0 — Pyplan Project Onboarding</title>
+  <title>SDAD v4.1 — Pyplan Project Onboarding</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -368,7 +368,7 @@
   <!-- ── HEADER ── -->
   <header>
     <p class="eyebrow">G7 AI Development Methodology — Pyplan Layer</p>
-    <h1>SDAD v4.0 — Pyplan Project Onboarding</h1>
+    <h1>SDAD v4.1 — Pyplan Project Onboarding</h1>
     <p>Everything you need to start, structure, and deliver a Pyplan project using the SDAD methodology.</p>
   </header>
 
@@ -383,6 +383,7 @@
       <li><a href="#skills">Pyplan skills</a></li>
       <li><a href="#build">Build flow</a></li>
       <li><a href="#deltas">Data delta handling</a></li>
+      <li><a href="#mcp">MCP tools</a></li>
       <li><a href="#qa">QA — Layer 7</a></li>
       <li><a href="#commands">Commands reference</a></li>
     </ul>
@@ -418,16 +419,16 @@
     </thead>
     <tbody>
       <tr>
-        <td>Pyplan skills (4)</td>
-        <td><code>pyplan-diagram</code>, <code>pyplan-interfaces</code>, <code>pyplan-qa-platform</code>, <code>pyplan-spec-context</code> load on-demand by trigger</td>
+        <td>Pyplan skills (5)</td>
+        <td><code>pyplan-diagram</code>, <code>pyplan-interfaces</code>, <code>pyplan-qa-platform</code>, <code>pyplan-spec-context</code>, <code>pyplan-mcp</code> load on-demand by trigger</td>
       </tr>
       <tr>
         <td>SPEC additions</td>
-        <td>§0, §A (Build Gate), and §B (Living Model State) prepended to the standard 13-section structure</td>
+        <td>§0, §A (Data Architecture), §B (Discovery Log), and §D (MCP Tools Catalog — conditional) prepended to the standard 13-section structure</td>
       </tr>
       <tr>
-        <td>$build gate</td>
-        <td>All items in §A must be checked before any <code>$build</code> increment is allowed</td>
+        <td>$build gates</td>
+        <td>§A must be approved before any <code>$build</code> increment. §D must be approved when project declares <code>@mcp_tool</code> nodes.</td>
       </tr>
       <tr>
         <td>$qa Layer 7</td>
@@ -510,6 +511,24 @@
       Activates the <strong>Brand Design</strong> skill automatically. Records brand material source,
       primary color, primary font, Brand Token Sheet status, and client approval date.
       Omit entirely for backend-only work or internal tools.
+    </div>
+  </div>
+
+  <!-- §D -->
+  <div class="spec-section">
+    <div class="sec-header">
+      <span class="sec-tag sec-tag-gate">§D</span>
+      <div>
+        <div class="sec-name">MCP Tools Catalog <em style="font-weight: 400; color: #64748B;">(conditional)</em></div>
+        <div class="sec-desc">Required only when the project exposes at least one <code>@mcp_tool</code> node. Gate section: blocks <code>$build</code> until approved.</div>
+      </div>
+    </div>
+    <div class="sec-body">
+      Documents each MCP tool: node identifier, tool name, description (written for an external LLM),
+      parameter names + types + <code>Annotated</code> descriptions, return type, serialization notes.
+      If the project has no <code>@mcp_tool</code> nodes, omit §D entirely.
+      The <strong>pyplan-mcp</strong> skill activates automatically when §D is detected or
+      <code>@mcp_tool</code> keywords appear.
     </div>
   </div>
 
@@ -671,8 +690,13 @@ result = _df   # always the last meaningful line</code></pre>
       </tr>
       <tr>
         <td><strong>pyplan-spec-context</strong></td>
-        <td>Pyplan SPEC structure (§0/§A/§B rules), reading order, <code>$spec</code> and <code>$build</code> behavior, delta handling rules</td>
+        <td>Pyplan SPEC structure (§0/§A/§B/§D rules), reading order, <code>$spec</code> and <code>$build</code> behavior, delta handling rules</td>
         <td>Auto-activated by <code>$spec</code> / <code>$specout</code> on Pyplan projects</td>
+      </tr>
+      <tr>
+        <td><strong>pyplan-mcp</strong></td>
+        <td><code>@mcp_tool</code> node design, §D authoring, Build-via-AI guardrails, MCP-specific QA checks (Layer 1 security + Layer 5 platform)</td>
+        <td>Keywords: <code>@mcp_tool</code>, MCP tools, dynamic tools, §D, <code>mcp_tool</code> decorator</td>
       </tr>
       <tr>
         <td><strong>brand-design</strong></td>
@@ -722,6 +746,11 @@ Dependencies: [what must be done first]
     <li><div class="check-box"></div><strong>Interface:</strong> Visualization components display calculated data (not empty)</li>
     <li><div class="check-box"></div><strong>Discovery:</strong> Any data deltas found during this increment recorded in §B and DECISIONS.md</li>
     <li><div class="check-box"></div><strong>Discovery:</strong> If structural delta found — $build paused, data gap report generated</li>
+    <li><div class="check-box"></div><strong>MCP (when §D present):</strong> Each new <code>@mcp_tool</code> node has a precise docstring explaining the business action</li>
+    <li><div class="check-box"></div><strong>MCP (when §D present):</strong> All parameters use <code>Annotated[type, 'description']</code> — no untyped parameters</li>
+    <li><div class="check-box"></div><strong>MCP (when §D present):</strong> Return value is JSON-serializable (no raw xarray, no bare DataFrames)</li>
+    <li><div class="check-box"></div><strong>MCP (when §D present):</strong> <code>result = _fn</code> assigned — not <code>result = _fn()</code></li>
+    <li><div class="check-box"></div><strong>MCP (when §D present):</strong> §D entry created or updated for this tool</li>
   </ul>
 
   <h3>After each increment</h3>
@@ -775,6 +804,106 @@ Dependencies: [what must be done first]
     resolution recorded in §B unlocks the build again.
   </div>
 
+  <!-- ── MCP TOOLS ── -->
+  <h2 id="mcp">MCP tools (v4.1)</h2>
+
+  <p>
+    Pyplan MCP (v1) allows AI clients to connect to a running Pyplan instance via OAuth 2.1,
+    discover application-specific tools, and execute them with structured parameters.
+    In SDAD, MCP tools are first-class deliverables with their own gate section (§D),
+    dedicated skill (<code>pyplan-mcp</code>), and QA checks.
+  </p>
+
+  <div class="alert warn">
+    <strong>Pyplan MCP is a v1 server</strong>
+    First release as of 2026. Treat as an external dependency whose API may change across
+    Pyplan updates. Document in §7 and flag in <code>$verify</code>. Do not assume stability.
+  </div>
+
+  <h3>The @mcp_tool pattern</h3>
+
+  <p>For a node to be discoverable as an MCP tool, its result must be a decorated function:</p>
+
+  <pre><code>from pyplan_core.classes.ai.Agent import mcp_tool
+from typing import Annotated
+
+@mcp_tool
+def _fn(
+    amount: Annotated[float, 'Amount to convert'],
+    source_currency: Annotated[str, 'Source currency code, e.g. USD'],
+    target_currency: Annotated[str, 'Target currency code, e.g. EUR'],
+) -> dict:
+    """
+    Convert an amount from one currency to another using the configured rate source.
+    Returns: source_currency, target_currency, original_amount, converted_amount, rate.
+    """
+    rate = exchange_rates.get_rate(source_currency, target_currency)
+    return {
+        'source_currency': source_currency,
+        'target_currency': target_currency,
+        'original_amount': amount,
+        'converted_amount': amount * rate,
+        'rate': rate,
+    }
+
+result = _fn   # assign the function — do not call it</code></pre>
+
+  <table>
+    <thead>
+      <tr><th>Rule</th><th>Correct</th><th>Wrong</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Assignment</td>
+        <td><code>result = _fn</code></td>
+        <td><code>result = _fn()</code></td>
+      </tr>
+      <tr>
+        <td>Parameters</td>
+        <td><code>Annotated[float, 'description']</code></td>
+        <td><code>amount: float</code> (no description)</td>
+      </tr>
+      <tr>
+        <td>Return</td>
+        <td>Plain dict, list, or scalar</td>
+        <td>Raw DataFrame or xarray object</td>
+      </tr>
+      <tr>
+        <td>Docstring</td>
+        <td>Precise — explains what the tool does for an external LLM</td>
+        <td>Vague ("converts data")</td>
+      </tr>
+      <tr>
+        <td>State</td>
+        <td>Uses only declared parameters</td>
+        <td>Reads from mutable session state</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Build-via-AI guardrails</h3>
+
+  <p>
+    Pyplan MCP includes a capability to build and modify application logic and interfaces
+    directly in a running Pyplan instance using natural language. SDAD allows this capability
+    <strong>with the same discipline as <code>$build</code></strong>:
+  </p>
+
+  <ol style="margin: 12px 0 20px 24px; font-size: 14px; color: #1E293B; line-height: 2.2;">
+    <li>Spec must be approved before any build/modify action — MCP does not bypass the Spec gate</li>
+    <li>Each AI-driven modification is announced as an increment and requires developer approval</li>
+    <li>After execution: DECISIONS.md entry written + §13 AI Authorship Log updated</li>
+    <li><code>$qa</code> runs on the modified increment — no increment is complete without QA</li>
+    <li>MCP surface checklist runs for any <code>@mcp_tool</code> node touched</li>
+  </ol>
+
+  <div class="alert block">
+    <strong>No Spec, no build — even via MCP</strong>
+    If <code>$spec</code> has not been run and approved, Claude blocks any Pyplan MCP
+    build/modify action and redirects to <code>$spec</code>. The Spec gate applies regardless
+    of how the modification is being made.
+  </div>
+
   <!-- ── QA ── -->
   <h2 id="qa">QA — Layer 7 (Pyplan Platform)</h2>
 
@@ -808,6 +937,10 @@ Dependencies: [what must be done first]
       <tr>
         <td><strong>7.5 Delivery Conventions</strong></td>
         <td>§A gate conditions met, client-visible text in correct language, no debug scaffolding, exports tested with real data, permissions match client roles</td>
+      </tr>
+      <tr>
+        <td><strong>7.6 MCP Tools (when §D present)</strong></td>
+        <td>All nodes in §D have <code>@mcp_tool</code> and <code>result = _fn</code>. All parameters use <code>Annotated[...]</code>. Docstrings precise enough for an external LLM. Returns JSON-serializable. OAuth token not exposed in results (P0). No path to arbitrary code execution via parameters (P1).</td>
       </tr>
     </tbody>
   </table>
@@ -845,7 +978,7 @@ Fix: Split into two nodes: sales_filtered (filter) and sales_variance (calculati
       </tr>
       <tr>
         <td><code>$build [feature]</code></td>
-        <td>Blocked if §A has unchecked items. Runs Pyplan increment checklist at close. Updates §B automatically.</td>
+        <td>Blocked if §A is not approved. Blocked if §D is present and not approved. Runs Pyplan increment checklist (including MCP surface) at close. Updates §B automatically.</td>
       </tr>
       <tr>
         <td><code>$qa</code></td>
@@ -876,7 +1009,7 @@ Fix: Split into two nodes: sales_filtered (filter) and sales_variance (calculati
   </div>
 
   <footer>
-    G7 AI Development Methodology &nbsp;·&nbsp; SDAD v4.0 &nbsp;·&nbsp; ONBOARDING_PYPLAN_v4.html
+    G7 AI Development Methodology &nbsp;·&nbsp; SDAD v4.1 &nbsp;·&nbsp; ONBOARDING_PYPLAN_v4.html
   </footer>
 
 </div>
