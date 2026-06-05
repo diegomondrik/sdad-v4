@@ -1,4 +1,4 @@
-# G7 SDAD v4.0
+# G7 SDAD v4.1
 ## Spec-Driven AI Development for Claude Code
 
 SDAD is G7's development methodology for teams using Claude Code as their
@@ -7,6 +7,14 @@ increments, integrated QA, compliance tiers, and a shared Lesson Library
 to AI-assisted development.
 
 ---
+
+## What's new in v4.1
+
+- **Pyplan MCP support** — native integration with the Pyplan MCP server (v1).
+  New `pyplan-mcp` skill, `§D` gate section, Build-via-AI guardrails, and
+  MCP-specific QA checks across Layer 1 (Security) and Layer 5 (Platform).
+- **§D — MCP Tools Catalog** — new conditional Spec section for projects that
+  expose `@mcp_tool` nodes. Gate section: blocks `$build` until approved.
 
 ## What's new in v4.0
 
@@ -143,6 +151,7 @@ in SPEC.md §0:
 | `pyplan/diagram` | Node diagrams and data flow work |
 | `pyplan/interfaces` | Input/output interfaces, forms, dashboards |
 | `pyplan/qa-platform` | Pyplan-specific QA checks |
+| `pyplan/mcp` | `@mcp_tool`, MCP tools, §D, dynamic tools |
 
 SDAD does not depend on Pyplan's native Analyst Agent. All methodology
 features work standalone.
@@ -174,7 +183,8 @@ sdad-v4/
 │   │       ├── spec-context/SKILL.md
 │   │       ├── diagram/SKILL.md
 │   │       ├── interfaces/SKILL.md
-│   │       └── qa-platform/SKILL.md
+│   │       ├── qa-platform/SKILL.md
+│   │       └── mcp/SKILL.md
 │   ├── agents/
 │   │   ├── code-reviewer.md
 │   │   ├── test-generator.md
@@ -215,4 +225,4 @@ After installing, start `claude` and verify:
 
 ---
 
-G7 AI Development Methodology | SDAD v4.0
+G7 AI Development Methodology | SDAD v4.1

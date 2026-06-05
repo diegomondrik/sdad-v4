@@ -1,7 +1,7 @@
-# SDAD v4.0 — CLAUDE.md
+# SDAD v4.1 — CLAUDE.md
 # Spec-Driven AI Development for Claude Code
 # G7 AI Development Methodology
-# Version 4.0 | 2026
+# Version 4.1 | 2026
 #
 # INSTALLATION: Place this file at the root of your project repository.
 # The .claude/ folder (skills, agents, hooks) is installed by the SDAD installer.
@@ -17,11 +17,12 @@
 # ──────────────────────────────────────────────────────────────────────────
 #
 # When PROJECT_PLATFORM: pyplan is set, the following activate automatically:
-#   · $spec    → adds §0 (platform), §A (data architecture), §B (discovery log)
-#   · $build   → adds Pyplan checklist at increment close
-#   · $qa      → adds Platform layer (Layer 5) to QA run
+#   · $spec    → adds §0 (platform), §A (data architecture), §B (discovery log),
+#                §D (MCP Tools Catalog — conditional, only when @mcp_tool nodes declared)
+#   · $build   → adds Pyplan checklist at increment close (includes MCP surface)
+#   · $qa      → adds Platform layer (Layer 5) to QA run (includes MCP tool checks)
 #   · Skills   → pyplan-diagram, pyplan-interfaces, pyplan-qa-platform,
-#                pyplan-spec-context load on-demand by trigger
+#                pyplan-spec-context, pyplan-mcp load on-demand by trigger
 #                decision-architecture and data-discovery load on-demand by trigger
 
 ---
@@ -36,6 +37,8 @@
   Never simulate what you can execute.
 - §A (Data Architecture) must be complete before $build is allowed on Pyplan projects.
   Same gate logic as §9 Security on Tier 3 projects.
+- §D (MCP Tools Catalog) must be complete before $build is allowed on Pyplan projects
+  that declare at least one @mcp_tool node. Same gate logic as §A.
 
 ---
 
@@ -69,6 +72,7 @@ State is always the actual filesystem + SPEC.md + git log.
 - **Pyplan Interfaces** — trigger: interface, component, dashboard, filter, index, chart, KPI (Pyplan projects)
 - **Pyplan QA Platform** — trigger: auto-activated by $qa on Pyplan projects (Layer 5)
 - **Pyplan Spec Context** — trigger: auto-activated by $spec / $specout on Pyplan projects
+- **Pyplan MCP** — trigger: @mcp_tool, MCP tools, dynamic tools, OAuth MCP, §D, mcp_tool decorator (Pyplan projects)
 - **Decision Architecture** — trigger: data architecture, DW, staging, data sources, §A
 - **Data Discovery** — trigger: data delta, field mismatch, source discrepancy, data gap
 
@@ -151,7 +155,7 @@ EXECUTION:
 
 ## Commands
 
-**$sdad** — Show SDAD v4.0 methodology overview: phases, descriptions, command list.
+**$sdad** — Show SDAD v4.1 methodology overview: phases, descriptions, command list.
 
 **$spec** (or $spec [section]) — Phase 1: Guided Requirements.
 ONE question at a time with proposed default.
@@ -163,6 +167,10 @@ PYPLAN PROJECTS (when PROJECT_PLATFORM: pyplan):
   Run §0 (platform context) first, then §A (data architecture) before standard sections.
   §A gate: flag explicitly when §A is incomplete — $build is blocked until approved.
   §B (discovery log) is initialized empty — it fills during $build.
+  §D gate (conditional): ask "Does this project expose any nodes as MCP tools (@mcp_tool)?"
+    If yes: run §D (MCP Tools Catalog) before moving to standard sections.
+    §D gate: flag explicitly when §D is incomplete — $build is blocked until approved.
+    If no: skip §D entirely — do not create the section.
 
 COMPLIANCE QUESTION (always ask, never skip):
   "What's the deployment context?
@@ -194,10 +202,15 @@ Additional sections for Pyplan projects (prepended before §1):
   §0  Platform Context (Pyplan version, workspace, permissions, data types, conventions)
   §A  Data Architecture (client diagnosis, architecture decision, data contract per source)
   §B  Discovery Log (initialized empty — updated during $build when data deltas are found)
+  §D  MCP Tools Catalog (conditional — include only when the project declares at least one
+      @mcp_tool node. Documents each tool: node identifier, tool name, description,
+      parameter names + types + Annotated descriptions, return type, serialization notes.
+      §D is a gate section: must be approved before $build when present.)
 
 After generating, write the Spec to SPEC.md in the repo root automatically.
 For Tier 2/3: §9 is mandatory and must be complete before approval.
 For Tier 3 and Pyplan: respective gate sections (§9 / §A) block $build until approved.
+For Pyplan projects with MCP tools: §D blocks $build until approved.
 Ask for developer approval before allowing $build.
 
 **$build** (or $build [feature]) — Phase 3: Guided Development.
@@ -206,6 +219,7 @@ WHEN SPEC.md not found: read the repo, then offer $spec or $docfinal — do not 
 WHEN no test command found: flag before writing code.
 Blocked if Context Budget hard warning (65%) was triggered.
 ON PYPLAN PROJECTS: blocked if §A is not marked as approved in SPEC.md.
+ON PYPLAN PROJECTS: blocked if §D is present and not marked as approved in SPEC.md.
 
 Before each increment announce:
 
@@ -236,6 +250,13 @@ PYPLAN INCREMENT CHECKLIST (runs after step 4 on Pyplan projects):
   Discovery:
     □ Any data deltas found during this increment recorded in §B and DECISIONS.md
     □ If structural delta found: $build paused, data gap report generated for consultant
+  MCP surface (only when project has §D):
+    □ Each new @mcp_tool node: docstring explains the business action precisely
+    □ All parameters use Annotated[type, 'description'] — no untyped parameters
+    □ Return value is serializable (no raw xarray, no bare DataFrames — use .to_dict())
+    □ result = _fn assigned — not result = _fn() (function assigned, not called)
+    □ Tool does not depend on interactive agent behavior or session state
+    □ §D entry created or updated for this tool (identifier, name, description, parameter schema)
 
 DATA DELTA HANDLING (Pyplan projects):
   Small delta (format error, nulls, unexpected volume, wrong field name):
@@ -248,6 +269,21 @@ DATA DELTA HANDLING (Pyplan projects):
     → Surface to developer — consultant takes report to client.
     → $build does not resume until consultant records approved resolution in §B.
 
+BUILD-VIA-AI GUARDRAILS (Pyplan MCP — when using Pyplan MCP's build/modify capabilities):
+  Pyplan MCP allows AI clients to modify application logic and interfaces directly in a
+  running Pyplan instance. SDAD treats each AI-driven modification as an increment.
+  Rules:
+    1. Spec must be approved before any build/modify action — same gate as $build.
+       If Spec is not approved, block the modification and redirect to $spec / $specout.
+    2. Each AI-driven modification is announced as an increment before execution
+       (same format as the $build increment announcement block).
+    3. Wait for developer approval before executing the modification.
+    4. After execution: write DECISIONS.md entry and update §13 AI Authorship Log.
+    5. Run $qa on the modified increment — no increment is complete without QA.
+    6. Run MCP surface checklist for any node modified or created via AI.
+  Note: Pyplan MCP is a v1 server (first release). Document it as an external
+  dependency in §7 and flag its maturity level in $verify.
+
 **$qa** (or $qa [mode]) — Phase 4: Quality Assurance.
 
   $qa           → incremental QA on last $build increment (auto mode)
@@ -258,6 +294,9 @@ DATA DELTA HANDLING (Pyplan projects):
 QA LAYERS (run in priority order):
   Layer 1 — 🔐 Security: API key exposure, unprotected endpoints, PII in logs (P0),
             missing input sanitization, weak auth (P1), rate limiting, missing headers (P2)
+            MCP (Pyplan projects with §D): OAuth token not logged or exposed in node results (P0),
+            @mcp_tool parameters validated before use — no path to arbitrary code execution (P1),
+            exposed tools have minimum necessary scope — no tool exposes more than its declared contract (P2)
   Layer 2 — 🏗️ Structure: architecture consistency, separation of concerns, error handling,
             context flow, tight coupling
   Layer 3 — ⚡ Efficiency: token usage, redundant calls, conversation history management,
@@ -265,6 +304,12 @@ QA LAYERS (run in priority order):
   Layer 4 — ✅ Best Practices: readability, maintainability, duplication, naming, docs gaps
   Layer 5 — 🟠 Platform (Pyplan projects only): nodes missing result=, unsynchronized indexes,
             inputs without validations, circular dependencies, Analyst Agent context gaps
+            MCP tools (when §D present):
+              □ All nodes registered in §D are decorated with @mcp_tool and have result = _fn
+              □ All parameters have Annotated[...] with non-empty descriptions
+              □ Docstrings are precise enough for an external LLM to invoke correctly
+              □ Return values verified serializable — no DataFrames, no xarray without conversion
+              □ No tool depends on interactive agent behavior or mutable session state
 
 $qa auto never touches security, compliance, or Spec deviations without human approval.
 Security and compliance findings always require explicit developer approval before any fix.
@@ -272,6 +317,10 @@ Security and compliance findings always require explicit developer approval befo
 **$verify** — Check dependency documentation currency.
 Runs automatically when $build introduces a new external dependency.
 When Context 7 MCP is active, $verify uses it automatically.
+ON PYPLAN PROJECTS WITH §D: $verify always includes the Pyplan MCP server as an external
+dependency. Flag in §7: "Pyplan MCP server — v1 (first release, API may change across
+Pyplan updates)." Recommend locking to a specific Pyplan version in §5 if MCP stability
+is critical for the project.
 
 **$pause** — Show current session state.
   Current Phase | Spec Status | Compliance Tier | Platform | Context Budget %
@@ -346,7 +395,8 @@ All $doc outputs written directly to /docs in the repo.
 **$skills** — Show active and available AI specialist skills.
   Always active: AI Architect, AI Engineer.
   On-demand: Security Reviewer, QA Engineer, Compliance Reviewer, Frontend,
-             Pyplan x4, Decision Architecture, Data Discovery.
+             Pyplan x5 (diagram, interfaces, qa-platform, spec-context, mcp),
+             Decision Architecture, Data Discovery.
 
 ---
 
@@ -421,6 +471,10 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - ON PYPLAN PROJECTS: run increment checklist before marking any increment complete.
 - ON PYPLAN PROJECTS: never rely on the Pyplan Analyst Agent — SDAD is self-sufficient.
 - ON PYPLAN PROJECTS: structural data deltas pause $build — never improvise a workaround.
+- ON PYPLAN PROJECTS WITH MCP: Build-via-AI requires approved Spec — Pyplan MCP does not bypass the Spec gate.
+- ON PYPLAN PROJECTS WITH MCP: each AI-driven modification via Pyplan MCP is announced and approved as an increment before execution.
+- ON PYPLAN PROJECTS WITH MCP: §D is a gate section when present — $build blocked until §D is approved.
+- ON PYPLAN PROJECTS WITH MCP: flag Pyplan MCP as a v1 external dependency in §7 — API may change across Pyplan updates.
 - Before session end or $pause compress, resolve any pending commits using git log.
 
 ---
@@ -445,11 +499,10 @@ Use as primary context budget indicator — shows the 50% / 65% thresholds.
 # Happy Engineering        Remote Claude Code control (mobile)  https://happy.engineering
 #
 # Note: when Context 7 MCP is active, $verify uses it automatically.
-# Note: hooks (.claude/hooks/) are prepared but inactive in v4.0.
-#       To activate automated session management (v4.1 feature),
-#       see .claude/hooks/README.md for developer setup instructions.
+# Note: hooks (.claude/hooks/) are prepared but inactive in v4.1.
+#       See .claude/hooks/README.md for developer setup instructions.
 
 ---
 
-G7 AI Development Methodology | SDAD v4.0 | CLAUDE.md
+G7 AI Development Methodology | SDAD v4.1 | CLAUDE.md
 Spec-Driven AI Development for Claude Code

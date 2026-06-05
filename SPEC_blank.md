@@ -56,6 +56,21 @@
 
 ---
 
+## §D — MCP Tools Catalog
+**Applies to:** Pyplan projects that expose at least one node as an MCP tool (`@mcp_tool`).
+Omit this section if no `@mcp_tool` nodes are declared.
+**Gate:** §D must be approved before `$build` is allowed (same gate as §A).
+
+| Node identifier | Tool name | Description | Parameters | Return type | Status |
+|-----------------|-----------|-------------|------------|-------------|--------|
+| [node_name] | [tool_name] | [What this tool does — written for an external LLM] | `param: Annotated[type, 'description']` per parameter | dict / list / scalar — JSON-serializable | Draft |
+
+**MCP server:** Pyplan MCP v1 — document in §7 as external dependency (API may change across Pyplan updates).
+
+**§D Status:** Draft / Approved
+
+---
+
 ## §1 — Vision & Objective
 
 **Problem:**

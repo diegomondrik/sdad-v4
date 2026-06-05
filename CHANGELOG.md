@@ -7,6 +7,77 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [4.1] — 2026-06-04
+
+### Overview
+
+SDAD v4.1 adds native support for the Pyplan MCP server (v1).
+The Pyplan MCP allows AI clients to connect to a running Pyplan instance,
+discover dynamic tools, and interact with application logic via natural language.
+v4.1 integrates this capability into the existing SDAD methodology without
+changing the core phases — it extends the Pyplan layer with a new gate section,
+a new skill, and MCP-specific checklist and QA items.
+
+**Upgrade note:** v4.0 projects are fully compatible. No existing files need to
+change unless the project starts using `@mcp_tool` nodes. Run `git tag v4.0`
+before pulling v4.1 to preserve the prior state.
+
+---
+
+### Added
+
+**Pyplan MCP layer**
+- `pyplan-mcp` skill (`.claude/skills/pyplan/mcp/SKILL.md`) — on-demand specialist
+  for `@mcp_tool` node design, §D authoring, Build-via-AI guardrails, and MCP QA.
+  Trigger: `@mcp_tool`, `MCP tools`, `dynamic tools`, `§D`, `mcp_tool decorator`.
+- `§D — MCP Tools Catalog` — new conditional gate section in SPEC.md for Pyplan
+  projects that expose at least one `@mcp_tool` node. Documents: node identifier,
+  tool name, description, parameter contracts, return types. Gate: blocks `$build`
+  until approved (same logic as §A). Added to `SPEC_blank.md`.
+- MCP surface checklist in `$build` Pyplan Increment Checklist — 6 items covering
+  decorator pattern, `Annotated` parameters, serializable returns, `result = _fn`
+  assignment, agent independence, and §D entry update.
+- Build-via-AI guardrails in `$build` — protocol for using Pyplan MCP's
+  build/modify capabilities with SDAD discipline (Spec gate, increment announcement,
+  approval, DECISIONS.md, $qa).
+- MCP security checks in QA Layer 1 — OAuth token exposure (P0), parameter
+  validation / code execution path (P1), minimum tool scope (P2).
+- MCP tool quality checks in QA Layer 5 — decorator + assignment correctness,
+  Annotated parameters, docstring precision, serialization, agent independence.
+- `$verify` extension for Pyplan MCP projects — flags Pyplan MCP server as v1
+  external dependency in §7; recommends version lock in §5.
+- 4 new Behavior Rules for Pyplan MCP (Spec gate, increment discipline, §D gate,
+  v1 dependency flag).
+
+**Project Declaration**
+- `PROJECT_PLATFORM: pyplan` now also activates `pyplan-mcp` skill and §D gate.
+
+---
+
+### Changed
+
+- `$sdad` command updated to report v4.1.
+- `$skills` updated: Pyplan x5 (added `pyplan-mcp`).
+- `$specout` Pyplan sections updated: §D added as conditional section.
+- `$spec` Pyplan block updated: §D conditional question added.
+- `.claude/hooks/README.md` note updated — "v4.1 feature" reference removed.
+- Footer of `CLAUDE.md` updated to v4.1.
+
+---
+
+### Notes
+
+- Pyplan MCP server is v1 (first release as of 2026-06-04). Treat as an external
+  dependency with potential API changes across Pyplan updates. Flag in §7.
+- `pyplan-mcp` SKILL.md is delivered as `pyplan-mcp-SKILL.md` in the repo root
+  because `.claude/` is write-protected in Cowork mode. Move it manually to
+  `.claude/skills/pyplan/mcp/SKILL.md` during installation.
+  The `install.ps1` / `install.sh` scripts should be updated to handle this path.
+- Build-via-AI (Pyplan MCP's natural-language edit capability) is allowed with
+  guardrails — Spec gate + increment discipline. Not blocked, not unrestricted.
+
+---
+
 ## [4.0] — 2026
 
 ### Overview
