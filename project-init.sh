@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 
 echo ""
 echo -e "${CYAN}======================================"
-echo -e "  SDAD v4.0 — Project Initializer"
+echo -e "  SDAD v4.1 — Project Initializer"
 echo -e "======================================${NC}"
 echo ""
 
@@ -219,7 +219,7 @@ else
 # LESSON_LIBRARY.md — $PROJECT_NAME
 # Transferable patterns captured during development.
 # Entries are proposed by Claude after \$qa runs and added with your approval.
-# Version: 4.0 | Created: $TODAY
+# Version: 4.1 | Created: $TODAY
 
 ---
 
@@ -247,13 +247,13 @@ else
     cat > DECISIONS.md << DECEOF
 # DECISIONS.md — $PROJECT_NAME
 # Design decisions log. Written automatically by \$build after each increment.
-# Version: 4.0 | Created: $TODAY
+# Version: 4.1 | Created: $TODAY
 
 ---
 
 | # | Date | Decision | Rationale | Status |
 |---|------|----------|-----------|--------|
-| D-001 | $TODAY | Project initialized with SDAD v4.0 | $TIER | Active |
+| D-001 | $TODAY | Project initialized with SDAD v4.1 | $TIER | Active |
 DECEOF
     echo -e "  ${GREEN}DECISIONS.md created.${NC}"
 fi
@@ -271,7 +271,7 @@ Created: $TODAY
 Developer: $DEV_NAME
 Client: $CLIENT_LINE
 Compliance tier: $TIER
-SDAD version: 4.0
+SDAD version: 4.1
 
 ## Session log
 

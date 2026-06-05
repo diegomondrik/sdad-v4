@@ -18,13 +18,13 @@ $SKILLS_BASE = ".claude/skills"
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "  SDAD v4.0 — Installer" -ForegroundColor Cyan
+Write-Host "  SDAD v4.1 — Installer" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
 # ─── STEP 1: Check prerequisites ─────────────────────────────────────────────
 
-Write-Host "[ 1/6 ] Checking prerequisites..." -ForegroundColor Yellow
+Write-Host "[ 1/7 ] Checking prerequisites..." -ForegroundColor Yellow
 
 # Node.js
 try {
@@ -64,17 +64,22 @@ try {
 # ─── STEP 2: Create .claude/ folder structure ─────────────────────────────────
 
 Write-Host ""
-Write-Host "[ 2/6 ] Creating .claude/ folder structure..." -ForegroundColor Yellow
+Write-Host "[ 2/7 ] Creating .claude/ folder structure..." -ForegroundColor Yellow
 
 $folders = @(
     ".claude/skills/ai-architect",
     ".claude/skills/ai-engineer",
+    ".claude/skills/qa-engineer",
+    ".claude/skills/compliance",
+    ".claude/skills/frontend",
     ".claude/skills/pyplan/diagram",
     ".claude/skills/pyplan/interfaces",
     ".claude/skills/pyplan/qa-platform",
     ".claude/skills/pyplan/spec-context",
+    ".claude/skills/pyplan/mcp",
     ".claude/skills/decision-architecture",
     ".claude/skills/data-discovery",
+    ".claude/agents",
     ".claude/hooks"
 )
 
@@ -89,17 +94,24 @@ Write-Host "  OK     Folder structure created" -ForegroundColor Green
 # ─── STEP 3: Download and install skill files ─────────────────────────────────
 
 Write-Host ""
-Write-Host "[ 3/6 ] Downloading skill files..." -ForegroundColor Yellow
+Write-Host "[ 3/7 ] Downloading skill files..." -ForegroundColor Yellow
 
 $skillFiles = @{
     ".claude/skills/ai-architect/SKILL.md"               = "$REPO/.claude/skills/ai-architect/SKILL.md"
     ".claude/skills/ai-engineer/SKILL.md"                = "$REPO/.claude/skills/ai-engineer/SKILL.md"
+    ".claude/skills/qa-engineer/SKILL.md"                = "$REPO/.claude/skills/qa-engineer/SKILL.md"
+    ".claude/skills/compliance/SKILL.md"                 = "$REPO/.claude/skills/compliance/SKILL.md"
+    ".claude/skills/frontend/SKILL.md"                   = "$REPO/.claude/skills/frontend/SKILL.md"
     ".claude/skills/pyplan/diagram/SKILL.md"             = "$REPO/.claude/skills/pyplan/diagram/SKILL.md"
     ".claude/skills/pyplan/interfaces/SKILL.md"          = "$REPO/.claude/skills/pyplan/interfaces/SKILL.md"
     ".claude/skills/pyplan/qa-platform/SKILL.md"         = "$REPO/.claude/skills/pyplan/qa-platform/SKILL.md"
     ".claude/skills/pyplan/spec-context/SKILL.md"        = "$REPO/.claude/skills/pyplan/spec-context/SKILL.md"
+    ".claude/skills/pyplan/mcp/SKILL.md"                 = "$REPO/.claude/skills/pyplan/mcp/SKILL.md"
     ".claude/skills/decision-architecture/SKILL.md"      = "$REPO/.claude/skills/decision-architecture/SKILL.md"
     ".claude/skills/data-discovery/SKILL.md"             = "$REPO/.claude/skills/data-discovery/SKILL.md"
+    ".claude/agents/code-reviewer.md"                    = "$REPO/.claude/agents/code-reviewer.md"
+    ".claude/agents/security-auditor.md"                 = "$REPO/.claude/agents/security-auditor.md"
+    ".claude/agents/test-generator.md"                   = "$REPO/.claude/agents/test-generator.md"
 }
 
 foreach ($dest in $skillFiles.Keys) {
@@ -117,19 +129,19 @@ foreach ($dest in $skillFiles.Keys) {
 # ─── STEP 4: Install CLAUDE.md ───────────────────────────────────────────────
 
 Write-Host ""
-Write-Host "[ 4/6 ] Installing CLAUDE.md..." -ForegroundColor Yellow
+Write-Host "[ 4/7 ] Installing CLAUDE.md..." -ForegroundColor Yellow
 
 $claudeMdUrl = "$REPO/Claude.md"
 
 if (Test-Path "CLAUDE.md") {
-    Write-Host "  WARNING  Existing CLAUDE.md found. Appending SDAD block." -ForegroundColor Yellow
     $existing = Get-Content "CLAUDE.md" -Raw
-    if ($existing -match "SDAD v4.0") {
-        Write-Host "  SKIP     SDAD v4.0 block already present in CLAUDE.md" -ForegroundColor Cyan
+    if ($existing -match "SDAD v4") {
+        Write-Host "  SKIP   SDAD v4.1 block already present in CLAUDE.md" -ForegroundColor Cyan
     } else {
+        Write-Host "  WARNING  Existing CLAUDE.md found. Appending SDAD block." -ForegroundColor Yellow
         $sdadBlock = (Invoke-WebRequest -Uri $claudeMdUrl -UseBasicParsing).Content
         Add-Content "CLAUDE.md" "`n`n$sdadBlock"
-        Write-Host "  OK     SDAD v4.0 block appended to CLAUDE.md" -ForegroundColor Green
+        Write-Host "  OK     SDAD v4.1 block appended to CLAUDE.md" -ForegroundColor Green
     }
 } else {
     Invoke-WebRequest -Uri $claudeMdUrl -OutFile "CLAUDE.md" -UseBasicParsing
@@ -139,7 +151,7 @@ if (Test-Path "CLAUDE.md") {
 # ─── STEP 5: Initialize project files ────────────────────────────────────────
 
 Write-Host ""
-Write-Host "[ 5/6 ] Initializing project files..." -ForegroundColor Yellow
+Write-Host "[ 5/7 ] Initializing project files..." -ForegroundColor Yellow
 
 # SPEC.md
 if (-not (Test-Path "SPEC.md")) {
@@ -186,22 +198,46 @@ if (Test-Path ".gitignore") {
     Write-Host "  OK     .gitignore created" -ForegroundColor Green
 }
 
-# ─── STEP 6: Summary ─────────────────────────────────────────────────────────
+# ─── STEP 6: Register Pyplan MCP server globally ─────────────────────────────
 
 Write-Host ""
-Write-Host "[ 6/6 ] Installation complete" -ForegroundColor Yellow
+Write-Host "[ 6/7 ] Registering Pyplan MCP server..." -ForegroundColor Yellow
+
+$mcpList = & claude mcp list 2>&1
+if ($mcpList -match "pyplan") {
+    Write-Host "  SKIP   Pyplan MCP already registered globally" -ForegroundColor Cyan
+} else {
+    try {
+        & claude mcp add pyplan https://dev.pyplan.com/ai/mcp --transport http 2>&1 | Out-Null
+        Write-Host "  OK     Pyplan MCP registered globally (dev.pyplan.com)" -ForegroundColor Green
+        Write-Host "         First use will prompt for Pyplan OAuth login in browser." -ForegroundColor Cyan
+    } catch {
+        Write-Host "  WARNING  Could not register Pyplan MCP automatically." -ForegroundColor Yellow
+        Write-Host "           Run manually: claude mcp add pyplan https://dev.pyplan.com/ai/mcp --transport http" -ForegroundColor Yellow
+    }
+}
+
+# ─── STEP 7: Summary ─────────────────────────────────────────────────────────
+
+Write-Host ""
+Write-Host "[ 7/7 ] Installation complete" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Green
-Write-Host "  SDAD v4.0 installed successfully" -ForegroundColor Green
+Write-Host "  SDAD v4.1 installed successfully" -ForegroundColor Green
 Write-Host "============================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Files installed:" -ForegroundColor White
 Write-Host "  CLAUDE.md                                — core instructions" -ForegroundColor White
 Write-Host "  .claude/skills/ai-architect/SKILL.md    — always active" -ForegroundColor White
 Write-Host "  .claude/skills/ai-engineer/SKILL.md     — always active" -ForegroundColor White
-Write-Host "  .claude/skills/pyplan/*/SKILL.md        — Pyplan layer (4 skills)" -ForegroundColor White
+Write-Host "  .claude/skills/qa-engineer/SKILL.md     — on-demand" -ForegroundColor White
+Write-Host "  .claude/skills/compliance/SKILL.md      — on-demand (auto Tier 2/3)" -ForegroundColor White
+Write-Host "  .claude/skills/frontend/SKILL.md        — on-demand" -ForegroundColor White
+Write-Host "  .claude/skills/pyplan/*/SKILL.md        — Pyplan layer (5 skills)" -ForegroundColor White
 Write-Host "  .claude/skills/decision-architecture/   — transversal skill" -ForegroundColor White
 Write-Host "  .claude/skills/data-discovery/          — transversal skill" -ForegroundColor White
+Write-Host "  .claude/agents/                          — code-reviewer, security-auditor, test-generator" -ForegroundColor White
+Write-Host "  Pyplan MCP                               — registered globally (dev.pyplan.com)" -ForegroundColor White
 Write-Host "  SPEC.md                                  — blank template (if new)" -ForegroundColor White
 Write-Host "  LESSON_LIBRARY.md                        — blank template (if new)" -ForegroundColor White
 Write-Host ""

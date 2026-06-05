@@ -13,7 +13,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host ""
 Write-Host "======================================" -ForegroundColor Cyan
-Write-Host "  SDAD v4.0 — Project Initializer" -ForegroundColor Cyan
+Write-Host "  SDAD v4.1 — Project Initializer" -ForegroundColor Cyan
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -227,7 +227,7 @@ if (Test-Path "LESSON_LIBRARY.md") {
 # LESSON_LIBRARY.md — $projectName
 # Transferable patterns captured during development.
 # Entries are proposed by Claude after $`qa runs and added with your approval.
-# Version: 4.0 | Created: $today
+# Version: 4.1 | Created: $today
 
 ---
 
@@ -256,13 +256,13 @@ if (Test-Path "DECISIONS.md") {
     $decisionsContent = @"
 # DECISIONS.md — $projectName
 # Design decisions log. Written automatically by `$`build after each increment.
-# Version: 4.0 | Created: $today
+# Version: 4.1 | Created: $today
 
 ---
 
 | # | Date | Decision | Rationale | Status |
 |---|------|----------|-----------|--------|
-| D-001 | $today | Project initialized with SDAD v4.0 | $tier | Active |
+| D-001 | $today | Project initialized with SDAD v4.1 | $tier | Active |
 "@
     Set-Content -Path "DECISIONS.md" -Value $decisionsContent -Encoding UTF8
     Write-Host "  DECISIONS.md created." -ForegroundColor Green
@@ -289,7 +289,7 @@ Created: $today
 Developer: $devName
 Client: $clientLine
 Compliance tier: $tier
-SDAD version: 4.0
+SDAD version: 4.1
 
 ## Session log
 

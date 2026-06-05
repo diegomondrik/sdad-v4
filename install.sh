@@ -18,13 +18,13 @@ NC='\033[0m'
 
 echo ""
 echo "============================================"
-echo "  SDAD v4.0 — Installer"
+echo "  SDAD v4.1 — Installer"
 echo "============================================"
 echo ""
 
 # ─── STEP 1: Check prerequisites ─────────────────────────────────────────────
 
-echo -e "${YELLOW}[ 1/6 ] Checking prerequisites...${NC}"
+echo -e "${YELLOW}[ 1/7 ] Checking prerequisites...${NC}"
 
 # Node.js
 if command -v node &>/dev/null; then
@@ -65,17 +65,22 @@ fi
 # ─── STEP 2: Create .claude/ folder structure ─────────────────────────────────
 
 echo ""
-echo -e "${YELLOW}[ 2/6 ] Creating .claude/ folder structure...${NC}"
+echo -e "${YELLOW}[ 2/7 ] Creating .claude/ folder structure...${NC}"
 
 mkdir -p \
     .claude/skills/ai-architect \
     .claude/skills/ai-engineer \
+    .claude/skills/qa-engineer \
+    .claude/skills/compliance \
+    .claude/skills/frontend \
     .claude/skills/pyplan/diagram \
     .claude/skills/pyplan/interfaces \
     .claude/skills/pyplan/qa-platform \
     .claude/skills/pyplan/spec-context \
+    .claude/skills/pyplan/mcp \
     .claude/skills/decision-architecture \
     .claude/skills/data-discovery \
+    .claude/agents \
     .claude/hooks
 
 echo -e "${GREEN}  OK     Folder structure created${NC}"
@@ -83,7 +88,7 @@ echo -e "${GREEN}  OK     Folder structure created${NC}"
 # ─── STEP 3: Download and install skill files ─────────────────────────────────
 
 echo ""
-echo -e "${YELLOW}[ 3/6 ] Downloading skill files...${NC}"
+echo -e "${YELLOW}[ 3/7 ] Downloading skill files...${NC}"
 
 download_skill() {
     local dest="$1"
@@ -98,26 +103,33 @@ download_skill() {
 
 download_skill ".claude/skills/ai-architect/SKILL.md"
 download_skill ".claude/skills/ai-engineer/SKILL.md"
+download_skill ".claude/skills/qa-engineer/SKILL.md"
+download_skill ".claude/skills/compliance/SKILL.md"
+download_skill ".claude/skills/frontend/SKILL.md"
 download_skill ".claude/skills/pyplan/diagram/SKILL.md"
 download_skill ".claude/skills/pyplan/interfaces/SKILL.md"
 download_skill ".claude/skills/pyplan/qa-platform/SKILL.md"
 download_skill ".claude/skills/pyplan/spec-context/SKILL.md"
+download_skill ".claude/skills/pyplan/mcp/SKILL.md"
 download_skill ".claude/skills/decision-architecture/SKILL.md"
 download_skill ".claude/skills/data-discovery/SKILL.md"
+download_skill ".claude/agents/code-reviewer.md"
+download_skill ".claude/agents/security-auditor.md"
+download_skill ".claude/agents/test-generator.md"
 
 # ─── STEP 4: Install CLAUDE.md ───────────────────────────────────────────────
 
 echo ""
-echo -e "${YELLOW}[ 4/6 ] Installing CLAUDE.md...${NC}"
+echo -e "${YELLOW}[ 4/7 ] Installing CLAUDE.md...${NC}"
 
 if [ -f "CLAUDE.md" ]; then
-    if grep -q "SDAD v4.0" CLAUDE.md 2>/dev/null; then
-        echo -e "${CYAN}  SKIP   SDAD v4.0 block already present in CLAUDE.md${NC}"
+    if grep -q "SDAD v4" CLAUDE.md 2>/dev/null; then
+        echo -e "${CYAN}  SKIP   SDAD v4.1 block already present in CLAUDE.md${NC}"
     else
         echo -e "${YELLOW}  WARNING  Existing CLAUDE.md found. Appending SDAD block.${NC}"
         echo "" >> CLAUDE.md
         curl -fsSL "$REPO/Claude.md" >> CLAUDE.md
-        echo -e "${GREEN}  OK     SDAD v4.0 block appended to CLAUDE.md${NC}"
+        echo -e "${GREEN}  OK     SDAD v4.1 block appended to CLAUDE.md${NC}"
     fi
 else
     curl -fsSL "$REPO/Claude.md" -o CLAUDE.md
@@ -127,7 +139,7 @@ fi
 # ─── STEP 5: Initialize project files ────────────────────────────────────────
 
 echo ""
-echo -e "${YELLOW}[ 5/6 ] Initializing project files...${NC}"
+echo -e "${YELLOW}[ 5/7 ] Initializing project files...${NC}"
 
 # SPEC.md
 if [ ! -f "SPEC.md" ]; then
@@ -166,22 +178,44 @@ else
     echo -e "${GREEN}  OK     .gitignore created${NC}"
 fi
 
-# ─── STEP 6: Summary ─────────────────────────────────────────────────────────
+# ─── STEP 6: Register Pyplan MCP server globally ─────────────────────────────
 
 echo ""
-echo -e "${YELLOW}[ 6/6 ] Installation complete${NC}"
+echo -e "${YELLOW}[ 6/7 ] Registering Pyplan MCP server...${NC}"
+
+if claude mcp list 2>/dev/null | grep -q "pyplan"; then
+    echo -e "${CYAN}  SKIP   Pyplan MCP already registered globally${NC}"
+else
+    if claude mcp add pyplan https://dev.pyplan.com/ai/mcp --transport http 2>/dev/null; then
+        echo -e "${GREEN}  OK     Pyplan MCP registered globally (dev.pyplan.com)${NC}"
+        echo -e "${CYAN}         First use will prompt for Pyplan OAuth login in browser.${NC}"
+    else
+        echo -e "${YELLOW}  WARNING  Could not register Pyplan MCP automatically.${NC}"
+        echo -e "${YELLOW}           Run manually: claude mcp add pyplan https://dev.pyplan.com/ai/mcp --transport http${NC}"
+    fi
+fi
+
+# ─── STEP 7: Summary ─────────────────────────────────────────────────────────
+
+echo ""
+echo -e "${YELLOW}[ 7/7 ] Installation complete${NC}"
 echo ""
 echo -e "${GREEN}============================================${NC}"
-echo -e "${GREEN}  SDAD v4.0 installed successfully${NC}"
+echo -e "${GREEN}  SDAD v4.1 installed successfully${NC}"
 echo -e "${GREEN}============================================${NC}"
 echo ""
 echo "Files installed:"
 echo "  CLAUDE.md                                — core instructions"
 echo "  .claude/skills/ai-architect/SKILL.md    — always active"
 echo "  .claude/skills/ai-engineer/SKILL.md     — always active"
-echo "  .claude/skills/pyplan/*/SKILL.md        — Pyplan layer (4 skills)"
+echo "  .claude/skills/qa-engineer/SKILL.md     — on-demand"
+echo "  .claude/skills/compliance/SKILL.md      — on-demand (auto Tier 2/3)"
+echo "  .claude/skills/frontend/SKILL.md        — on-demand"
+echo "  .claude/skills/pyplan/*/SKILL.md        — Pyplan layer (5 skills)"
 echo "  .claude/skills/decision-architecture/   — transversal skill"
 echo "  .claude/skills/data-discovery/          — transversal skill"
+echo "  .claude/agents/                          — code-reviewer, security-auditor, test-generator"
+echo "  Pyplan MCP                               — registered globally (dev.pyplan.com)"
 echo "  SPEC.md                                  — blank template (if new)"
 echo "  LESSON_LIBRARY.md                        — blank template (if new)"
 echo ""
