@@ -22,3 +22,16 @@ Transferable lessons captured across SDAD projects. Surfaced automatically in Ph
   (and set `[Console]::OutputEncoding = [Text.Encoding]::UTF8` for stdout). Always test hooks
   on real Windows before shipping — the bug is silent otherwise.
 - **Origin:** SDAD v4.2 Track B (hooks). Caught by the mandatory Windows test gate.
+
+### L-02 — Validate single-source rules against real workflows: the premise can be wrong even when the rule is right
+- **Category:** Workflow
+- **Tags:** `#stack:methodology` `#phase:spec` `#phase:qa`
+- **Signal:** A rule or requirement is justified by a single source (one video, one developer, one
+  anecdote). The justification sounds plausible but was never checked against your own real usage.
+- **Principle:** Validate single-source assumptions against at least one real workflow before locking
+  them — and separate two questions: "is the rule useful?" vs "is the stated reason true?". Two SDAD
+  v4.2 rules passed only after their *premise* was corrected: C-011 assumed "many simultaneous MCPs
+  degrade context" (G7 runs few — the real value is the security gate), and C-012 assumed
+  "multi-author drift" (one maintainer today — the real value is an auto-reminder + future team
+  scaling). Both rules stayed; their reasons changed. Keep the rule, fix the reason.
+- **Origin:** SDAD v4.2 §2.1 single-source validation, closed with the G7 source 2026-06-07.
