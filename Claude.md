@@ -505,7 +505,7 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - $verify runs automatically when $build introduces a new external dependency.
 - $verify audit is the proactive mode — run it in Phase 0 when >30 days elapsed since the last $build.
 - In consumer context, weigh CLI-vs-MCP per the $specout §7 rule; if the CLI adds security risk, keep the vetted MCP. Never applies in producer context (§D active).
-- $pause always includes Context Budget status, Decisions log count, platform, and flows count.
+- $pause always includes Context Budget status, Decisions log count, platform, flows count, and project CLAUDE.md mod date.
 - Write DECISIONS.md entry and HUB BLOCK after each completed increment.
 - ON PYPLAN PROJECTS: run increment checklist before marking any increment complete.
 - ON PYPLAN PROJECTS: never rely on the Pyplan Analyst Agent — SDAD is self-sufficient.
