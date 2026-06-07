@@ -143,6 +143,27 @@ Platform note: Windows-first (the test gate). macOS/Linux .sh ports are a docume
 
 ---
 
+## Increment 8 — C-004: Prompt caching boundary (documentation only)
+
+Date: 2026-06-07 · Model: opus · effort medium
+API-access status: NOT used. Decision driven by cost + team reach — Claude Code (the app, flat
+subscription) already does prompt caching automatically; the API is pay-per-token and not every
+developer has access. Requiring API would fragment the methodology and add variable cost. So
+v4.2 scope = document the boundary; actual API-level caching deferred until/unless API access is
+confirmed (explicitly NOT a v4.3 nice-to-have — it is access-gated, and the app makes it moot).
+
+Caching boundary (structure context to maximize the app's automatic caching):
+- CACHEABLE / stable across a session (keep early and contiguous, change rarely):
+    SDAD CLAUDE.md · always-on skills (ai-architect, ai-engineer SKILL.md) · LESSON_LIBRARY.md.
+- VOLATILE / not worth caching (changes within a session):
+    SPEC.md · DECISIONS.md · the active increment's working state.
+Practical rule: do not interleave volatile edits into the always-on layer; keep the stable layer
+stable so the app's automatic cache keeps hitting. No code, no API calls, no per-dev cost.
+
+[LOCK] No API dependency in the methodology — caching is documentation + structure only (cost/reach).
+
+---
+
 ## §13 — AI Authorship Log (v4.2)
 
 | Increment | Feature | Model | Date | Notes |
@@ -154,6 +175,7 @@ Platform note: Windows-first (the test gate). macOS/Linux .sh ports are a docume
 | 5 | C-014 dev-setup skill | claude-opus-4-8 · effort low | 2026-06-07 | New .claude/skills/dev-setup/ + CLAUDE.md registration. Links verified live. §2.1 pending [verificar]. |
 | 6 | C-007 [LOCK] + COMPACT ANCHOR | claude-opus-4-8 · effort low | 2026-06-07 | CLAUDE.md $pause compress + Behavior Rule + DECISIONS.md [LOCK] section. |
 | 7 | Track B hooks (SessionStart/PreCompact/SessionEnd) | claude-opus-4-8 · effort high | 2026-06-07 | 3 PowerShell hooks + settings.json. Tested on Windows; encoding bug fixed. Design corrected vs docs. |
+| 8 | C-004 caching boundary (doc only) | claude-opus-4-8 · effort medium | 2026-06-07 | Documented cacheable vs volatile; no API (cost/reach). Implementation deferred (access-gated). |
 
 ---
 
