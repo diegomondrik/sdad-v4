@@ -8,6 +8,7 @@ Each `[LOCK]`-prefixed decision must not be reopened without explicit developer 
 - [LOCK] CLAUDE.md stays lean: short critical rules inline, voluminous content → on-demand skills (§2.0).
 - [LOCK] CLAUDE.md net line budget for v4.2 ≤ +40 (§2.0).
 - [LOCK] Anchor survival = PreCompact writes to disk + SessionStart re-injects after compaction; PreCompact's own injection does NOT survive (verified vs docs).
+- [LOCK] No API dependency in the methodology — prompt caching is documentation + structure only (cost/team-reach) (C-004).
 
 ---
 
