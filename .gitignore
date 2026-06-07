@@ -1,6 +1,9 @@
 # MCP config — contains tokens, never commit
 mcp.json
 
+# SDAD runtime state (hook artifacts: compact anchor snapshot, autocommit hold sentinel)
+.sdad/
+
 # Windows
 Thumbs.db
 Desktop.ini

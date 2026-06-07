@@ -540,8 +540,8 @@ Use as primary context budget indicator — shows the 50% / 65% thresholds.
 # Happy Engineering        Remote Claude Code control (mobile)  https://happy.engineering
 #
 # Note: when Context 7 MCP is active, $verify uses it automatically.
-# Note: hooks (.claude/hooks/) are prepared but inactive in v4.1.
-#       See .claude/hooks/README.md for developer setup instructions.
+# Note: hooks (.claude/hooks/) are ACTIVE in v4.2 (Windows/PowerShell): SessionStart (anchor +
+#       guarded ff-pull), PreCompact (anchor snapshot), SessionEnd (whitelisted autocommit). See README.
 
 ---
 

@@ -1,31 +1,31 @@
 # .claude/hooks/
 
-Hooks are Claude Code lifecycle scripts that run automatically at defined
-points in the development workflow (e.g., before a tool call, after a response).
+Claude Code lifecycle scripts that run automatically at defined points in the workflow.
 
-## Status in SDAD v4.0
+## Status in SDAD v4.2
 
-**Hooks are inactive in v4.0.**
+**ACTIVE (Windows / PowerShell).** Three hooks are wired in `.claude/settings.json`:
 
-The folder exists to reserve the extension point. No hook scripts are shipped
-or executed in this version.
+| Hook | Script | What it does | Safeguards |
+|---|---|---|---|
+| `SessionStart` | `session-start.ps1` | Injects the COMPACT ANCHOR ([LOCK] decisions from `DECISIONS.md`) into context, and does a fast-forward `git pull`. Fires after compaction too — this is what makes the anchor survive compaction. | Pull only if no tracked file is modified and only `--ff-only`; never blocks session start; always exits 0. |
+| `PreCompact` | `pre-compact.ps1` | Writes a compaction-time anchor snapshot to `.sdad/compact_anchor.md` so `SessionStart(compact)` can re-inject it. | Never blocks compaction (never exits 2); exits 0. |
+| `SessionEnd` | `session-end.ps1` | Batch auto-commit of SDAD docs at session end. | Whitelist: ONLY `DECISIONS.md` + `LESSON_LIBRARY.md`, never code; skips if `.sdad/HOLD_AUTOCOMMIT` exists; no empty commit; standardized message. |
 
-## Planned for future versions
+### Design note (verified against Claude Code docs)
+A `PreCompact` hook **cannot** inject context that survives compaction — its `additionalContext`
+is discarded by the compaction. The durable mechanism is `PreCompact` writing the anchor to disk +
+`SessionStart` (matcher includes `compact`) re-injecting it **after** compaction. This corrects the
+original roadmap assumption that PreCompact alone would persist the anchor.
 
-Hooks will be evaluated once G7 has real project evidence of where automation
-adds consistent value. Candidates under consideration:
+### Autocommit hold
+To pause autocommit (e.g. an open P0 QA finding or a failing increment), create an empty file
+`.sdad/HOLD_AUTOCOMMIT`. Delete it to resume. `.sdad/` is gitignored (runtime state only).
 
-- **pre-build** — validate SPEC.md §9 is complete before $build on Tier 3 projects
-- **post-qa** — auto-append QA summary to DECISIONS.md after each $qa run
-- **pre-commit** — run a lightweight security check before git commit
+## Platform
+These hooks are **Windows/PowerShell** (the v4.2 test gate). macOS/Linux `.sh` equivalents are a
+documented follow-up — the logic is small and mirrors these three scripts.
 
-These will only be added when a recurring manual step justifies automation.
-Hooks designed in the abstract tend to add friction without payoff.
-
-## If you want to experiment
-
-Claude Code hooks documentation:
-https://docs.anthropic.com/en/docs/claude-code/hooks
-
-Any hook added here activates automatically for all developers using this repo.
-Test in a branch before merging to main.
+## Reference
+Claude Code hooks: https://code.claude.com/docs/en/hooks
+Any hook here activates for all developers using this repo. Test in a branch before merging to main.
