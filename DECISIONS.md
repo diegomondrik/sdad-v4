@@ -26,18 +26,18 @@ Alternatives considered: (a) token-only rule with no security clause — rejecte
 Impact: CLAUDE.md edited in 3 places ($specout §7 subsection, $qa Layer 1 line, Behavior Rules line). Δ +15 net lines. No code surface. DECISIONS.md created.
 ════════════════════════════════════════════════════════
 
-**§2.1 — single-source validation evidence:** 🧠 [verificar — pendiente workflow G7]
-Reasoned conjecture (NOT yet validated against a real G7 workflow): in G7 Pyplan/FP&A
-engagements, sessions frequently run multiple consumer MCPs simultaneously, which the
-roadmap (§3 C-011) flags as degrading context and cost. A single-endpoint CLI wrapper
-would reduce that footprint — *provided* it does not move credentials into argv/env or
-introduce shell-injection/parsing fragility. Diego to replace this line with one concrete
-G7 case (which MCP, which task, observed context/cost impact) to close DoD §2.1 for C-011.
+**§2.1 — single-source validation evidence (validated with Diego, 2026-06-07):**
+G7 environments today run FEW simultaneous third-party MCPs, so the video's original "many MCPs
+degrade context/cost" driver barely applies to G7. The rule's real value for G7 is its SECURITY
+gate — clause (c): if a CLI wrapper adds shell-injection / credentials-in-argv / fragile-parsing
+risk, keep the vetted MCP. Token saving is secondary/future-proofing. This matches how the rule
+is built (security-primary), so no change needed — the single-source premise was corrected, not
+the rule.
 
 **DoD status (roadmap §6):**
 - [x] Rule drafted; security clause present.
 - [x] Reviewed against §D (producer context excluded) and $qa Layer 1 (no contradiction).
-- [ ] §2.1 single-source validation — OPEN (placeholder above; awaiting real G7 workflow line).
+- [x] §2.1 single-source validation — CLOSED: validated with Diego (few MCPs in G7; value is the security gate).
 
 ---
 
@@ -72,7 +72,10 @@ SDAD methodology file (avoids self-reference confusion).
 Rationale: SDAD managed SPEC/DECISIONS/LESSON but not the project's own CLAUDE.md; it rotted
 without a protocol. "What to exclude" (no SPEC.md duplication) is the main control, per roadmap.
 Impact: CLAUDE.md $build + $pause + Behavior Rules. No code surface.
-§2.1 evidence: 🧠 [verificar — pendiente workflow G7]. DoD §2.1 OPEN.
+§2.1 evidence (validated with Diego, 2026-06-07): With Diego as the sole CLAUDE.md maintainer today,
+the multi-author drift risk does NOT apply yet. Validated value = an automatic reminder to update the
+project CLAUDE.md right after a structural change (so it is not forgotten), which also scales as G7's
+dev team grows (see C-014). Low-cost safety net, kept deliberately. DoD §2.1 CLOSED.
 
 ## Increment 4 — C-013: $verify audit (proactive mode)
 
@@ -82,7 +85,10 @@ verifies each against current docs via Context 7 MCP or WebSearch). Trigger: Pha
 days since last $build (date source: last §13 entry / git log) or on demand; not per session.
 Rationale: $verify was reactive only; existing deps deprecated between sessions went unaudited.
 Impact: CLAUDE.md $verify + Behavior Rule. Reactive default behavior unchanged.
-§2.1 evidence: 🧠 [verificar — pendiente workflow G7]. DoD §2.1 OPEN.
+§2.1 evidence (validated with Diego, 2026-06-07): G7 projects do get resumed after gaps AND get edited
+manually outside SDAD, so dependencies can drift regardless of how the code changed; a proactive Phase-0
+audit catches deprecations either way. Scope note: $verify audit checks dependency currency — it does not
+generate code. DoD §2.1 CLOSED.
 
 ## Increment 5 — C-014: Dev Setup (skill, external links only)
 
@@ -95,8 +101,10 @@ Rationale: native features that boost SDAD were not discoverable; links-only avo
 Verification: ✅ docs host migrated docs.claude.com → code.claude.com (301), confirmed live
 2026-06-07. Concept deep-links (memory, skills, hooks, mcp, sub-agents, routines, cli-reference,
 settings) verified against the live overview page.
-Impact: new skill file + CLAUDE.md Active Skills (+1) + $sdad pointer (+1).
-§2.1 evidence: 🧠 [verificar — pendiente workflow G7]. DoD §2.1 OPEN.
+Impact: new skill file + CLAUDE.md Active Skills (+1) + $sdad pointer (+1; later reclaimed in C-006).
+§2.1 evidence (validated with Diego, 2026-06-07): G7 developers are just starting with AI / SDAD /
+Claude Code / Pyplan; onboarding discoverability of native features is directly valuable — confirmed
+real need, "all help welcome." DoD §2.1 CLOSED.
 
 ---
 
@@ -174,7 +182,9 @@ keyword filter to `$lesson search [kw]` (now tag-aware) and added a Phase 0 rule
 relevant lessons. Net CLAUDE.md delta: 0 — reclaimed the redundant $sdad Dev Setup pointer line
 (the dev-setup skill stays discoverable via Active Skills + its trigger).
 Seeded L-01 = the Windows PowerShell encoding lesson caught during Track B QA (dogfooding the
-Lesson Capture flow). §2.1: keyword retrieval is a standard pattern; evidence [verificar].
+Lesson Capture flow). §2.1 evidence (validated with Diego, 2026-06-07): CLOSED with a real case —
+L-01 itself emerged in this real session and applies to any future G7 Windows/hooks work; concrete
+proof that capturing and surfacing lessons across projects adds value. DoD §2.1 CLOSED.
 
 ## Increment 10 — C-010: Sub-agent handoff pattern
 
@@ -192,11 +202,11 @@ $agent at it (extended the existing $agent header line — net CLAUDE.md delta 0
 
 | Increment | Feature | Model | Date | Notes |
 |---|---|---|---|---|
-| 1 | C-011 MCP vs CLI rule | claude-opus-4-8 · effort high | 2026-06-05 | CLAUDE.md $specout §7 + $qa Layer 1 + Behavior Rules. Δ +15 net lines. §2.1 evidence pending [verificar]. |
+| 1 | C-011 MCP vs CLI rule | claude-opus-4-8 · effort high | 2026-06-05 | CLAUDE.md $specout §7 + $qa Layer 1 + Behavior Rules. Δ +15 net lines. §2.1 validated 2026-06-07. |
 | 2 | C-015 model notice in announcement | claude-opus-4-8 · effort low | 2026-06-05 | CLAUDE.md $build announcement + Behavior Rules. Δ +6 net lines. Templated [model]/[effort], generic. |
-| 3 | C-012 project CLAUDE.md protocol | claude-opus-4-8 · effort low | 2026-06-05 | CLAUDE.md $build step 5.5 + $pause + Behavior Rules. §2.1 pending [verificar]. |
-| 4 | C-013 $verify audit | claude-opus-4-8 · effort low | 2026-06-05 | CLAUDE.md $verify + Behavior Rule. §2.1 pending [verificar]. |
-| 5 | C-014 dev-setup skill | claude-opus-4-8 · effort low | 2026-06-07 | New .claude/skills/dev-setup/ + CLAUDE.md registration. Links verified live. §2.1 pending [verificar]. |
+| 3 | C-012 project CLAUDE.md protocol | claude-opus-4-8 · effort low | 2026-06-05 | CLAUDE.md $build step 5.5 + $pause + Behavior Rules. §2.1 validated 2026-06-07. |
+| 4 | C-013 $verify audit | claude-opus-4-8 · effort low | 2026-06-05 | CLAUDE.md $verify + Behavior Rule. §2.1 validated 2026-06-07. |
+| 5 | C-014 dev-setup skill | claude-opus-4-8 · effort low | 2026-06-07 | New .claude/skills/dev-setup/ + CLAUDE.md registration. Links verified live. §2.1 validated 2026-06-07. |
 | 6 | C-007 [LOCK] + COMPACT ANCHOR | claude-opus-4-8 · effort low | 2026-06-07 | CLAUDE.md $pause compress + Behavior Rule + DECISIONS.md [LOCK] section. |
 | 7 | Track B hooks (SessionStart/PreCompact/SessionEnd) | claude-opus-4-8 · effort high | 2026-06-07 | 3 PowerShell hooks + settings.json. Tested on Windows; encoding bug fixed. Design corrected vs docs. |
 | 8 | C-004 caching boundary (doc only) | claude-opus-4-8 · effort medium | 2026-06-07 | Documented cacheable vs volatile; no API (cost/reach). Implementation deferred (access-gated). |
@@ -229,9 +239,12 @@ separate skill/hook/template/library files, per the [LOCK] "CLAUDE.md stays lean
 ## v4.2 Definition of Done (roadmap §6) — status
 
 DONE: C-011, C-012, C-013, C-014, C-015, C-007, Hooks (tested on Windows), C-006, C-010,
-PreCompact-survival design corrected, §2.0 budget within cap, version/§13 to update on tag.
-OPEN (developer): §2.1 single-source validation for C-011/C-012/C-013/C-014/C-006 — 5 reasoned
-[verificar] placeholders awaiting one real G7-workflow line each.
+PreCompact-survival design corrected, §2.0 budget within cap, CLAUDE.md v4.2 + §13 done,
+branch pushed to origin.
+§2.1 single-source validation: CLOSED 2026-06-07 — validated with Diego for C-011/C-012/C-013/
+C-014/C-006. Premises "many simultaneous MCPs" (C-011) and "multi-author drift" (C-012) were
+corrected against G7 reality; the rules stand on their real value (security gate, onboarding,
+resume/manual-edit audit, lesson reuse). See each increment's evidence line.
 DEFERRED (access-gated, not v4.3-by-choice): C-004 API-level caching implementation.
 OUT OF v4.2 (agreed): C-009 git worktrees.
-PENDING: bump CLAUDE.md header to v4.2 + push branch — on developer's go.
+PENDING (developer): open the PR; live auto-compaction test of the anchor (verifiable only in real use).
