@@ -7,6 +7,7 @@ Each `[LOCK]`-prefixed decision must not be reopened without explicit developer 
 - [LOCK] MCP-vs-CLI: security is a hard gate — never reduce it to a token/cost choice (C-011).
 - [LOCK] CLAUDE.md stays lean: short critical rules inline, voluminous content → on-demand skills (§2.0).
 - [LOCK] CLAUDE.md net line budget for v4.2 ≤ +40 (§2.0).
+- [LOCK] Anchor survival = PreCompact writes to disk + SessionStart re-injects after compaction; PreCompact's own injection does NOT survive (verified vs docs).
 
 ---
 
@@ -114,6 +115,34 @@ Impact: CLAUDE.md $pause compress + Behavior Rule; DECISIONS.md [LOCK] section a
 
 ---
 
+## Increment 7 — Track B Hooks (SessionStart + PreCompact + SessionEnd)
+
+Date: 2026-06-07 · Model: opus · effort high
+Decision: Activate three Windows/PowerShell hooks via .claude/settings.json.
+- SessionStart: inject COMPACT ANCHOR ([LOCK] decisions) + guarded ff-only git pull.
+- PreCompact: write anchor snapshot to .sdad/compact_anchor.md.
+- SessionEnd: batch autocommit of whitelisted docs (DECISIONS.md, LESSON_LIBRARY.md) only.
+
+Design corrections (both verified against official Claude Code docs via research subagent):
+1. PreCompact CANNOT inject context that survives compaction. The durable mechanism is
+   PreCompact-writes-to-disk + SessionStart(matcher includes `compact`)-re-injects-after.
+   This fixes the roadmap's original premise and the unsatisfiable DoD §6 PreCompact criterion.
+2. Autocommit moved from PostToolUse (per-edit, roadmap original) to SessionEnd (batched) per
+   developer decision — cleaner git history, no race with manual commits.
+
+Safeguards implemented: ff-only pull only on clean tracked tree, never blocks startup;
+autocommit whitelist (never code), .sdad/HOLD_AUTOCOMMIT sentinel, no empty commit.
+
+Testing on Windows (the §6 gate): all three scripts run as child PowerShell processes with
+mock stdin JSON. Caught and fixed a Windows codepage encoding bug (non-ASCII em-dash broke the
+parser; mojibake in anchor) — scripts are now pure-ASCII and read/write UTF-8 explicitly.
+SessionStart emits valid JSON, anchor unicode clean, read hooks do not mutate the repo.
+SessionEnd verified: sentinel-guard blocks; whitelist commits DECISIONS.md only.
+
+Platform note: Windows-first (the test gate). macOS/Linux .sh ports are a documented follow-up.
+
+---
+
 ## §13 — AI Authorship Log (v4.2)
 
 | Increment | Feature | Model | Date | Notes |
@@ -124,6 +153,7 @@ Impact: CLAUDE.md $pause compress + Behavior Rule; DECISIONS.md [LOCK] section a
 | 4 | C-013 $verify audit | claude-opus-4-8 · effort low | 2026-06-05 | CLAUDE.md $verify + Behavior Rule. §2.1 pending [verificar]. |
 | 5 | C-014 dev-setup skill | claude-opus-4-8 · effort low | 2026-06-07 | New .claude/skills/dev-setup/ + CLAUDE.md registration. Links verified live. §2.1 pending [verificar]. |
 | 6 | C-007 [LOCK] + COMPACT ANCHOR | claude-opus-4-8 · effort low | 2026-06-07 | CLAUDE.md $pause compress + Behavior Rule + DECISIONS.md [LOCK] section. |
+| 7 | Track B hooks (SessionStart/PreCompact/SessionEnd) | claude-opus-4-8 · effort high | 2026-06-07 | 3 PowerShell hooks + settings.json. Tested on Windows; encoding bug fixed. Design corrected vs docs. |
 
 ---
 
