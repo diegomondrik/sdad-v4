@@ -75,6 +75,7 @@ State is always the actual filesystem + SPEC.md + git log.
 - **Pyplan MCP** — trigger: @mcp_tool, MCP tools, dynamic tools, OAuth MCP, §D, mcp_tool decorator (Pyplan projects)
 - **Decision Architecture** — trigger: data architecture, DW, staging, data sources, §A
 - **Data Discovery** — trigger: data delta, field mismatch, source discrepancy, data gap
+- **Dev Setup** — trigger: onboarding, dev setup, which Claude Code features complement SDAD (links to live docs)
 
 Use $skills to view details or activate additional skills manually.
 
@@ -156,6 +157,7 @@ EXECUTION:
 ## Commands
 
 **$sdad** — Show SDAD v4.1 methodology overview: phases, descriptions, command list.
+Dev Setup: for native Claude Code features that complement SDAD, load the dev-setup skill (links to live docs at code.claude.com — no transcribed feature names).
 
 **$spec** (or $spec [section]) — Phase 1: Guided Requirements.
 ONE question at a time with proposed default.
@@ -207,6 +209,18 @@ Additional sections for Pyplan projects (prepended before §1):
       parameter names + types + Annotated descriptions, return type, serialization notes.
       §D is a gate section: must be approved before $build when present.)
 
+§7 — MCP vs CLI rule (consumer context only):
+  When §7 documents a third-party integration SDAD will consume during $build,
+  evaluate wrapping a CLI over invoking the MCP directly when ALL hold:
+    (a) the task hits a single endpoint,
+    (b) context is near the budget threshold, AND
+    (c) the CLI adds no greater security risk than the MCP
+        (shell injection, credentials in argv/env, fragile parsing).
+  If (c) fails, keep the vetted MCP. Record the choice and its security
+  rationale in §7 of SPEC.md. Cross-check $qa Layer 1 (Security).
+  Does NOT apply in producer context (Pyplan §D / @mcp_tool — MCP is the
+  correct architecture; no CLI preference).
+
 After generating, write the Spec to SPEC.md in the repo root automatically.
 For Tier 2/3: §9 is mandatory and must be complete before approval.
 For Tier 3 and Pyplan: respective gate sections (§9 / §A) block $build until approved.
@@ -224,12 +238,17 @@ ON PYPLAN PROJECTS: blocked if §D is present and not marked as approved in SPEC
 Before each increment announce:
 
   🔨 INCREMENT [N]: [feature name]
+  🧠 MODEL: [model] · effort [low|high] — [reason, ~4 words]
+     (low = executing already-specified work · high = medium/high risk or open decision)
+     If the active session differs:  /model [model]   and   /effort [low|high]
   Files: [list of files to create or modify]
   Tests: [unit / integration / E2E — will be executed after writing]
   Docs: [README update / API doc / inline comments required]
   Dependencies: [what must be done first]
   ──────────────────────────────────────────────────────
-  [Wait for developer approval, then write code, then run tests immediately]
+  [If the active model/effort matches the recommendation, confirm in one line and proceed.
+   If it differs, flag it and wait for the developer to switch before writing any code.
+   The main session does not auto-switch models. Then write code, run tests immediately.]
 
 After writing code for an increment:
   1. Run the project's test command. Report actual result — pass count, failures, errors.
@@ -237,6 +256,13 @@ After writing code for an increment:
   3. Write DECISIONS.md entry for this increment (see HUB BLOCK below).
   4. Update SPEC.md §13 AI Authorship Log.
   5. ON PYPLAN PROJECTS: run Pyplan increment checklist (see below).
+  5.5. Project CLAUDE.md sync — if this increment changed structure, propose an update to the
+       project's own CLAUDE.md (see PROJECT CLAUDE.md PROTOCOL below).
+
+PROJECT CLAUDE.md PROTOCOL (the developer's own repo CLAUDE.md — not this methodology file):
+  Contains: stack/architecture conventions, project commands, hard rules, lasting structural
+    decisions. Excludes: increment status and anything already in SPEC.md (no duplication — the
+    main control). Update on structural-increment close or at session end. Soft guide ~150–200 lines.
 
 PYPLAN INCREMENT CHECKLIST (runs after step 4 on Pyplan projects):
   Diagram surface:
@@ -297,6 +323,8 @@ QA LAYERS (run in priority order):
             MCP (Pyplan projects with §D): OAuth token not logged or exposed in node results (P0),
             @mcp_tool parameters validated before use — no path to arbitrary code execution (P1),
             exposed tools have minimum necessary scope — no tool exposes more than its declared contract (P2)
+            MCP vs CLI (consumer context): a CLI wrapper chosen over a vetted MCP
+            must not add shell-injection, credentials-in-argv/env, or fragile-parsing risk (P1) — see $specout §7 rule
   Layer 2 — 🏗️ Structure: architecture consistency, separation of concerns, error handling,
             context flow, tight coupling
   Layer 3 — ⚡ Efficiency: token usage, redundant calls, conversation history management,
@@ -317,6 +345,12 @@ Security and compliance findings always require explicit developer approval befo
 **$verify** — Check dependency documentation currency.
 Runs automatically when $build introduces a new external dependency.
 When Context 7 MCP is active, $verify uses it automatically.
+
+  $verify         → reactive (default): triggered when $build adds a new dependency.
+  $verify audit   → proactive: read package.json / requirements.txt / dep tree and verify
+                    each dependency against current docs (Context 7 MCP, else WebSearch).
+                    Trigger: Phase 0 when the project went >30 days without $build (date
+                    source: last §13 entry / git log), or on demand. Not automatic per session.
 ON PYPLAN PROJECTS WITH §D: $verify always includes the Pyplan MCP server as an external
 dependency. Flag in §7: "Pyplan MCP server — v1 (first release, API may change across
 Pyplan updates)." Recommend locking to a specific Pyplan version in §5 if MCP stability
@@ -326,6 +360,7 @@ is critical for the project.
   Current Phase | Spec Status | Compliance Tier | Platform | Context Budget %
   Last increment + test result | Open QA findings (H-XX) | Active Skills
   Decisions log: [N entries — last entry title and date]
+  Project CLAUDE.md: last modified [date]
   Flows defined: [N] | Next step recommendation
 
 **$pause compress** — Generate Session Snapshot for next session.
@@ -456,6 +491,8 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - Ask one question at a time in $spec — never present a questionnaire.
 - Always propose a default — interrupt only when data cannot be inferred.
 - Announce increments before coding — never skip the announcement.
+- Announce a recommended model + effort in every $build increment; if the active session differs, flag and wait for the developer to switch before writing code.
+- After a structural increment, propose an update to the project's own CLAUDE.md (step 5.5); never duplicate SPEC.md content into it.
 - Include docs update in every $build increment announcement.
 - Mark critical security issues with 🚨 regardless of current phase.
 - Mark compliance violations with 🔒 regardless of current phase.
@@ -466,6 +503,8 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - In Phase 0, detect UI presence and suggest frontend skill if applicable.
 - $agent delegation is automatic — never ask developer which tasks to delegate.
 - $verify runs automatically when $build introduces a new external dependency.
+- $verify audit is the proactive mode — run it in Phase 0 when >30 days elapsed since the last $build.
+- In consumer context, weigh CLI-vs-MCP per the $specout §7 rule; if the CLI adds security risk, keep the vetted MCP. Never applies in producer context (§D active).
 - $pause always includes Context Budget status, Decisions log count, platform, and flows count.
 - Write DECISIONS.md entry and HUB BLOCK after each completed increment.
 - ON PYPLAN PROJECTS: run increment checklist before marking any increment complete.
