@@ -1,7 +1,7 @@
-# SDAD v4.1 — CLAUDE.md
+# SDAD v4.2 — CLAUDE.md
 # Spec-Driven AI Development for Claude Code
 # G7 AI Development Methodology
-# Version 4.1 | 2026
+# Version 4.2 | 2026
 #
 # INSTALLATION: Place this file at the root of your project repository.
 # The .claude/ folder (skills, agents, hooks) is installed by the SDAD installer.
@@ -156,7 +156,7 @@ EXECUTION:
 
 ## Commands
 
-**$sdad** — Show SDAD v4.1 methodology overview: phases, descriptions, command list.
+**$sdad** — Show SDAD v4.2 methodology overview: phases, descriptions, command list.
 
 **$spec** (or $spec [section]) — Phase 1: Guided Requirements.
 ONE question at a time with proposed default.
@@ -545,5 +545,5 @@ Use as primary context budget indicator — shows the 50% / 65% thresholds.
 
 ---
 
-G7 AI Development Methodology | SDAD v4.1 | CLAUDE.md
+G7 AI Development Methodology | SDAD v4.2 | CLAUDE.md
 Spec-Driven AI Development for Claude Code
