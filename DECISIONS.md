@@ -164,6 +164,29 @@ stable so the app's automatic cache keeps hitting. No code, no API calls, no per
 
 ---
 
+## Increment 9 — C-006: Lesson retrieval (keyword + tags)
+
+Date: 2026-06-07 · Model: opus · effort medium
+Decision: Created LESSON_LIBRARY.md (did not exist) with the `#stack`/`#phase` tag convention,
+the L-XX format, and the retrieval note (no embeddings until ~50 entries). CLAUDE.md: renamed the
+keyword filter to `$lesson search [kw]` (now tag-aware) and added a Phase 0 rule to surface 2-3
+relevant lessons. Net CLAUDE.md delta: 0 — reclaimed the redundant $sdad Dev Setup pointer line
+(the dev-setup skill stays discoverable via Active Skills + its trigger).
+Seeded L-01 = the Windows PowerShell encoding lesson caught during Track B QA (dogfooding the
+Lesson Capture flow). §2.1: keyword retrieval is a standard pattern; evidence [verificar].
+
+## Increment 10 — C-010: Sub-agent handoff pattern
+
+Date: 2026-06-07 · Model: opus · effort high
+Dynamic-workflows evaluation (roadmap-required, done first): Claude Code already provides native
+sub-agent delegation that RETURNS the sub-agent's final message, plus schema-based structured
+output. So no custom orchestration/return infrastructure is needed — the real gap (the structured
+return) is closed by a lightweight convention, not new machinery.
+Decision: Created .claude/agents/HANDOFF_TEMPLATE.md (the AGENT HANDOFF block + rules) and pointed
+$agent at it (extended the existing $agent header line — net CLAUDE.md delta 0).
+
+---
+
 ## §13 — AI Authorship Log (v4.2)
 
 | Increment | Feature | Model | Date | Notes |
@@ -176,6 +199,8 @@ stable so the app's automatic cache keeps hitting. No code, no API calls, no per
 | 6 | C-007 [LOCK] + COMPACT ANCHOR | claude-opus-4-8 · effort low | 2026-06-07 | CLAUDE.md $pause compress + Behavior Rule + DECISIONS.md [LOCK] section. |
 | 7 | Track B hooks (SessionStart/PreCompact/SessionEnd) | claude-opus-4-8 · effort high | 2026-06-07 | 3 PowerShell hooks + settings.json. Tested on Windows; encoding bug fixed. Design corrected vs docs. |
 | 8 | C-004 caching boundary (doc only) | claude-opus-4-8 · effort medium | 2026-06-07 | Documented cacheable vs volatile; no API (cost/reach). Implementation deferred (access-gated). |
+| 9 | C-006 lesson retrieval | claude-opus-4-8 · effort medium | 2026-06-07 | LESSON_LIBRARY.md created (+ L-01) + $lesson search + Phase 0 surfacing. CLAUDE.md net 0. |
+| 10 | C-010 agent handoff | claude-opus-4-8 · effort high | 2026-06-07 | HANDOFF_TEMPLATE.md + $agent pointer. Native delegation evaluated — no custom infra needed. CLAUDE.md net 0. |
 
 ---
 
@@ -188,6 +213,24 @@ stable so the app's automatic cache keeps hitting. No code, no API calls, no per
 | C-012 | ~+10 | ~+31 |
 | C-013 | ~+7 | ~+38 |
 | C-014 | +2 (skill holds the rest) | ~+40 |
+| C-007 | +2 (−1 clawback) | ~+40 |
+| Hooks | 0 (note flipped; logic in scripts) | ~+40 |
+| C-004 | 0 (doc in DECISIONS) | ~+40 |
+| C-006 | 0 (−1 clawback; content in LESSON_LIBRARY) | ~+40 |
+| C-010 | 0 (content in HANDOFF_TEMPLATE) | ~+40 |
 
-**Measured net delta (CLAUDE.md, 547 − 509 = +38)** — within the §2.0 cap of +40, ~+2 margin.
-Track A complete. Track B should claw back margin via skills if it adds volume.
+**FINAL measured net delta (CLAUDE.md): 549 − 509 = +40 — exactly at the §2.0 cap, not over.**
+Voluminous content (C-014 dev-setup, C-010 handoff, hooks logic, C-004/C-006 detail) lives in
+separate skill/hook/template/library files, per the [LOCK] "CLAUDE.md stays lean" decision.
+
+---
+
+## v4.2 Definition of Done (roadmap §6) — status
+
+DONE: C-011, C-012, C-013, C-014, C-015, C-007, Hooks (tested on Windows), C-006, C-010,
+PreCompact-survival design corrected, §2.0 budget within cap, version/§13 to update on tag.
+OPEN (developer): §2.1 single-source validation for C-011/C-012/C-013/C-014/C-006 — 5 reasoned
+[verificar] placeholders awaiting one real G7-workflow line each.
+DEFERRED (access-gated, not v4.3-by-choice): C-004 API-level caching implementation.
+OUT OF v4.2 (agreed): C-009 git worktrees.
+PENDING: bump CLAUDE.md header to v4.2 + push branch — on developer's go.

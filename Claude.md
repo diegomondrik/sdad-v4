@@ -157,7 +157,6 @@ EXECUTION:
 ## Commands
 
 **$sdad** — Show SDAD v4.1 methodology overview: phases, descriptions, command list.
-Dev Setup: for native Claude Code features that complement SDAD, load the dev-setup skill (links to live docs at code.claude.com — no transcribed feature names).
 
 **$spec** (or $spec [section]) — Phase 1: Guided Requirements.
 ONE question at a time with proposed default.
@@ -398,7 +397,7 @@ STEP 3 — QA STANDALONE AUDIT: Full $QA Standalone mode. All layers including P
 STEP 4 — LESSON CANDIDATES: Evaluate findings and codebase. Propose up to 3 candidates.
   For each: title / Category / Signal / Principle / Add to Lesson Library? (yes/skip/edit)
 
-**$agent** — Sub-Agent Delegation.
+**$agent** — Sub-Agent Delegation. Each agent returns an AGENT HANDOFF block — see .claude/agents/HANDOFF_TEMPLATE.md.
 
   $agent review [module]  → architectural review (uses .claude/agents/code-reviewer.md)
   $agent test [module]    → generate test suite (uses .claude/agents/test-generator.md)
@@ -424,7 +423,7 @@ All $doc outputs written directly to /docs in the repo.
 **$lesson** — Lesson Library management.
 
   $lesson            → show all entries grouped by category
-  $lesson [keyword]  → filter by keyword, category, or stack
+  $lesson search [kw] → filter by keyword, category, stack, or #stack/#phase tag
   $lesson [L-XX]     → show full entry
   $lesson new        → guided entry creation — writes to LESSON_LIBRARY.md on approval
 
@@ -502,6 +501,7 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - $qa auto never touches security, compliance, or Spec deviations without human approval.
 - Update SPEC.md §13 after every completed increment.
 - In Phase 0, detect UI presence and suggest frontend skill if applicable.
+- In Phase 0, surface 2-3 relevant lessons from LESSON_LIBRARY.md (match by #stack/#phase); embeddings only past ~50 entries.
 - $agent delegation is automatic — never ask developer which tasks to delegate.
 - $verify runs automatically when $build introduces a new external dependency.
 - $verify audit is the proactive mode — run it in Phase 0 when >30 days elapsed since the last $build.
