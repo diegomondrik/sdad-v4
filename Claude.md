@@ -246,9 +246,8 @@ Before each increment announce:
   Docs: [README update / API doc / inline comments required]
   Dependencies: [what must be done first]
   ──────────────────────────────────────────────────────
-  [If the active model/effort matches the recommendation, confirm in one line and proceed.
-   If it differs, flag it and wait for the developer to switch before writing any code.
-   The main session does not auto-switch models. Then write code, run tests immediately.]
+  [If model/effort matches the recommendation, confirm and proceed; if it differs, flag and wait
+   for the developer to switch before writing code. The session does not auto-switch. Then run tests.]
 
 After writing code for an increment:
   1. Run the project's test command. Report actual result — pass count, failures, errors.
@@ -371,6 +370,8 @@ is critical for the project.
   active skills, context budget %, flows defined, exact next step.
   When a Session Snapshot is detected at conversation start:
   acknowledge and restore all state without asking developer to re-explain.
+  Emit a COMPACT ANCHOR within the snapshot: active phase/tier/platform, approved spec sections,
+  active increment, [LOCK] decisions only, open QA (H-XX), and constraints that must not be lost.
 
 **$docfinal** — Retroactive Documentation. For projects built without SDAD.
 No Spec required. Infers everything from the codebase. Runs 4 steps in sequence.
@@ -507,6 +508,7 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - In consumer context, weigh CLI-vs-MCP per the $specout §7 rule; if the CLI adds security risk, keep the vetted MCP. Never applies in producer context (§D active).
 - $pause always includes Context Budget status, Decisions log count, platform, flows count, and project CLAUDE.md mod date.
 - Write DECISIONS.md entry and HUB BLOCK after each completed increment.
+- Mark non-reopenable decisions [LOCK] in DECISIONS.md; $pause compress carries only [LOCK] decisions into the COMPACT ANCHOR.
 - ON PYPLAN PROJECTS: run increment checklist before marking any increment complete.
 - ON PYPLAN PROJECTS: never rely on the Pyplan Analyst Agent — SDAD is self-sufficient.
 - ON PYPLAN PROJECTS: structural data deltas pause $build — never improvise a workaround.

@@ -3,6 +3,11 @@
 Decision log for the v4.2 roadmap execution (spec: `SDAD_v42_ROADMAP_FINAL.md`).
 Each `[LOCK]`-prefixed decision must not be reopened without explicit developer override.
 
+## [LOCK] decisions (carried into every COMPACT ANCHOR)
+- [LOCK] MCP-vs-CLI: security is a hard gate — never reduce it to a token/cost choice (C-011).
+- [LOCK] CLAUDE.md stays lean: short critical rules inline, voluminous content → on-demand skills (§2.0).
+- [LOCK] CLAUDE.md net line budget for v4.2 ≤ +40 (§2.0).
+
 ---
 
 ## Increment 1 — C-011: MCP vs CLI rule
@@ -93,6 +98,22 @@ Impact: new skill file + CLAUDE.md Active Skills (+1) + $sdad pointer (+1).
 
 ---
 
+## Increment 6 — C-007: [LOCK] convention + COMPACT ANCHOR
+
+Date: 2026-06-07 · Model: opus · effort low
+Decision: Establish the `[LOCK]` prefix in DECISIONS.md for non-reopenable decisions; $pause
+compress emits a COMPACT ANCHOR carrying only [LOCK] decisions (plus phase/tier/platform,
+approved spec, active increment, open QA, hard constraints) so they survive context compaction.
+Rationale: Roadmap rebajó C-007 de "comando nuevo" a extensión de $pause compress (la Opción B
+original no sobrevivía a la compactación). El anclaje automático real llega con el hook PreCompact
+(Track B); esto es el mecanismo manual/v1.
+Kept tight inline (anchor = 2 lines) and reclaimed 1 redundant line from the C-015 announcement
+block (QA-driven), so the net CLAUDE.md delta stays within the §2.0 +40 cap.
+Impact: CLAUDE.md $pause compress + Behavior Rule; DECISIONS.md [LOCK] section added. No code.
+§2.1: not applicable (C-007 derives from the roadmap's own critical revision, not the video).
+
+---
+
 ## §13 — AI Authorship Log (v4.2)
 
 | Increment | Feature | Model | Date | Notes |
@@ -102,6 +123,7 @@ Impact: new skill file + CLAUDE.md Active Skills (+1) + $sdad pointer (+1).
 | 3 | C-012 project CLAUDE.md protocol | claude-opus-4-8 · effort low | 2026-06-05 | CLAUDE.md $build step 5.5 + $pause + Behavior Rules. §2.1 pending [verificar]. |
 | 4 | C-013 $verify audit | claude-opus-4-8 · effort low | 2026-06-05 | CLAUDE.md $verify + Behavior Rule. §2.1 pending [verificar]. |
 | 5 | C-014 dev-setup skill | claude-opus-4-8 · effort low | 2026-06-07 | New .claude/skills/dev-setup/ + CLAUDE.md registration. Links verified live. §2.1 pending [verificar]. |
+| 6 | C-007 [LOCK] + COMPACT ANCHOR | claude-opus-4-8 · effort low | 2026-06-07 | CLAUDE.md $pause compress + Behavior Rule + DECISIONS.md [LOCK] section. |
 
 ---
 
