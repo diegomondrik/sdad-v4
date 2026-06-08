@@ -11,7 +11,7 @@ description: >
 ---
 
 # SKILL: pyplan-spec-context
-# Version: 1.0 | SDAD v4.0
+# Version: 1.0 | SDAD v4.2
 # Layer: Pyplan Platform — Spec Structure & Navigation
 # Activation: active whenever a Pyplan SPEC.md is being written, read, or used
 

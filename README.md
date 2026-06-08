@@ -1,4 +1,4 @@
-# G7 SDAD v4.1
+# G7 SDAD v4.2
 ## Spec-Driven AI Development for Claude Code
 
 SDAD is G7's development methodology for teams using Claude Code as their
@@ -7,6 +7,31 @@ increments, integrated QA, compliance tiers, and a shared Lesson Library
 to AI-assisted development.
 
 ---
+
+## What's new in v4.2
+
+- **Hooks activated** — `SessionStart`, `PreCompact`, and `SessionEnd` hooks are
+  now live. Session state is auto-restored on resume; anchor snapshots survive
+  compaction; whitelisted autocommit runs at session end.
+- **COMPACT ANCHOR + `[LOCK]` convention** — `$pause compress` now emits a
+  COMPACT ANCHOR with `[LOCK]`-tagged decisions that survive compaction and are
+  re-injected at session start. Non-reopenable architectural decisions persist
+  across sessions without developer intervention.
+- **MCP-vs-CLI security gate** — the §7 MCP-vs-CLI evaluation now has a hard
+  security gate: if a CLI wrapper introduces shell injection, credentials-in-argv,
+  or fragile parsing risk, the vetted MCP is kept. This is a `[LOCK]` decision.
+- **Project CLAUDE.md protocol** — `$build` step 5.5 proposes an update to the
+  project's own `CLAUDE.md` after every structural increment. Keeps project-level
+  rules in sync without duplicating SPEC.md content.
+- **`$verify audit` (proactive mode)** — new trigger: Phase 0 when the project
+  went >30 days without a `$build`. Proactively audits all dependencies against
+  current docs, not just new ones.
+- **Dev Setup skill** (on-demand) — links to live Claude Code docs for onboarding.
+  Zero rot by design: no feature names or release dates transcribed inline.
+- **Agent HANDOFF template** — sub-agents return a structured HANDOFF block
+  (`.claude/agents/HANDOFF_TEMPLATE.md`) for clean result incorporation.
+- **DECISIONS.md `[LOCK]` tagging** — decisions marked `[LOCK]` in `DECISIONS.md`
+  are carried into the COMPACT ANCHOR; unlocked decisions are not.
 
 ## What's new in v4.1
 
@@ -190,7 +215,7 @@ sdad-v4/
 │   │   ├── test-generator.md
 │   │   └── security-auditor.md
 │   └── hooks/
-│       └── README.md                  # Inactive in v4.0
+│       └── README.md                  # Active in v4.2
 └── docs/
     ├── INSTALL_GUIDE_v4.md
     ├── USAGE_AND_SHORTCUTS_v4.md
@@ -225,4 +250,4 @@ After installing, start `claude` and verify:
 
 ---
 
-G7 AI Development Methodology | SDAD v4.1
+G7 AI Development Methodology | SDAD v4.2

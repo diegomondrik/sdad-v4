@@ -1,7 +1,7 @@
 # Agent: Test Generator
 # Invocation: $agent test [module]
 # Scope: isolated test suite generation for an existing module
-# Version: 4.0 | 2026
+# Version: 4.2 | 2026
 
 ## Purpose
 

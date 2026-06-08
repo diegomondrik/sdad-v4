@@ -1,7 +1,7 @@
 # Agent: Code Reviewer
 # Invocation: $agent review [module]
 # Scope: isolated architectural and code quality review of a specific module
-# Version: 4.0 | 2026
+# Version: 4.2 | 2026
 
 ## Purpose
 

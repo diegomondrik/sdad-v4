@@ -2,7 +2,7 @@
 # Activation: automatic when §C is populated in SPEC.md
 #             or when user runs $skills brand-design
 # Scope: Phase 1 (brand discovery) through Phase 3 (token application)
-# Version: 4.0 | 2026
+# Version: 4.2 | 2026
 
 ## Role
 

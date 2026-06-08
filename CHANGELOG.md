@@ -7,6 +7,101 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [4.2] — 2026-06-08
+
+### Overview
+
+SDAD v4.2 hardens session continuity and methodology robustness.
+Core focus: hooks activation, cross-session anchor survival, MCP-vs-CLI
+security gate, and structural quality improvements to `$build`, `$verify`,
+and the Lesson Library. No new phases or commands — all changes deepen
+existing capabilities.
+
+**Upgrade note:** v4.1 projects are fully compatible. No existing files
+need to change. Run `git tag v4.1` before pulling v4.2 to preserve prior state.
+
+---
+
+### Added
+
+**Hooks (now active)**
+- `SessionStart` hook — restores COMPACT ANCHOR after session resume or
+  compaction; runs `git pull` (guarded fast-forward) on session open.
+- `PreCompact` hook — writes COMPACT ANCHOR snapshot to disk before
+  compaction so it survives context reduction.
+- `SessionEnd` hook — whitelisted autocommit with safety guards
+  (no force push, no untracked secrets, no main/master direct push).
+- `.claude/settings.json` — hook registration and permission allowlist.
+
+**COMPACT ANCHOR + `[LOCK]` convention**
+- `$pause compress` now emits a COMPACT ANCHOR block with `[LOCK]`-tagged
+  decisions that survive compaction and are re-injected at session start.
+- `DECISIONS.md` entries marked `[LOCK]` are carried into the anchor;
+  unlocked decisions are not.
+- Non-reopenable architectural decisions persist across sessions without
+  developer re-explanation.
+
+**MCP-vs-CLI security gate** (§7 + QA Layer 1)
+- The §7 CLI-vs-MCP evaluation now has a hard security gate: if a CLI
+  wrapper introduces shell injection, credentials-in-argv/env, or fragile
+  parsing risk, the vetted MCP is kept regardless of context cost.
+- QA Layer 1 checks this explicitly (P1 finding).
+- Rule is `[LOCK]` — cannot be reduced to a token/cost tradeoff.
+
+**`$build` step 5.5 — Project CLAUDE.md protocol**
+- After every structural increment, `$build` proposes an update to the
+  project's own `CLAUDE.md`. Keeps project-level conventions in sync
+  without duplicating SPEC.md content. Soft guide: ~150–200 lines.
+
+**`$verify audit` — proactive mode**
+- New trigger: Phase 0 when the project went >30 days without a `$build`
+  (date source: last §13 entry / git log).
+- Proactively audits all dependencies against current docs, not just
+  newly introduced ones.
+
+**Dev Setup skill** (on-demand, `.claude/skills/dev-setup/SKILL.md`)
+- Links to live Claude Code docs for onboarding and tooling setup.
+- Zero rot by design: no feature names or release dates transcribed inline
+  (C-014 — links only, never transcribes unstable feature names).
+- Trigger: "onboarding", "dev setup", "which Claude Code features complement SDAD".
+
+**Agent HANDOFF template** (`.claude/agents/HANDOFF_TEMPLATE.md`)
+- Structured return format for all `$agent` sub-agents.
+- Fields: Agent, Task, Findings (H-XX), Recommended actions, Files reviewed,
+  Delegated-safely confirmation.
+
+**Lesson Library — L-02**
+- L-02: Validate single-source rules against real workflows before locking.
+  Category: Workflow. Added from v4.2 validation session.
+
+---
+
+### Changed
+
+- `$build` announcement block — now includes model + effort recommendation
+  with explicit flag-and-wait when active session differs.
+- `$verify` — `$verify audit` split out as named proactive mode; `$verify`
+  alone remains reactive (triggered by new dependency in `$build`).
+- `$pause` — always includes Decisions log count, flows count, platform,
+  and project CLAUDE.md last-modified date.
+- `$pause compress` — COMPACT ANCHOR added to snapshot output.
+- QA Layer 1 — MCP-vs-CLI security check added (P1).
+- All skill and agent version stamps bumped to v4.2.
+- README.md updated to v4.2 with "What's new in v4.2" section.
+- `.claude/hooks/README.md` — hooks now active (were inactive in v4.0/v4.1).
+
+---
+
+### Notes
+
+- Hooks require PowerShell (Windows) or bash (Mac/Linux). The installer
+  registers them automatically via `.claude/settings.json`.
+- `PreCompact` hook injection does NOT survive compaction by itself —
+  survival relies on `SessionStart` re-injecting from disk after compaction.
+  This is by design (verified against Claude Code docs).
+
+---
+
 ## [4.1] — 2026-06-04
 
 ### Overview
@@ -216,4 +311,4 @@ by Claude Code — no manual file copying or separate skill repos required.
 
 ---
 
-G7 AI Development Methodology | SDAD v4.0
+G7 AI Development Methodology | SDAD v4.2

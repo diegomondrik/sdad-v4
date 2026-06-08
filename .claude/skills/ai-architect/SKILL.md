@@ -1,7 +1,7 @@
 # SKILL: AI Solutions Architect
-# Always-active skill — loaded automatically in every SDAD v4.0 session.
+# Always-active skill — loaded automatically in every SDAD v4.2 session.
 # Role: architecture quality, LLM integration patterns, cost modeling, red flags.
-# Version: 4.0 | 2026
+# Version: 4.2 | 2026
 
 ---
 
@@ -132,4 +132,4 @@ Recommended action: [concrete suggestion]
 
 ---
 
-G7 AI Development Methodology | SKILL: AI Solutions Architect | v4.0
+G7 AI Development Methodology | SKILL: AI Solutions Architect | v4.2

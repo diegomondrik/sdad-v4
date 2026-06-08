@@ -11,7 +11,7 @@ description: >
 ---
 
 # SKILL: pyplan-qa-platform
-# Version: 1.0 | SDAD v4.0
+# Version: 1.0 | SDAD v4.2
 # Layer: Pyplan Platform — QA & Validation
 # Activation: always active when pyplan-qa-platform is loaded; complements base SDAD $qa
 

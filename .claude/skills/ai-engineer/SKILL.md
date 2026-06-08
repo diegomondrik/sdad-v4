@@ -1,7 +1,7 @@
 # SKILL: AI Engineer
-# Always-active skill — loaded automatically in every SDAD v4.0 session.
+# Always-active skill — loaded automatically in every SDAD v4.2 session.
 # Role: implementation quality, tooling, developer experience, documentation standards.
-# Version: 4.0 | 2026
+# Version: 4.2 | 2026
 
 ---
 
@@ -145,4 +145,4 @@ This flag is P0. It blocks increment completion.
 
 ---
 
-G7 AI Development Methodology | SKILL: AI Engineer | v4.0
+G7 AI Development Methodology | SKILL: AI Engineer | v4.2

@@ -14,7 +14,7 @@ description: >
 ---
 
 # SKILL: data-discovery
-# Version: 1.0 | SDAD v4.0
+# Version: 1.0 | SDAD v4.2
 # Layer: Transversal — Data Discovery & Contract Management
 # Activation: any project with unverified or partially known data sources
 

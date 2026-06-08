@@ -1,5 +1,5 @@
 # Pyplan MCP Skill
-# SDAD v4.1 — .claude/skills/pyplan/mcp/SKILL.md
+# SDAD v4.2 — .claude/skills/pyplan/mcp/SKILL.md
 # G7 AI Development Methodology
 # On-demand skill — loads when @mcp_tool, MCP tools, dynamic tools, §D, or
 # mcp_tool decorator are detected in a Pyplan project context.
@@ -161,5 +161,5 @@ Category for all Pyplan MCP findings: **Pyplan**
 
 ---
 
-G7 AI Development Methodology | SDAD v4.1
+G7 AI Development Methodology | SDAD v4.2
 Pyplan MCP Skill — .claude/skills/pyplan/mcp/SKILL.md

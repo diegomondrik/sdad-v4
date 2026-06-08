@@ -1,7 +1,7 @@
 # Skill: QA Engineer
 # Activation: always active (Phases 3–4)
 # Scope: test coverage, DoD compliance, acceptance criteria, regression risk
-# Version: 4.0 | 2026
+# Version: 4.2 | 2026
 
 ## Role
 
