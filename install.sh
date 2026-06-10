@@ -124,11 +124,23 @@ download_skill ".claude/agents/security-auditor.md"
 download_skill ".claude/agents/test-generator.md"
 download_skill ".claude/agents/HANDOFF_TEMPLATE.md"
 download_skill ".claude/hooks/README.md"
+download_skill ".claude/hooks/run-hook.sh"
+download_skill ".claude/hooks/session-start.sh"
+download_skill ".claude/hooks/pre-compact.sh"
+download_skill ".claude/hooks/session-end.sh"
+download_skill ".claude/hooks/session-start.ps1"
+download_skill ".claude/hooks/pre-compact.ps1"
+download_skill ".claude/hooks/session-end.ps1"
+chmod +x .claude/hooks/*.sh 2>/dev/null
 
-# NOTE: SDAD v4.3 hooks (session-start, pre-compact, session-end) ship as
-# PowerShell scripts and are Windows-only in this version. Bash equivalents
-# are planned — see .claude/hooks/README.md. settings.json (which registers
-# the .ps1 hooks) is intentionally NOT installed on Mac/Linux.
+# settings.json registers the three hooks via the cross-platform dispatcher
+# (.claude/hooks/run-hook.sh — .sh on macOS/Linux, .ps1 on Windows/Git Bash).
+# Never overwritten if the project already has one.
+if [ -f ".claude/settings.json" ]; then
+    echo -e "${CYAN}  SKIP   .claude/settings.json already exists — not overwritten${NC}"
+else
+    download_skill ".claude/settings.json"
+fi
 
 # ─── STEP 4: Install CLAUDE.md ───────────────────────────────────────────────
 
@@ -230,7 +242,8 @@ echo "  .claude/skills/data-discovery/          — transversal skill"
 echo "  .claude/skills/dev-setup/               — on-demand (onboarding)"
 echo "  .claude/skills/brand-design/            — on-demand (visual identity)"
 echo "  .claude/agents/                          — code-reviewer, security-auditor, test-generator + HANDOFF template"
-echo "  .claude/hooks/README.md                  — hooks are Windows-only in v4.3 (PowerShell)"
+echo "  .claude/hooks/                           — SessionStart/PreCompact/SessionEnd (cross-platform .sh + .ps1)"
+echo "  .claude/settings.json                    — hook registration (if new)"
 echo "  Pyplan MCP                               — registered globally (dev.pyplan.com)"
 echo "  SPEC.md                                  — blank template (if new)"
 echo "  LESSON_LIBRARY.md                        — blank template (if new)"
