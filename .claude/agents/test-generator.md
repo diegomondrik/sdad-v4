@@ -1,7 +1,14 @@
+﻿---
+name: test-generator
+description: Isolated test suite generation for an existing module
+model: sonnet
+effort: medium
+---
+
 # Agent: Test Generator
 # Invocation: $agent test [module]
 # Scope: isolated test suite generation for an existing module
-# Version: 4.2 | 2026
+# Version: 4.3 | 2026
 
 ## Purpose
 

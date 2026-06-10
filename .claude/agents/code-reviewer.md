@@ -1,7 +1,14 @@
+﻿---
+name: code-reviewer
+description: Isolated architectural and code quality review of a specific module
+model: opus
+effort: high
+---
+
 # Agent: Code Reviewer
 # Invocation: $agent review [module]
 # Scope: isolated architectural and code quality review of a specific module
-# Version: 4.2 | 2026
+# Version: 4.3 | 2026
 
 ## Purpose
 

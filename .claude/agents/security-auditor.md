@@ -1,7 +1,14 @@
+﻿---
+name: security-auditor
+description: Isolated security audit of a file, module, or full codebase
+model: opus
+effort: high
+---
+
 # Agent: Security Auditor
 # Invocation: $agent audit [file or folder]
 # Scope: isolated security audit of a file, module, or full codebase
-# Version: 4.2 | 2026
+# Version: 4.3 | 2026
 
 ## Purpose
 
