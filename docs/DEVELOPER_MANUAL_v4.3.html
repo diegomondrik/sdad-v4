@@ -124,6 +124,16 @@ performance, security, compliance tier and testing. The tier question is mandato
 never skipped. The project language question (English/Spanish) comes first — see
 <a href="#language">section 6</a>.</p>
 
+<div class="box"><b>💡 Document ingestion (MarkItDown)</b>
+When the requirements arrive as binary documents — PDF, Word, Excel, PowerPoint, Outlook
+messages — Claude converts them to Markdown first with Microsoft
+<a href="https://github.com/microsoft/markitdown">MarkItDown</a>
+(<code>pip install 'markitdown[all]'</code> → <code>markitdown file.pdf -o file.md</code>)
+and reads the Markdown: it preserves headings, tables and lists, and consumes far fewer
+tokens. Applies to <code>$spec</code>, §A client diagnosis and <code>$docfinal</code>.
+Converted copies live in <code>.sdad/ingest/</code>. Local trusted files only — MarkItDown
+performs I/O with the privileges of the process.</div>
+
 <h3>Phase 2 — Spec generation (<code>$specout</code>)</h3>
 <p>Generates the full document (§1 Vision … §13 AI Authorship Log) and writes it directly
 to <code>SPEC.md</code>, then asks for your approval. No approval, no <code>$build</code>.</p>
@@ -256,7 +266,43 @@ distinguishes two cases:</p>
 <p>Every Pyplan increment closes by verifying: all new nodes have <code>result=</code>
 assigned and calculate without error; no circular dependencies; read-node sources match
 the §A data contract; indexes are synchronized; inputs have validations; visualization
-components display calculated data (not empty); and any deltas found were recorded in §B.</p>
+components display calculated data (not empty); and any deltas found were recorded in §B.
+If the increment touches an HTML interface, the HTML interface surface block also runs
+(see below).</p>
+
+<h3>HTML interfaces</h3>
+
+<p>Pyplan supports two interface types. A <b>component interface</b> is the classic grid
+of draggable components, built manually. An <b>HTML interface</b> is a single,
+self-contained web page (HTML, CSS and JavaScript) that replaces the grid entirely and
+talks to the model through Python callbacks. HTML interfaces are designed to be created
+by AI agents — Pyplan's own agents or external AI clients via Pyplan MCP — and they are
+the <b>default type whenever an agent builds a screen</b>.</p>
+
+<p>The anatomy is two parts stored together: the HTML page, and a Python class
+<code>HTMLInterface(HTMLInterfaceBase)</code> whose <code>@callback</code> methods are the
+only ones the page can call. The page reaches Python through the built-in
+<code>window.pyplan</code> bridge (<code>callback</code>, <code>on</code>,
+<code>toast</code>, <code>import</code>). Getters return JSON-friendly data; mutators
+change the model via <code>set_input</code> / <code>set_form_values</code> and return the
+stale-widget list from <code>get_nodes_to_refresh()</code>. Headings backed by nodes carry
+<code>data-pyplan-nodes</code>, which links the number on screen back to the influence
+diagram.</p>
+
+<div class="box gate"><b>🔒 Sandbox — the rules that matter</b>
+The page runs in a sandboxed frame with an isolated origin: no cookies, no
+<code>localStorage</code>, no <code>&lt;iframe&gt;</code> embeds, no authenticated requests
+outside <code>window.pyplan.callback</code>. Consequence: <b>state must persist through
+the model via callbacks</b>. External scripts, styles, fonts and images are allowed (Pyplan
+proxies them same-origin); dynamic JS modules load via
+<code>window.pyplan.import(url)</code>.</div>
+
+<div class="box"><b>💡 How SDAD treats them</b>
+The methodology does not change. An AI-built HTML interface is an <b>increment</b> under
+the Build-via-AI guardrails: approved Spec, announcement, your approval, QA, DECISIONS.md
+entry. The increment closes with the HTML interface surface checklist (CLAUDE.md), and
+<code>$qa</code> Layer 5 re-verifies the same rules. <code>$spec</code> asks which screens
+need a fully custom layout so the interface type is recorded per screen in §3/§5.</div>
 
 <h3>MCP in Pyplan (<code>@mcp_tool</code> nodes)</h3>
 

@@ -11,7 +11,7 @@ description: >
 ---
 
 # SKILL: pyplan-qa-platform
-# Version: 1.0 | SDAD v4.2
+# Version: 1.1 | SDAD v4.3
 # Layer: Pyplan Platform — QA & Validation
 # Activation: always active when pyplan-qa-platform is loaded; complements base SDAD $qa
 
@@ -80,6 +80,19 @@ Report findings with prefix PP-01, PP-02... (independent numbering from H-XX).
 - [ ] No development scaffolding left visible (debug nodes, test selectors, placeholder text)
 - [ ] Export / download functions tested with real data, not just structure
 - [ ] Permissions model matches the client's role structure (if multi-user)
+
+---
+
+### 7.6 HTML Interfaces (when the project has any)
+
+- [ ] All page-model traffic goes through window.pyplan.callback - no direct fetch/XHR
+- [ ] Getter callbacks return JSON-friendly data; no raw DataFrames or xarray
+- [ ] Mutator callbacks return stale-widget lists from get_nodes_to_refresh(...)
+- [ ] Model writes only via set_input / set_form_values
+- [ ] No cookie/localStorage dependence - state persists through model callbacks
+- [ ] Node-backed headings carry data-pyplan-nodes for diagram traceability
+- [ ] External JS modules loaded via window.pyplan.import; no iframe embeds
+- [ ] Brand Token Sheet applied if active (cross-check pyplan-interfaces section 11)
 
 ---
 

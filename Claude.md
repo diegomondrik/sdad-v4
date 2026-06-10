@@ -210,6 +210,15 @@ Standard order: scope, user flows, data model, integrations, business rules,
 performance, security, compliance tier, testing.
 Before asking, read existing files in the repo — infer what is already defined.
 
+DOCUMENT INGESTION (all projects — $spec, §A client diagnosis, $docfinal inputs):
+  When source material arrives as binary office documents (PDF, docx, xlsx, pptx,
+  Outlook .msg, images), convert to Markdown first with markitdown, then read the
+  Markdown — it preserves headings/tables/lists and is far more token-efficient:
+    pip install 'markitdown[all]'   →   markitdown file.pdf -o file.md
+  Security: convert local, trusted files only (convert_local) — never feed
+  untrusted paths or URLs (markitdown performs I/O with process privileges).
+  Keep converted .md files in .sdad/ingest/ — they are working copies, not deliverables.
+
 PYPLAN PROJECTS (when PROJECT_PLATFORM: pyplan):
   Run §0 (platform context) first, then §A (data architecture) before standard sections.
   §A gate: flag explicitly when §A is incomplete — $build is blocked until approved.
@@ -318,6 +327,13 @@ PYPLAN INCREMENT CHECKLIST (runs after step 4 on Pyplan projects):
     □ All new indexes are synchronized
     □ Inputs have type and range validations configured
     □ Visualization components display calculated data (not empty)
+  HTML interface surface (only when the increment touches an HTML interface):
+    □ All page↔model traffic goes through window.pyplan.callback — no direct fetch/XHR
+    □ Getters return JSON-friendly data; mutators return get_nodes_to_refresh(...) lists
+    □ Model writes use set_input / set_form_values — never touch model internals directly
+    □ No cookie/localStorage reliance — state persists via callbacks to the model
+    □ Node-backed headings carry data-pyplan-nodes; in-app navigation uses plain anchors
+    □ External JS modules load via window.pyplan.import — no <iframe> embeds (unsupported)
   Discovery:
     □ Any data deltas found during this increment recorded in §B and DECISIONS.md
     □ If structural delta found: $build paused, data gap report generated for consultant
@@ -343,6 +359,9 @@ DATA DELTA HANDLING (Pyplan projects):
 BUILD-VIA-AI GUARDRAILS (Pyplan MCP — when using Pyplan MCP's build/modify capabilities):
   Pyplan MCP allows AI clients to modify application logic and interfaces directly in a
   running Pyplan instance. SDAD treats each AI-driven modification as an increment.
+  Interfaces built via AI (Pyplan agents or Pyplan MCP) are HTML interfaces by default —
+  each generated or modified HTML interface is itself an increment under these rules,
+  and closes with the HTML interface surface checklist.
   Rules:
     1. Spec must be approved before any build/modify action — same gate as $build.
        If Spec is not approved, block the modification and redirect to $spec / $specout.
@@ -383,6 +402,10 @@ QA LAYERS (run in priority order):
               □ Docstrings are precise enough for an external LLM to invoke correctly
               □ Return values verified serializable — no DataFrames, no xarray without conversion
               □ No tool depends on interactive agent behavior or mutable session state
+            HTML interfaces (when the project has any):
+              □ Page↔model traffic only via window.pyplan.callback — no direct requests
+              □ Mutator callbacks report stale widgets via get_nodes_to_refresh
+              □ No cookie/localStorage dependence — state persisted through model callbacks
 
 $qa auto never touches security, compliance, or Spec deviations without human approval.
 Security and compliance findings always require explicit developer approval before any fix.
@@ -566,6 +589,10 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - ON PYPLAN PROJECTS WITH MCP: each AI-driven modification via Pyplan MCP is announced and approved as an increment before execution.
 - ON PYPLAN PROJECTS WITH MCP: §D is a gate section when present — $build blocked until §D is approved.
 - ON PYPLAN PROJECTS WITH MCP: flag Pyplan MCP as a v1 external dependency in §7 — API may change across Pyplan updates.
+- ON PYPLAN PROJECTS: AI-built interfaces default to HTML interfaces; each one is announced,
+  approved, and QA'd as an increment, closing with the HTML interface surface checklist.
+- Convert binary source documents (PDF/docx/xlsx/pptx) to Markdown with markitdown before
+  reading them — see DOCUMENT INGESTION under $spec. Local trusted files only.
 - Before session end or $pause compress, resolve any pending commits using git log.
 - All .ps1 scripts must be pure ASCII — Windows PowerShell 5.1 misreads UTF-8 without BOM
   and non-ASCII characters (em-dashes, accents) break the parser (L-01, confirmed twice).
@@ -590,6 +617,7 @@ Use as primary context budget indicator — shows the 50% / 65% thresholds.
 # Context 7 MCP           Up-to-date API docs in session       /plugin → "Context 7"
 # Sequential Thinking MCP Chain-of-thought reasoning           type "install sequential thinking MCP"
 # Happy Engineering        Remote Claude Code control (mobile)  https://happy.engineering
+# MarkItDown              Office/PDF → Markdown for ingestion  https://github.com/microsoft/markitdown
 #
 # Note: when Context 7 MCP is active, $verify uses it automatically.
 # Note: hooks (.claude/hooks/) are ACTIVE since v4.2 (Windows/PowerShell): SessionStart (anchor +

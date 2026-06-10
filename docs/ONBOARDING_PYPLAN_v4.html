@@ -582,6 +582,10 @@
         <li>Index components write selections back to diagram</li>
         <li>Input components write user values back to Input nodes</li>
         <li>Everything the end user sees and touches</li>
+        <li><strong>HTML interfaces:</strong> full-page web interfaces driven by Python
+          <code>@callback</code> methods and the <code>window.pyplan</code> bridge —
+          the default type when an AI agent builds a screen (see pyplan-interfaces
+          skill, section 11)</li>
       </ul>
       <span class="skill-tag">Skill: pyplan-interfaces</span>
     </div>
@@ -744,6 +748,7 @@ Dependencies: [what must be done first]
     <li><div class="check-box"></div><strong>Interface:</strong> All new indexes are synchronized</li>
     <li><div class="check-box"></div><strong>Interface:</strong> Inputs have type and range validations configured</li>
     <li><div class="check-box"></div><strong>Interface:</strong> Visualization components display calculated data (not empty)</li>
+    <li><div class="check-box"></div><strong>HTML interface (when touched):</strong> All page↔model traffic via <code>window.pyplan.callback</code>; mutators return <code>get_nodes_to_refresh(...)</code> lists; writes via <code>set_input</code>/<code>set_form_values</code>; no cookies/localStorage; no iframes; external JS via <code>window.pyplan.import</code></li>
     <li><div class="check-box"></div><strong>Discovery:</strong> Any data deltas found during this increment recorded in §B and DECISIONS.md</li>
     <li><div class="check-box"></div><strong>Discovery:</strong> If structural delta found — $build paused, data gap report generated</li>
     <li><div class="check-box"></div><strong>MCP (when §D present):</strong> Each new <code>@mcp_tool</code> node has a precise docstring explaining the business action</li>
@@ -895,6 +900,8 @@ result = _fn   # assign the function — do not call it</code></pre>
     <li>After execution: DECISIONS.md entry written + §13 AI Authorship Log updated</li>
     <li><code>$qa</code> runs on the modified increment — no increment is complete without QA</li>
     <li>MCP surface checklist runs for any <code>@mcp_tool</code> node touched</li>
+    <li>HTML interface surface checklist runs for any HTML interface created or modified —
+      AI-built interfaces are HTML interfaces by default</li>
   </ol>
 
   <div class="alert block">

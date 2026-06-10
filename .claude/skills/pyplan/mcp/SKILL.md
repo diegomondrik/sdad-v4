@@ -118,6 +118,9 @@ a running Pyplan instance), SDAD enforces the same discipline as $build:
 4. After execution: DECISIONS.md entry + §13 update.
 5. Run $qa on the modified increment.
 6. Run MCP surface checklist on any @mcp_tool node touched.
+7. If the modification created or changed an HTML interface (the default
+   interface type for AI-built screens), run the HTML interface surface
+   checklist (pyplan-interfaces skill, section 11.8).
 
 ---
 
