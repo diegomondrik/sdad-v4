@@ -49,7 +49,24 @@ before pulling v4.3 to preserve prior state.
   `apply-v4.3.ps1` and by the installers.
 
 **Developer Manual** (`docs/DEVELOPER_MANUAL_v4.3.html`)
-- Didactic manual covering SDAD core, SDAD for Pyplan, and day-to-day usage.
+- Didactic manual covering SDAD core, SDAD for Pyplan, and day-to-day usage. In English.
+
+**Project language selection (PROJECT_LANGUAGE)**
+- New project declaration field `PROJECT_LANGUAGE: en | es`. The FIRST `$spec`
+  question asks whether the project runs in English or Spanish; the answer is
+  locked and governs all interaction and generated documents (SPEC.md,
+  DECISIONS.md, QA reports, lessons, $doc output). Code identifiers and
+  comments stay in English regardless.
+
+**Documentation refresh**
+- All four legacy HTML docs (INSTALL_GUIDE, USAGE_AND_SHORTCUTS,
+  DEVELOPER_GUIDE, ONBOARDING_PYPLAN) re-stamped from v4.1 to v4.3; stale
+  "hooks inactive" note corrected; feature-origin references normalized to
+  "since v4.1". All repo documentation is in English.
+- `apply-v4.3-stamps.ps1` — one-shot version-stamp bump for files inside
+  `.claude/` (skills, agents, hooks README). Self-deletes.
+- `docs/TASK_HOOKS_MACOS_PORT.md` — self-contained task brief for a macOS dev
+  to port the three hooks to bash (setup, spec, test gate, SDAD discipline).
 
 **Context budget cap raised**
 - CLAUDE.md net line budget per release: +40 → +60 ([LOCK] updated in

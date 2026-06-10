@@ -1,7 +1,7 @@
-# Skill: Compliance Reviewer
+﻿# Skill: Compliance Reviewer
 # Activation: automatic on Tier 2 or Tier 3 confirmation
 # Scope: all phases once activated
-# Version: 4.2 | 2026
+# Version: 4.3 | 2026
 
 ## Role
 

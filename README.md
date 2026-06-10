@@ -24,6 +24,9 @@ to AI-assisted development.
   real SKILL.md (secrets, injection, auth, PII, severity discipline).
 - **Developer Manual** — `docs/DEVELOPER_MANUAL_v4.3.html`: didactic guide to
   SDAD, SDAD for Pyplan, and day-to-day usage.
+- **Project language** — the first `$spec` question asks English or Spanish;
+  the answer (`PROJECT_LANGUAGE`) governs all interaction and generated
+  documents for that project. Code stays in English.
 - **Installer fixes** — `install.ps1` / `install.sh` now install `dev-setup` and
   `brand-design` skills, the agent HANDOFF template, and (Windows) the hook
   scripts + `settings.json` registration that v4.2 declared active but never

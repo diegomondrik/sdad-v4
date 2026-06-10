@@ -1,77 +1,77 @@
-# TAREA — Port de hooks SDAD a bash (macOS/Linux)
-# SDAD v4.3 · gap conocido documentado en CHANGELOG [4.3]
-# Asignable a: dev con macOS · Estimación: 1 sesión
+# TASK — Port SDAD hooks to bash (macOS/Linux)
+# SDAD v4.3 · known gap documented in CHANGELOG [4.3]
+# Assignable to: a dev with macOS · Estimate: 1 session
 
-## Contexto (leé esto primero)
+## Context (read this first)
 
-SDAD v4.3 tiene 3 hooks de Claude Code que hoy son **solo Windows/PowerShell**:
-`.claude/hooks/session-start.ps1`, `pre-compact.ps1` y `session-end.ps1`.
-Tu tarea es portarlos a bash (`.sh`) y probarlos en macOS, siguiendo la propia
-metodología SDAD (esto es un incremento — se anuncia, se aprueba, se testea,
-se registra en DECISIONS.md).
+SDAD v4.3 ships 3 Claude Code hooks that are currently **Windows/PowerShell only**:
+`.claude/hooks/session-start.ps1`, `pre-compact.ps1` and `session-end.ps1`.
+Your task is to port them to bash (`.sh`) and test them on macOS, following the
+SDAD methodology itself (this is an increment — announce it, get approval, test it,
+record it in DECISIONS.md).
 
-Documentación de referencia obligatoria antes de tocar nada:
-- `.claude/hooks/README.md` — qué hace cada hook y sus salvaguardas
-- Los 3 scripts `.ps1` — son la especificación funcional exacta del port
-- https://code.claude.com/docs/en/hooks — formato de stdin JSON y exit codes
+Mandatory reference reading before touching anything:
+- `.claude/hooks/README.md` — what each hook does and its safeguards
+- The 3 `.ps1` scripts — they are the exact functional spec for the port
+- https://code.claude.com/docs/en/hooks — stdin JSON format and exit codes
 
 ## Setup
 
 ```bash
 git clone https://github.com/diegomondrik/sdad-v4.git
 cd sdad-v4
-git checkout -b hooks-bash-port        # NUNCA trabajar en main (regla del hooks README)
-claude                                  # verificar que $sdad responde con v4.3
+git checkout -b hooks-bash-port        # NEVER work on main (hooks README rule)
+claude                                  # verify $sdad responds with v4.3
 ```
 
-## Qué portar (la lógica es chica — espejo 1:1 de los .ps1)
+## What to port (the logic is small — a 1:1 mirror of the .ps1 files)
 
-| Script nuevo | Espeja a | Comportamiento requerido |
+| New script | Mirrors | Required behavior |
 |---|---|---|
-| `session-start.sh` | `session-start.ps1` | 1) Si existe `.sdad/compact_anchor.md`, emitir su contenido como `additionalContext` en el JSON de salida. 2) `git pull --ff-only` SOLO si el árbol tracked está limpio. 3) Jamás bloquear el inicio: siempre `exit 0`. |
-| `pre-compact.sh` | `pre-compact.ps1` | Escribir el snapshot del anchor ([LOCK] de DECISIONS.md) a `.sdad/compact_anchor.md`. Jamás `exit 2`. Siempre `exit 0`. |
-| `session-end.sh` | `session-end.ps1` | Autocommit batch SOLO de `DECISIONS.md` + `LESSON_LIBRARY.md` (whitelist — nunca código). Skip si existe `.sdad/HOLD_AUTOCOMMIT`. Sin commits vacíos. Mensaje estandarizado (copiar el de la versión .ps1). |
+| `session-start.sh` | `session-start.ps1` | 1) If `.sdad/compact_anchor.md` exists, emit its content as `additionalContext` in the output JSON. 2) `git pull --ff-only` ONLY if the tracked tree is clean. 3) Never block session start: always `exit 0`. |
+| `pre-compact.sh` | `pre-compact.ps1` | Write the anchor snapshot ([LOCK] entries from DECISIONS.md) to `.sdad/compact_anchor.md`. Never `exit 2`. Always `exit 0`. |
+| `session-end.sh` | `session-end.ps1` | Batch autocommit of ONLY `DECISIONS.md` + `LESSON_LIBRARY.md` (whitelist — never code). Skip if `.sdad/HOLD_AUTOCOMMIT` exists. No empty commits. Standardized message (copy it from the .ps1 version). |
 
-## Registración en settings.json (parte del diseño — pensalo antes de codear)
+## settings.json registration (part of the design — think before coding)
 
-El `.claude/settings.json` actual invoca `powershell ...` hardcodeado, así que en Mac
-los hooks ni se disparan. Tenés que resolver la registración multiplataforma.
-Opciones a evaluar (decidí una y documentá por qué en DECISIONS.md):
-  a) Un wrapper único por hook que detecte la plataforma y delegue al .ps1 o .sh.
-  b) settings.json invoca `sh` y en Windows se usa settings.local.json para override.
-  c) Otra que encuentres mejor en los docs de hooks de Claude Code.
-Restricción: la solución NO puede romper el setup Windows existente de Diego.
+The current `.claude/settings.json` invokes `powershell ...` hardcoded, so on a Mac the
+hooks never fire. You must solve cross-platform registration.
+Options to evaluate (pick one and document why in DECISIONS.md):
+  a) A single wrapper per hook that detects the platform and delegates to .ps1 or .sh.
+  b) settings.json invokes `sh` and Windows overrides via settings.local.json.
+  c) Anything better you find in the Claude Code hooks docs.
+Constraint: the solution must NOT break Diego's existing Windows setup.
 
-## Lecciones que ya nos costaron caro (no las repitas)
+## Lessons that already cost us (do not repeat them)
 
-- **L-01 (encoding):** los .ps1 son ASCII puro porque caracteres no-ASCII rompieron
-  el parser DOS VECES. En bash: usá UTF-8 explícito, probá con contenido con tildes
-  y guiones largos en DECISIONS.md, y verificá que el anchor no salga con mojibake.
-- **PreCompact NO sobrevive a la compactación por sí solo** (verificado contra docs):
-  el mecanismo durable es PreCompact-escribe-a-disco + SessionStart-reinyecta.
-  No "mejores" ese diseño — es intencional.
-- Los hooks de lectura (start/pre-compact) JAMÁS mutan el repo.
+- **L-01 (encoding):** the .ps1 files are pure ASCII because non-ASCII characters broke
+  the PowerShell parser TWICE. In bash: use explicit UTF-8, test with accented characters
+  and em-dashes in DECISIONS.md content, and verify the anchor re-injects without mojibake.
+- **PreCompact does NOT survive compaction by itself** (verified against the docs):
+  the durable mechanism is PreCompact-writes-to-disk + SessionStart-re-injects.
+  Do not "improve" this design — it is intentional.
+- Read hooks (start/pre-compact) NEVER mutate the repo.
 
-## Test gate (mismo estándar que el port Windows — sin esto no se mergea)
+## Test gate (same standard as the Windows port — no merge without it)
 
-Ejecutar cada script como proceso hijo con JSON mock por stdin (mirá el formato en
-los docs de hooks) y verificar:
+Run each script as a child process with mock JSON on stdin (see the format in the hooks
+docs) and verify:
 
-- [ ] `session-start.sh` emite JSON válido (validar con `jq`)
-- [ ] Anchor con tildes/ñ/guiones largos se reinyecta sin mojibake
-- [ ] `git pull` NO corre con árbol sucio; corre solo `--ff-only` con árbol limpio
-- [ ] `pre-compact.sh` escribe `.sdad/compact_anchor.md` y exit 0 siempre
-- [ ] `session-end.sh` con `.sdad/HOLD_AUTOCOMMIT` presente: NO commitea
-- [ ] `session-end.sh` sin hold: commitea SOLO los archivos whitelisted (probar con
-      un archivo de código modificado a propósito — debe quedar fuera del commit)
-- [ ] Sin cambios en whitelisted: NO crea commit vacío
-- [ ] Prueba integrada: sesión real de Claude Code en un repo de prueba — abrir,
-      forzar compactación, cerrar — y verificar los 3 disparos
+- [ ] `session-start.sh` emits valid JSON (validate with `jq`)
+- [ ] An anchor containing accents/ñ/em-dashes re-injects without mojibake
+- [ ] `git pull` does NOT run on a dirty tree; runs `--ff-only` only on a clean tree
+- [ ] `pre-compact.sh` writes `.sdad/compact_anchor.md` and always exits 0
+- [ ] `session-end.sh` with `.sdad/HOLD_AUTOCOMMIT` present: does NOT commit
+- [ ] `session-end.sh` without the hold: commits ONLY whitelisted files (test with a
+      deliberately modified code file — it must stay out of the commit)
+- [ ] No changes in whitelisted files: NO empty commit is created
+- [ ] Integration test: a real Claude Code session in a scratch repo — open, force a
+      compaction, close — and verify all 3 hooks fired
 
-## Cierre (disciplina SDAD)
+## Closing (SDAD discipline)
 
-1. Actualizar `.claude/hooks/README.md` (sección Platform) y `install.sh`
-   (que descargue los .sh nuevos; hoy tiene una nota de "Windows-only" — quitarla).
-2. Entrada en DECISIONS.md con la decisión de registración multiplataforma.
-3. Candidato a lección si encontraste un quirk de hooks en macOS.
-4. PR a main — Diego revisa y mergea. NO pushear a main directo.
+1. Update `.claude/hooks/README.md` (Platform section) and `install.sh`
+   (download the new .sh files; it currently carries a "Windows-only" note — remove it).
+2. DECISIONS.md entry with the cross-platform registration decision.
+3. Lesson candidate if you found a macOS hooks quirk.
+4. PR to main — Diego reviews and merges. Do NOT push to main directly.

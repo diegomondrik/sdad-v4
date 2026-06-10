@@ -1,8 +1,8 @@
-# .claude/hooks/
+﻿# .claude/hooks/
 
 Claude Code lifecycle scripts that run automatically at defined points in the workflow.
 
-## Status in SDAD v4.2
+## Status in SDAD v4.3
 
 **ACTIVE (Windows / PowerShell).** Three hooks are wired in `.claude/settings.json`:
 

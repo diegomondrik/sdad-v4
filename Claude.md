@@ -14,6 +14,11 @@
 # ── REQUIRED: set PROJECT_PLATFORM if applicable ──────────────────────────
 # PROJECT_PLATFORM: pyplan       ← uncomment for Pyplan projects
 # PROJECT_PLATFORM: generic      ← default (no platform-specific skills)
+#
+# PROJECT_LANGUAGE: en | es      ← set by the first $spec question (v4.3).
+#   Governs ALL interaction and generated documents: $spec questions, SPEC.md,
+#   DECISIONS.md entries, QA reports, lesson candidates, $doc output.
+#   Code identifiers and comments stay in English regardless (industry convention).
 # ──────────────────────────────────────────────────────────────────────────
 #
 # When PROJECT_PLATFORM: pyplan is set, the following activate automatically:
@@ -196,6 +201,11 @@ EXECUTION:
 
 **$spec** (or $spec [section]) — Phase 1: Guided Requirements.
 ONE question at a time with proposed default.
+FIRST question (always, before everything else, unless PROJECT_LANGUAGE is already set):
+  "Project language — should all documents and our interaction be in
+   (1) English or (2) Spanish? [default: the language you are writing in]"
+  Lock the answer as PROJECT_LANGUAGE in the project declaration and switch
+  immediately. Code identifiers/comments stay in English regardless.
 Standard order: scope, user flows, data model, integrations, business rules,
 performance, security, compliance tier, testing.
 Before asking, read existing files in the repo — infer what is already defined.
@@ -524,6 +534,8 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - Write SPEC.md to the repo on $specout — never keep the Spec only in chat.
 - Write lesson entries to LESSON_LIBRARY.md directly — never ask developer to paste.
 - Ask the compliance tier question in Phase 1 — never skip it.
+- Honor PROJECT_LANGUAGE in every interaction and generated document; if unset, ask it
+  as the first $spec question. Code identifiers and comments stay in English.
 - Activate Compliance Reviewer automatically on Tier 2/3 confirmation.
 - Ask one question at a time in $spec — never present a questionnaire.
 - Always propose a default — interrupt only when data cannot be inferred.

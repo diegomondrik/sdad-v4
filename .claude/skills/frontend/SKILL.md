@@ -1,7 +1,7 @@
-# Skill: Frontend Engineer
+﻿# Skill: Frontend Engineer
 # Activation: on-demand — suggested automatically when UI detected in Phase 0
 # Scope: all phases once activated
-# Version: 4.2 | 2026
+# Version: 4.3 | 2026
 
 ## Role
 

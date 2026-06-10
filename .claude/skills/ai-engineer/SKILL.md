@@ -1,7 +1,7 @@
-# SKILL: AI Engineer
+﻿# SKILL: AI Engineer
 # Always-active skill — loaded automatically in every SDAD v4.2 session.
 # Role: implementation quality, tooling, developer experience, documentation standards.
-# Version: 4.2 | 2026
+# Version: 4.3 | 2026
 
 ---
 
