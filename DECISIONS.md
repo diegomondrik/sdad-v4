@@ -230,6 +230,50 @@ install.ps1/sh, README, CHANGELOG, DEVELOPER_MANUAL updated.
 
 ---
 
+## Increment 12 — Hooks bash port (macOS/Linux) + cross-platform registration
+
+════════════════════════════════════════════════════════
+📋 HUB BLOCK — DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-10
+Increment: 12 — Hooks bash port (macOS/Linux)
+Model: claude-fable-5 · effort high
+Decision: Port the three hooks to POSIX sh (session-start.sh, pre-compact.sh,
+session-end.sh — 1:1 mirrors of the .ps1 spec) and solve cross-platform
+registration with option (a): a single run-hook.sh dispatcher registered in
+settings.json as one shell-form command per hook.
+Rationale: Verified against the Claude Code hooks docs — shell-form commands run
+via `sh -c` on macOS/Linux and via Git Bash on Windows (when available). The
+dispatcher detects Windows (MINGW/MSYS/CYGWIN) and delegates to the unchanged,
+tested .ps1 scripts, so Diego's Windows setup keeps running the exact same
+PowerShell command as before; macOS/Linux runs the .sh ports.
+Alternatives considered: (b) settings.json invokes sh + Windows override via
+settings.local.json — rejected: hooks from multiple settings files MERGE, so
+Windows-with-Git-Bash would double-fire, and Windows breaks until the local
+override is created manually. Dual entries in settings.json — rejected for the
+same double-fire reason plus a powershell-not-found error on every Mac session.
+Known limit (accepted): Windows WITHOUT Git for Windows falls back to PowerShell,
+which cannot run `sh` — hooks fail non-blocking; Git Bash ships with Git for
+Windows, already required by the SDAD workflow.
+Impact: 4 new files in .claude/hooks/ (3 ports + dispatcher), settings.json
+commands swapped to the dispatcher, hooks README Platform section rewritten,
+install.sh ships all hook scripts + settings.json (guarded), CHANGELOG gap
+closed. L-01 honored: .sh scripts tested with ñ/accents/em-dashes — round-trip
+clean.
+Testing (the task-brief gate, on macOS): 9/9 mock-stdin child-process checks
+passed in a scratch repo (valid JSON via jq; unicode clean; pull skipped on
+dirty tracked tree, ff-only pull on clean tree with real remote; untracked-only
+tree still pulls; anchor snapshot written, exit 0; compact source prefers the
+snapshot; HOLD_AUTOCOMMIT respected; only whitelisted files committed — a
+deliberately modified code file stayed out; no empty commit). Integration:
+real headless Claude Code session fired SessionStart + SessionEnd through the
+dispatcher (autocommit landed; pull correctly skipped on dirty tree).
+PENDING (manual, needs interactive session): force a /compact in a live session
+to see PreCompact fire end-to-end — script + re-injection path already verified.
+════════════════════════════════════════════════════════
+
+---
+
 ## §13 — AI Authorship Log (v4.2)
 
 | Increment | Feature | Model | Date | Notes |
@@ -245,6 +289,7 @@ install.ps1/sh, README, CHANGELOG, DEVELOPER_MANUAL updated.
 | 9 | C-006 lesson retrieval | claude-opus-4-8 · effort medium | 2026-06-07 | LESSON_LIBRARY.md created (+ L-01) + $lesson search + Phase 0 surfacing. CLAUDE.md net 0. |
 | 10 | C-010 agent handoff | claude-opus-4-8 · effort high | 2026-06-07 | HANDOFF_TEMPLATE.md + $agent pointer. Native delegation evaluated — no custom infra needed. CLAUDE.md net 0. |
 | 11 | v4.3 Model & Effort Routing + installer repair | claude-fable-5 · effort medium | 2026-06-10 | CLAUDE.md routing section (+~44 net) + agent frontmatter (staged) + install.ps1/sh repair + README/CHANGELOG v4.3. |
+| 12 | Hooks bash port (macOS/Linux) | claude-fable-5 · effort high | 2026-06-10 | 3 .sh ports + run-hook.sh dispatcher + settings.json. Test gate 9/9 on macOS + real-session integration. Live /compact check pending. |
 
 ---
 

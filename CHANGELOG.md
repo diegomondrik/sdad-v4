@@ -7,6 +7,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+**Hooks ported to bash — macOS/Linux support (closes the [4.3] known gap)**
+- `session-start.sh`, `pre-compact.sh`, `session-end.sh` — 1:1 POSIX sh ports of
+  the three PowerShell hooks, same safeguards (guarded ff-only pull, anchor
+  snapshot, autocommit whitelist + HOLD sentinel, no empty commits).
+- `run-hook.sh` — cross-platform dispatcher. `settings.json` now registers one
+  shell-form command per hook; on Windows it runs under Git Bash and delegates
+  to the unchanged `.ps1` scripts, on macOS/Linux it runs the `.sh` ports.
+- Test gate passed on macOS: valid JSON (`jq`), unicode (ñ/accents/em-dashes)
+  round-trip without mojibake (L-01 regression content), pull guard, hold
+  sentinel, whitelist isolation, no empty commits, real-session integration
+  (SessionStart + SessionEnd fired through the dispatcher).
+- `install.sh` now ships all hook scripts (.sh + .ps1) and `settings.json`
+  (never overwritten if present); Windows-only note removed.
+
+---
+
 ## [4.3] — 2026-06-10
 
 ### Overview
@@ -93,7 +113,8 @@ before pulling v4.3 to preserve prior state.
 
 - Bash equivalents of the three PowerShell hooks (hooks remain Windows-only;
   porting without a test environment risks repeating the L-01 encoding class
-  of bugs — deliberately deferred, not forgotten).
+  of bugs — deliberately deferred, not forgotten). → CLOSED in [Unreleased]:
+  ported and tested on macOS.
 - CHANGELOG [4.0] §A/§B section names and "Layer 7" reference don't match
   current CLAUDE.md naming — left as historical record.
 
