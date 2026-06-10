@@ -555,6 +555,8 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - ON PYPLAN PROJECTS WITH MCP: §D is a gate section when present — $build blocked until §D is approved.
 - ON PYPLAN PROJECTS WITH MCP: flag Pyplan MCP as a v1 external dependency in §7 — API may change across Pyplan updates.
 - Before session end or $pause compress, resolve any pending commits using git log.
+- All .ps1 scripts must be pure ASCII — Windows PowerShell 5.1 misreads UTF-8 without BOM
+  and non-ASCII characters (em-dashes, accents) break the parser (L-01, confirmed twice).
 
 ---
 
