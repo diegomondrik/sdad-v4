@@ -78,6 +78,39 @@ before pulling v4.3 to preserve prior state.
   DECISIONS.md, QA reports, lessons, $doc output). Code identifiers and
   comments stay in English regardless.
 
+**Pyplan HTML Interfaces support**
+- Pyplan now ships HTML interfaces: a full-page web interface (HTML/CSS/JS)
+  driven by an `HTMLInterface` Python class with `@callback` methods and the
+  `window.pyplan` bridge — the DEFAULT type when an AI agent builds a screen.
+  SDAD methodology is unchanged (Spec → Build → QA); the Pyplan surfaces were
+  extended to cover it:
+  - CLAUDE.md: new "HTML interface surface" block in the Pyplan increment
+    checklist; HTML interface checks added to $qa Layer 5; Build-via-AI
+    guardrails now explicitly cover AI-generated interfaces (each one is an
+    increment); new behavior rule.
+  - `pyplan/interfaces` skill: new section 11 — anatomy (callbacks, getters/
+    mutators, set_input / set_form_values / get_nodes_to_refresh), window.pyplan
+    bridge, data-pyplan-nodes traceability, sandbox constraints (no cookies/
+    localStorage/iframe — state persists via the model), common errors, and a
+    dedicated QA checklist (11.8). Component-vs-HTML routing guidance.
+  - `pyplan/qa-platform` skill: new Layer 7.6 HTML interface checks.
+  - `pyplan/spec-context` skill: $spec question 5 (interface strategy) and
+    "Interface types" field in §5 architecture.
+  - `pyplan/mcp` skill: Build-via-AI protocol step 7 (HTML interface checklist).
+  - `.claude/` is write-protected in Cowork mode — skill patches ship as
+    `apply-v4.3-pyplan-html.ps1` (one-shot, idempotent, self-deleting, ASCII).
+  Source: https://docs.pyplan.com/user-guide/interfaces/html-interfaces
+
+**Document ingestion via MarkItDown (CLAUDE.md)**
+- New DOCUMENT INGESTION rule under $spec: binary source documents (PDF, docx,
+  xlsx, pptx, .msg, images) are converted to Markdown with Microsoft MarkItDown
+  before reading — structure-preserving and token-efficient. Applies to $spec,
+  §A client diagnosis, and $docfinal input gathering. Converted files live in
+  `.sdad/ingest/` (working copies, not deliverables). Security rule: local
+  trusted files only (convert_local) — MarkItDown performs I/O with process
+  privileges. Added to Complementary Tools.
+  Source: https://github.com/microsoft/markitdown
+
 **Documentation refresh**
 - All four legacy HTML docs (INSTALL_GUIDE, USAGE_AND_SHORTCUTS,
   DEVELOPER_GUIDE, ONBOARDING_PYPLAN) re-stamped from v4.1 to v4.3; stale

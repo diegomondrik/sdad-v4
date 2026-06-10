@@ -11,7 +11,7 @@ description: >
 ---
 
 # SKILL: pyplan-spec-context
-# Version: 1.0 | SDAD v4.2
+# Version: 1.1 | SDAD v4.3
 # Layer: Pyplan Platform — Spec Structure & Navigation
 # Activation: active whenever a Pyplan SPEC.md is being written, read, or used
 
@@ -159,6 +159,7 @@ PYPLAN ARCHITECTURE:
   Driver nodes:         [user-adjustable inputs — list or "none at this stage"]
   Calculation layers:   [data → drivers → formulas → outputs]
   Interface entry point: [which module the user lands on first]
+  Interface types:      [per screen: component / HTML - AI-built screens default to HTML]
 ```
 
 If this information is not available at spec time, mark each field `[TBD]` and
@@ -213,6 +214,9 @@ When `$spec` runs on a Pyplan project, add these questions to the standard flow
 2. "What are the main data sources? (file uploads, ERP connections, manual inputs?)"
 3. "Who are the model users and what do they need to see? (roles and views)"
 4. "Are there existing Pyplan conventions at this client we need to follow?"
+5. "Which screens need a fully custom layout or will be built by an AI agent?
+   (those become HTML interfaces - the agent default; standard dashboards
+   stay as component interfaces)"
 
 These answers populate §0, §A, §B, §5, and §7 automatically during `$specout`.
 

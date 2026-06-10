@@ -33,6 +33,17 @@ to AI-assisted development.
   shipped through the installer. Hooks remain Windows-only (PowerShell).
 - **Brand Design skill discoverable** — now listed in CLAUDE.md on-demand skills
   and `$skills`.
+- **Pyplan HTML Interfaces** — Pyplan's new full-page web interfaces (an
+  `HTMLInterface` Python class with `@callback` methods + the `window.pyplan`
+  bridge) are now covered across SDAD: increment checklist block, `$qa` Layer 5
+  checks, Build-via-AI guardrails (AI-built interfaces default to HTML and are
+  treated as increments), `pyplan/interfaces` skill section 11, `qa-platform`
+  7.6, and a `$spec` interface-strategy question. Skill patches apply via
+  `apply-v4.3-pyplan-html.ps1` (one-shot, self-deletes).
+- **Document ingestion via MarkItDown** — binary client documents (PDF, docx,
+  xlsx, pptx) are converted to Markdown with Microsoft MarkItDown before
+  reading during `$spec`, §A diagnosis, and `$docfinal`. Local trusted files
+  only; converted copies live in `.sdad/ingest/`.
 
 ## What's new in v4.2
 
@@ -202,7 +213,7 @@ in SPEC.md §0:
 |-------|----------------|
 | `pyplan/spec-context` | Always on Pyplan projects |
 | `pyplan/diagram` | Node diagrams and data flow work |
-| `pyplan/interfaces` | Input/output interfaces, forms, dashboards |
+| `pyplan/interfaces` | Input/output interfaces, forms, dashboards, HTML interfaces (callbacks + window.pyplan) |
 | `pyplan/qa-platform` | Pyplan-specific QA checks |
 | `pyplan/mcp` | `@mcp_tool`, MCP tools, §D, dynamic tools |
 
@@ -222,6 +233,7 @@ sdad-v4/
 ├── project-init.sh                    # Mac/Linux project initializer
 ├── project-init.ps1                   # Windows project initializer
 ├── apply-v4.3.ps1                     # One-shot v4.3 migration (self-deletes)
+├── apply-v4.3-pyplan-html.ps1         # One-shot Pyplan HTML Interfaces patch (self-deletes)
 ├── README.md                          # This file
 ├── CHANGELOG.md                       # Version history
 ├── .claude/

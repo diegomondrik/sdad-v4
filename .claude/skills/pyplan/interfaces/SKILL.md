@@ -7,13 +7,15 @@ description: >
   setting up index synchronization, designing hierarchical filters,
   configuring input validations, applying styles and conditional formatting,
   applying client brand identity via Brand Token Sheet, designing HTML
-  components for homescreens and headers, or reviewing dashboard UX for
+  components for homescreens and headers, building or reviewing HTML
+  interfaces (full-page web interfaces with an HTMLInterface Python class,
+  @callback methods and the window.pyplan bridge), or reviewing dashboard UX for
   planning and analytics apps. Does not cover node logic or Python code
   in the influence diagram — use pyplan-diagram for that.
 license: G7 proprietary
 metadata:
   author: G7 AI Development
-  version: "4.2"
+  version: "4.3"
   platform: pyplan
 ---
 
@@ -27,7 +29,15 @@ patterns, and visual identity application for planning and analytics tools.
 
 ## 1. Core Mental Model
 
-An interface in Pyplan is a **screen made of components placed in a grid**.
+Pyplan has two interface types:
+
+- **Component interface** - a screen made of components placed in a grid.
+  Built manually. The standard choice for most dashboards. Sections 2-10.
+- **HTML interface** - the whole screen is a single self-contained web page
+  talking to the model through Python callbacks. Built by AI agents by
+  default (Pyplan agents or external AI clients via Pyplan MCP). Section 11.
+
+A component interface is a **screen made of components placed in a grid**.
 Components read from and write to nodes in the influence diagram.
 
 The relationship is:
@@ -458,6 +468,9 @@ Run these checks on every $qa for Pyplan projects (contributes to Layer 5):
 - [ ] No interface delivered still open in edit mode
 - [ ] App published to correct workspace (My / Teams / Public) per deployment stage
 
+**HTML interfaces (when the project has any)**
+- [ ] Run the HTML interface surface checklist in section 11.8
+
 **Brand (when Brand Token Sheet is active)**
 - [ ] Homescreen logo version matches brandbook permitted versions
 - [ ] Logo minimum size respected (≥ brandbook digital minimum)
@@ -485,3 +498,147 @@ Run these checks on every $qa for Pyplan projects (contributes to Layer 5):
 | Logo not displaying in HTML component | Local file path used instead of URL | Host logo on accessible URL and reference it |
 | Font not rendering in Pyplan | Font not available in client instance | Use web-safe fallback or load via Google Fonts CDN in HTML component |
 | Chart colors not matching brand | Data viz palette not applied | Set series colors manually in chart config using Brand Token Sheet hex values |
+
+
+---
+
+## 11. HTML Interfaces
+
+An **HTML interface** is an interface whose entire screen is a single,
+self-contained web page (HTML, CSS and JavaScript) instead of a component
+grid. It renders as a sandboxed mini-app that talks to the model through
+Python callbacks. Use it for bespoke dashboards, forms and tools whose
+layout or interaction goes beyond what standard components express.
+
+HTML interfaces are designed to be created by AI agents - Pyplan agents or
+external AI clients via Pyplan MCP - and are the DEFAULT type whenever an
+agent is asked to create an interface. SDAD treats every AI-generated or
+AI-modified HTML interface as an increment (Build-via-AI guardrails in
+CLAUDE.md): announce, approve, build, then run the 11.8 checklist.
+
+### 11.1 Choosing the right option
+
+| Option | What it is | When to use |
+|--------|-----------|-------------|
+| Component interface | Grid of draggable components | Standard dashboards and input/output screens (sections 2-10) |
+| Dynamic HTML component | One HTML block inside a component interface, wired via actions table | A custom card, banner or block INSIDE an otherwise standard interface (section 8.2) |
+| HTML interface | The whole interface is a web page driven by Python callbacks | Fully custom layout or tailored tool; any screen built by an AI agent |
+
+### 11.2 Anatomy: HTML page + Python callbacks
+
+An HTML interface stores two parts together: the HTML page and a Python
+class. The Python code runs inside the model namespace - exactly like a
+node definition - so it references nodes by name. Only methods decorated
+with @callback are reachable from the page.
+
+```python
+from pyplan_core.html_interface import HTMLInterfaceBase, callback
+
+class HTMLInterface(HTMLInterfaceBase):
+
+    # Getter: read-only, returns JSON-friendly data for the page.
+    @callback
+    def get_sales(self, page: int = 0, page_size: int = 50) -> list:
+        df = sales_data[sales_data.year == selected_year]
+        start = page * page_size
+        return df.iloc[start:start + page_size].to_dict("records")
+
+    # Mutator: changes the model, then reports which widgets are stale.
+    @callback
+    def set_year(self, year: int) -> dict:
+        self.set_input('selected_year', year)
+        return {"refresh": self.get_nodes_to_refresh(['sales_table', 'profit_kpi'])}
+```
+
+Rules:
+- Getters read from the model and return JSON-friendly data (lists, dicts,
+  numbers, strings). Never return raw DataFrames or xarray objects.
+- Mutators change the model and return the list of widgets to refresh, so
+  the page re-fetches only what changed.
+- Parameters are typed (int, float, str, bool, list) - Pyplan coerces the
+  values coming from the page automatically.
+- Selectors are read by name: if the user changes a selector elsewhere in
+  the app, the next callback sees the updated value.
+
+Model-write helpers (never touch model internals directly):
+- self.set_input(node_id, value) - set a selector or input scalar. For a
+  multi-select selector, pass the full list of selected values.
+- self.set_form_values(node_id, changes) - apply cell edits to a form;
+  changes is a list of {'row', 'column', 'value'} items.
+- self.get_nodes_to_refresh(node_ids) - given the widgets the interface
+  renders, returns the subset that became stale after a change.
+
+### 11.3 The window.pyplan bridge (HTML side)
+
+All page-to-model communication goes through the built-in bridge:
+
+- window.pyplan.callback(method, params) - call a Python @callback,
+  returns a promise with the result.
+- window.pyplan.on(event, handler) - react to events sent from Pyplan.
+- window.pyplan.toast(message, kind) - notification: "info", "success",
+  "warning", "error". Failed-callback errors surface automatically.
+- window.pyplan.import(url) - dynamically import an external JS module
+  (use this instead of a bare import()).
+
+### 11.4 Linking to the model and the app
+
+- Mark node-backed titles with data-pyplan-nodes="node_id" (comma-separate
+  several ids). Clicking opens the node popup with a Go-to-node link into
+  the influence diagram - this surfaces HOW a number is computed.
+- Plain anchors navigate in-app: /interfaces/<INTERFACE_ID>,
+  /code/go-to?nodeId=<id>, /files. In-app paths keep the shell mounted;
+  external http(s)/mailto links open in a new tab.
+- External libraries, fonts, styles and images: write normal URLs - Pyplan
+  re-routes them through a same-origin proxy (works on restricted corporate
+  networks). For dynamic JS modules use window.pyplan.import.
+
+### 11.5 Sandbox constraints (hard rules)
+
+The page runs in a sandboxed frame with an isolated origin. It:
+- cannot read cookies, localStorage, or the surrounding app data;
+- cannot make authenticated requests on its own - ALL model communication
+  goes through window.pyplan.callback over a short-lived session token;
+- cannot embed third-party pages via iframe (external scripts/styles/fonts/
+  images ARE allowed).
+
+Consequence: persisting state MUST go through the model via callbacks.
+Toolbar differences: Refresh reloads the page and re-runs initial calls
+(also picks up code edits); custom views and screenshot are not available.
+
+### 11.6 G7 design rules
+
+- Default routing: standard dashboards -> component interface; fully custom
+  layout or AI-built screens -> HTML interface; one custom block inside a
+  standard screen -> dynamic HTML component.
+- Record the interface type per screen in SPEC section 3 / section 5.
+- Brand identity: apply the Brand Token Sheet exactly as in section 8 -
+  substitute actual hex values, never hardcode off-brand colors.
+- Iterate with the agent in plain language first; drop to direct HTML or
+  Python edits only for fine-tuning.
+
+### 11.7 Common errors and fixes
+
+| Error | Likely cause | Fix |
+|-------|-------------|-----|
+| Page loads but shows no data | Initial callback not awaited or failed silently | Await window.pyplan.callback in an async init and surface errors via toast |
+| Stale widgets after an input change | Mutator does not return refresh list | Return get_nodes_to_refresh([...]) from every mutator |
+| State lost on refresh | Page relied on localStorage or cookies | Persist through the model via set_input / set_form_values |
+| External JS module fails to load | Bare dynamic import() used | Use window.pyplan.import(url) |
+| Embedded page does not render | iframe used | Not supported - link out or rebuild the content inline |
+| Callback receives wrong types | Untyped parameters | Type every parameter (int, float, str, bool, list) |
+
+### 11.8 QA checklist - HTML interface surface
+
+Run on every $qa touching an HTML interface (contributes to Layer 5):
+
+- [ ] All page-model traffic goes through window.pyplan.callback - no direct fetch/XHR
+- [ ] Getters return JSON-friendly data (lists, dicts, numbers, strings)
+- [ ] Mutators return refresh lists from get_nodes_to_refresh(...)
+- [ ] Model writes only via set_input / set_form_values
+- [ ] No cookie/localStorage reliance - state persists via the model
+- [ ] Node-backed headings carry data-pyplan-nodes
+- [ ] In-app navigation uses plain anchors with in-app paths
+- [ ] External JS modules load via window.pyplan.import; no iframe embeds
+- [ ] Errors surfaced to the user (toast or automatic callback error)
+- [ ] Brand tokens applied when a Brand Token Sheet is active
+- [ ] Interface type recorded in SPEC section 3 / section 5
