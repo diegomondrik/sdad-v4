@@ -1,4 +1,4 @@
-# G7 SDAD v4.2
+# G7 SDAD v4.3
 ## Spec-Driven AI Development for Claude Code
 
 SDAD is G7's development methodology for teams using Claude Code as their
@@ -7,6 +7,29 @@ increments, integrated QA, compliance tiers, and a shared Lesson Library
 to AI-assisted development.
 
 ---
+
+## What's new in v4.3
+
+- **Model & Effort Routing** — new CLAUDE.md section with a per-phase routing
+  table using model-agnostic tiers (FRONTIER / STANDARD / ECONOMY). The 🧠 MODEL
+  announcement line now fires at the start of `$spec`, `$specout`, `$qa full`,
+  and `$docfinal` — not just `$build`. Only `$build` blocks on mismatch; other
+  phases flag once and continue. The session never auto-switches — the developer
+  runs `/model` + `/effort`.
+- **Agent model pinning (Vía B)** — `code-reviewer` and `security-auditor` pin
+  `model: opus · effort: high`; `test-generator` pins `model: sonnet · effort:
+  medium` via agent frontmatter. Override per project as needed. Applied by
+  running `apply-v4.3.ps1` once from the repo root.
+- **security-reviewer skill** — referenced since v4.0 but never shipped; now a
+  real SKILL.md (secrets, injection, auth, PII, severity discipline).
+- **Developer Manual** — `docs/DEVELOPER_MANUAL_v4.3.html`: didactic guide to
+  SDAD, SDAD for Pyplan, and day-to-day usage.
+- **Installer fixes** — `install.ps1` / `install.sh` now install `dev-setup` and
+  `brand-design` skills, the agent HANDOFF template, and (Windows) the hook
+  scripts + `settings.json` registration that v4.2 declared active but never
+  shipped through the installer. Hooks remain Windows-only (PowerShell).
+- **Brand Design skill discoverable** — now listed in CLAUDE.md on-demand skills
+  and `$skills`.
 
 ## What's new in v4.2
 
@@ -150,18 +173,20 @@ Tier 3 blocks `$build` until SPEC.md §9 is complete and approved.
 
 ---
 
-## Active skills (always on)
+## Active skills
+
+Always on:
 
 | Skill | Role |
 |-------|------|
 | 🏗️ AI Solutions Architect | Architecture decisions, LLM patterns, cost modeling |
 | 🔧 AI Engineer | Implementation quality, UI detection, docs standards |
-| 🔐 Security Reviewer | API key exposure, injection, PII, auth vulnerabilities |
-| ✅ QA Engineer | Test coverage, DoD compliance, acceptance criteria |
+
+On-demand (loaded by trigger): 🔐 Security Reviewer, ✅ QA Engineer,
+🎨 Frontend Engineer (suggested when UI detected in Phase 0), 🖌️ Brand Design,
+Decision Architecture, Data Discovery, Dev Setup.
 
 Auto-activated by tier: 🔒 Compliance Reviewer (Tier 2/3).
-
-On-demand: Frontend Engineer (suggested when UI detected in Phase 0).
 
 ---
 
@@ -193,15 +218,20 @@ sdad-v4/
 ├── install.ps1                        # Windows methodology installer
 ├── project-init.sh                    # Mac/Linux project initializer
 ├── project-init.ps1                   # Windows project initializer
+├── apply-v4.3.ps1                     # One-shot v4.3 migration (self-deletes)
 ├── README.md                          # This file
 ├── CHANGELOG.md                       # Version history
 ├── .claude/
+│   ├── settings.json                  # Hook registration
 │   ├── skills/
 │   │   ├── ai-architect/SKILL.md
 │   │   ├── ai-engineer/SKILL.md
+│   │   ├── security-reviewer/SKILL.md
 │   │   ├── compliance/SKILL.md
 │   │   ├── qa-engineer/SKILL.md
 │   │   ├── frontend/SKILL.md
+│   │   ├── brand-design/SKILL.md
+│   │   ├── dev-setup/SKILL.md
 │   │   ├── decision-architecture/SKILL.md
 │   │   ├── data-discovery/SKILL.md
 │   │   └── pyplan/
@@ -213,14 +243,19 @@ sdad-v4/
 │   ├── agents/
 │   │   ├── code-reviewer.md
 │   │   ├── test-generator.md
-│   │   └── security-auditor.md
+│   │   ├── security-auditor.md
+│   │   └── HANDOFF_TEMPLATE.md
 │   └── hooks/
-│       └── README.md                  # Active in v4.2
+│       ├── README.md                  # Hooks active since v4.2 (Windows/PowerShell)
+│       ├── session-start.ps1
+│       ├── pre-compact.ps1
+│       └── session-end.ps1
 └── docs/
-    ├── INSTALL_GUIDE_v4.md
-    ├── USAGE_AND_SHORTCUTS_v4.md
-    ├── DEVELOPER_GUIDE_v4.docx
-    └── ONBOARDING_PYPLAN_v4.md
+    ├── DEVELOPER_MANUAL_v4.3.html     # Didactic manual — SDAD + Pyplan + usage
+    ├── INSTALL_GUIDE_v4.html
+    ├── USAGE_AND_SHORTCUTS_v4.html
+    ├── DEVELOPER_GUIDE_v4.html
+    └── ONBOARDING_PYPLAN_v4.html
 ```
 
 ---
@@ -243,11 +278,12 @@ After installing, start `claude` and verify:
 
 | File | Contents |
 |------|----------|
-| `docs/INSTALL_GUIDE_v4.md` | Full installation guide |
-| `docs/USAGE_AND_SHORTCUTS_v4.md` | All commands and workflows |
-| `docs/DEVELOPER_GUIDE_v4.docx` | Full methodology reference |
-| `docs/ONBOARDING_PYPLAN_v4.md` | Pyplan project onboarding guide |
+| `docs/DEVELOPER_MANUAL_v4.3.html` | **Start here** — didactic manual: SDAD, SDAD for Pyplan, day-to-day usage |
+| `docs/INSTALL_GUIDE_v4.html` | Full installation guide |
+| `docs/USAGE_AND_SHORTCUTS_v4.html` | All commands and workflows |
+| `docs/DEVELOPER_GUIDE_v4.html` | Full methodology reference |
+| `docs/ONBOARDING_PYPLAN_v4.html` | Pyplan project onboarding guide |
 
 ---
 
-G7 AI Development Methodology | SDAD v4.2
+G7 AI Development Methodology | SDAD v4.3

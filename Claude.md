@@ -1,7 +1,7 @@
-# SDAD v4.2 — CLAUDE.md
+# SDAD v4.3 — CLAUDE.md
 # Spec-Driven AI Development for Claude Code
 # G7 AI Development Methodology
-# Version 4.2 | 2026
+# Version 4.3 | 2026
 #
 # INSTALLATION: Place this file at the root of your project repository.
 # The .claude/ folder (skills, agents, hooks) is installed by the SDAD installer.
@@ -49,6 +49,41 @@ State is always the actual filesystem + SPEC.md + git log.
 
 ---
 
+## Model & Effort Routing
+# Added in v4.3 — extends the $build model line (C-015) to every SDAD phase.
+
+CAPABILITY (verified against Claude Code, 2026-06):
+  The main session never auto-switches model or effort. Changes happen only via
+  /model + /effort (manual, Vía A) or pinned model/effort in the frontmatter of
+  .claude/agents/*.md (delegated work, Vía B).
+
+MODEL TIERS (agnostic — map to whatever is installed; survives model releases):
+  FRONTIER → best reasoning model available (e.g. fable, opus)
+  STANDARD → balanced cost/capability model (e.g. sonnet)
+  ECONOMY  → fastest, cheapest model (e.g. haiku)
+
+ROUTING TABLE (recommended model + effort per phase):
+  $spec / $specout            → FRONTIER · high    — open decisions, requirements design
+  $build (per increment)      → STANDARD · low when executing already-specified work;
+                                FRONTIER · high when increment has medium/high risk
+                                or an open decision (existing per-increment rule)
+  $qa (incremental)           → STANDARD · medium  — bounded review of one increment
+  $qa full / $QA / $docfinal  → FRONTIER · high    — whole-codebase judgment
+  $verify / $doc              → ECONOMY–STANDARD · low — mechanical, delegable
+  $agent review / audit       → pinned in agent frontmatter (FRONTIER · high)
+  $agent test                 → pinned in agent frontmatter (STANDARD · medium)
+  $pause / $lesson / $flow    → current model · low — never switch for these
+
+ANNOUNCEMENT RULE (generalizes the $build 🧠 MODEL line):
+  At the start of $spec, $specout, $qa full, and $docfinal emit:
+    🧠 MODEL: [recommended] · effort [level] — [reason, ~4 words]
+       If the active session differs:  /model [model]   and   /effort [level]
+  $build keeps its gate: a mismatch blocks code writing until the developer
+  switches. All other phases flag the mismatch once and continue — routing
+  recommendations never block non-build phases.
+
+---
+
 ## Active Skills
 
 # Skills load from .claude/skills/ using SKILL.md progressive disclosure.
@@ -68,6 +103,7 @@ State is always the actual filesystem + SPEC.md + git log.
 - **QA Engineer** — trigger: QA, testing, code review, Phase 4, coverage
 - **Compliance Reviewer** — trigger: auto-activated on Tier 2/3 confirmation
 - **Frontend / UI** — trigger: user interface, components, React, Vue, dashboard, screen design
+- **Brand Design** — trigger: brand, visual identity, brand tokens, logo, color palette, §C
 - **Pyplan Diagram** — trigger: nodes, influence diagram, result=, module, wizard, xarray (Pyplan projects)
 - **Pyplan Interfaces** — trigger: interface, component, dashboard, filter, index, chart, KPI (Pyplan projects)
 - **Pyplan QA Platform** — trigger: auto-activated by $qa on Pyplan projects (Layer 5)
@@ -156,7 +192,7 @@ EXECUTION:
 
 ## Commands
 
-**$sdad** — Show SDAD v4.2 methodology overview: phases, descriptions, command list.
+**$sdad** — Show SDAD v4.3 methodology overview: phases, descriptions, command list.
 
 **$spec** (or $spec [section]) — Phase 1: Guided Requirements.
 ONE question at a time with proposed default.
@@ -238,7 +274,8 @@ Before each increment announce:
 
   🔨 INCREMENT [N]: [feature name]
   🧠 MODEL: [model] · effort [low|high] — [reason, ~4 words]
-     (low = executing already-specified work · high = medium/high risk or open decision)
+     (per Model & Effort Routing table — low = executing already-specified work ·
+      high = medium/high risk or open decision)
      If the active session differs:  /model [model]   and   /effort [low|high]
   Files: [list of files to create or modify]
   Tests: [unit / integration / E2E — will be executed after writing]
@@ -430,8 +467,8 @@ All $doc outputs written directly to /docs in the repo.
 **$skills** — Show active and available AI specialist skills.
   Always active: AI Architect, AI Engineer.
   On-demand: Security Reviewer, QA Engineer, Compliance Reviewer, Frontend,
-             Pyplan x5 (diagram, interfaces, qa-platform, spec-context, mcp),
-             Decision Architecture, Data Discovery.
+             Brand Design, Pyplan x5 (diagram, interfaces, qa-platform,
+             spec-context, mcp), Decision Architecture, Data Discovery.
 
 ---
 
@@ -492,6 +529,7 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - Always propose a default — interrupt only when data cannot be inferred.
 - Announce increments before coding — never skip the announcement.
 - Announce a recommended model + effort in every $build increment; if the active session differs, flag and wait for the developer to switch before writing code.
+- Route model + effort per the Model & Effort Routing table; emit the 🧠 MODEL line at the start of $spec, $specout, $qa full, and $docfinal. Only $build blocks on mismatch — other phases flag once and continue.
 - After a structural increment, propose an update to the project's own CLAUDE.md (step 5.5); never duplicate SPEC.md content into it.
 - Include docs update in every $build increment announcement.
 - Mark critical security issues with 🚨 regardless of current phase.
@@ -540,10 +578,10 @@ Use as primary context budget indicator — shows the 50% / 65% thresholds.
 # Happy Engineering        Remote Claude Code control (mobile)  https://happy.engineering
 #
 # Note: when Context 7 MCP is active, $verify uses it automatically.
-# Note: hooks (.claude/hooks/) are ACTIVE in v4.2 (Windows/PowerShell): SessionStart (anchor +
+# Note: hooks (.claude/hooks/) are ACTIVE since v4.2 (Windows/PowerShell): SessionStart (anchor +
 #       guarded ff-pull), PreCompact (anchor snapshot), SessionEnd (whitelisted autocommit). See README.
 
 ---
 
-G7 AI Development Methodology | SDAD v4.2 | CLAUDE.md
+G7 AI Development Methodology | SDAD v4.3 | CLAUDE.md
 Spec-Driven AI Development for Claude Code

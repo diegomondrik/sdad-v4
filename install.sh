@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# SDAD v4.1 — Installer for Mac / Linux
+# SDAD v4.3 — Installer for Mac / Linux
 # Spec-Driven AI Development — G7 AI Development Methodology
-# Version: 4.1 | 2026
+# Version: 4.3 | 2026
 #
 # Run from inside the project repo where you want SDAD installed:
 #
@@ -18,7 +18,7 @@ NC='\033[0m'
 
 echo ""
 echo "============================================"
-echo "  SDAD v4.1 — Installer"
+echo "  SDAD v4.3 — Installer"
 echo "============================================"
 echo ""
 
@@ -80,6 +80,9 @@ mkdir -p \
     .claude/skills/pyplan/mcp \
     .claude/skills/decision-architecture \
     .claude/skills/data-discovery \
+    .claude/skills/dev-setup \
+    .claude/skills/brand-design \
+    .claude/skills/security-reviewer \
     .claude/agents \
     .claude/hooks
 
@@ -113,9 +116,19 @@ download_skill ".claude/skills/pyplan/spec-context/SKILL.md"
 download_skill ".claude/skills/pyplan/mcp/SKILL.md"
 download_skill ".claude/skills/decision-architecture/SKILL.md"
 download_skill ".claude/skills/data-discovery/SKILL.md"
+download_skill ".claude/skills/dev-setup/SKILL.md"
+download_skill ".claude/skills/brand-design/SKILL.md"
+download_skill ".claude/skills/security-reviewer/SKILL.md"
 download_skill ".claude/agents/code-reviewer.md"
 download_skill ".claude/agents/security-auditor.md"
 download_skill ".claude/agents/test-generator.md"
+download_skill ".claude/agents/HANDOFF_TEMPLATE.md"
+download_skill ".claude/hooks/README.md"
+
+# NOTE: SDAD v4.3 hooks (session-start, pre-compact, session-end) ship as
+# PowerShell scripts and are Windows-only in this version. Bash equivalents
+# are planned — see .claude/hooks/README.md. settings.json (which registers
+# the .ps1 hooks) is intentionally NOT installed on Mac/Linux.
 
 # ─── STEP 4: Install CLAUDE.md ───────────────────────────────────────────────
 
@@ -124,12 +137,12 @@ echo -e "${YELLOW}[ 4/7 ] Installing CLAUDE.md...${NC}"
 
 if [ -f "CLAUDE.md" ]; then
     if grep -q "SDAD v4" CLAUDE.md 2>/dev/null; then
-        echo -e "${CYAN}  SKIP   SDAD v4.1 block already present in CLAUDE.md${NC}"
+        echo -e "${CYAN}  SKIP   SDAD v4.x block already present in CLAUDE.md${NC}"
     else
         echo -e "${YELLOW}  WARNING  Existing CLAUDE.md found. Appending SDAD block.${NC}"
         echo "" >> CLAUDE.md
         curl -fsSL "$REPO/Claude.md" >> CLAUDE.md
-        echo -e "${GREEN}  OK     SDAD v4.1 block appended to CLAUDE.md${NC}"
+        echo -e "${GREEN}  OK     SDAD v4.3 block appended to CLAUDE.md${NC}"
     fi
 else
     curl -fsSL "$REPO/Claude.md" -o CLAUDE.md
@@ -167,14 +180,14 @@ fi
 
 # .gitignore
 if [ -f ".gitignore" ]; then
-    if ! grep -q "SDAD v4.1" .gitignore 2>/dev/null; then
-        printf "\n# SDAD v4.1\n.claude/.session_tmp\n*.tmp\n" >> .gitignore
+    if ! grep -q "SDAD v4" .gitignore 2>/dev/null; then
+        printf "\n# SDAD v4.3\n.claude/.session_tmp\n*.tmp\n" >> .gitignore
         echo -e "${GREEN}  OK     .gitignore updated${NC}"
     else
         echo -e "${CYAN}  SKIP   .gitignore already has SDAD entries${NC}"
     fi
 else
-    printf "# SDAD v4.1\n.claude/.session_tmp\n*.tmp\n" > .gitignore
+    printf "# SDAD v4.3\n.claude/.session_tmp\n*.tmp\n" > .gitignore
     echo -e "${GREEN}  OK     .gitignore created${NC}"
 fi
 
@@ -201,7 +214,7 @@ echo ""
 echo -e "${YELLOW}[ 7/7 ] Installation complete${NC}"
 echo ""
 echo -e "${GREEN}============================================${NC}"
-echo -e "${GREEN}  SDAD v4.1 installed successfully${NC}"
+echo -e "${GREEN}  SDAD v4.3 installed successfully${NC}"
 echo -e "${GREEN}============================================${NC}"
 echo ""
 echo "Files installed:"
@@ -214,7 +227,10 @@ echo "  .claude/skills/frontend/SKILL.md        — on-demand"
 echo "  .claude/skills/pyplan/*/SKILL.md        — Pyplan layer (5 skills)"
 echo "  .claude/skills/decision-architecture/   — transversal skill"
 echo "  .claude/skills/data-discovery/          — transversal skill"
-echo "  .claude/agents/                          — code-reviewer, security-auditor, test-generator"
+echo "  .claude/skills/dev-setup/               — on-demand (onboarding)"
+echo "  .claude/skills/brand-design/            — on-demand (visual identity)"
+echo "  .claude/agents/                          — code-reviewer, security-auditor, test-generator + HANDOFF template"
+echo "  .claude/hooks/README.md                  — hooks are Windows-only in v4.3 (PowerShell)"
 echo "  Pyplan MCP                               — registered globally (dev.pyplan.com)"
 echo "  SPEC.md                                  — blank template (if new)"
 echo "  LESSON_LIBRARY.md                        — blank template (if new)"

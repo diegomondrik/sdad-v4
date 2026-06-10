@@ -7,6 +7,81 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [4.3] — 2026-06-10
+
+### Overview
+
+SDAD v4.3 adds Model & Effort Routing across all phases and repairs installer
+drift found in a full v4.2 audit. Core focus: choosing the right model and
+reasoning effort per SDAD phase (Fable/Opus/Sonnet/Haiku era), pinning models
+for delegated agents, and making the installers actually ship everything v4.2
+declared.
+
+**Upgrade note:** v4.2 projects are fully compatible. Run `git tag v4.2`
+before pulling v4.3 to preserve prior state.
+
+---
+
+### Added
+
+**Model & Effort Routing (CLAUDE.md section)**
+- Model-agnostic tiers: FRONTIER (best reasoning available, e.g. fable/opus),
+  STANDARD (e.g. sonnet), ECONOMY (e.g. haiku) — survives model releases.
+- Per-phase routing table: $spec/$specout → FRONTIER·high; $build per-increment
+  (STANDARD·low executing / FRONTIER·high open decisions); $qa incremental →
+  STANDARD·medium; $qa full/$QA/$docfinal → FRONTIER·high; $verify/$doc →
+  ECONOMY–STANDARD·low; $pause/$lesson/$flow → current model, never switch.
+- 🧠 MODEL announcement generalized: fires at the start of $spec, $specout,
+  $qa full, and $docfinal (was $build-only via C-015). Only $build blocks on
+  mismatch — other phases flag once and continue.
+- Capability note locked in: main session never auto-switches; Vía A is manual
+  /model + /effort; Vía B is agent frontmatter (roadmap §2.1b).
+
+**Agent model pinning (Vía B)**
+- Frontmatter for the three agents: code-reviewer opus·high, security-auditor
+  opus·high, test-generator sonnet·medium. Applied via `apply-v4.3.ps1` (one-shot,
+  idempotent, self-deleting — `.claude/` is write-protected in Cowork mode).
+
+**security-reviewer skill** (`.claude/skills/security-reviewer/SKILL.md`)
+- Was referenced in CLAUDE.md since v4.0 but never existed. Created: secrets/
+  credentials (P0), injection & input handling (P1), auth (P1), PII (P0–P1),
+  severity discipline, $qa Layer 1 + Tier 2/3 §9 integration. Installed by
+  `apply-v4.3.ps1` and by the installers.
+
+**Developer Manual** (`docs/DEVELOPER_MANUAL_v4.3.html`)
+- Didactic manual covering SDAD core, SDAD for Pyplan, and day-to-day usage.
+
+**Context budget cap raised**
+- CLAUDE.md net line budget per release: +40 → +60 ([LOCK] updated in
+  DECISIONS.md; the "stays lean" rule is unchanged — voluminous content still
+  goes to on-demand skills). Rationale: the Model & Effort Routing table gates
+  every phase and belongs inline.
+
+---
+
+### Fixed
+
+- `install.ps1` / `install.sh` were still v4.1: missing `dev-setup` and
+  `brand-design` skills, agent HANDOFF template, hook scripts, hooks README,
+  and `settings.json` registration — v4.2 declared hooks active but the
+  installer never shipped them. All added. `settings.json` is never overwritten
+  if present; hooks remain Windows-only (PowerShell) — install.sh notes this.
+- `brand-design` skill existed since v4.0 but was not listed in CLAUDE.md
+  Active Skills or `$skills` — now discoverable (trigger: brand, visual
+  identity, brand tokens, §C).
+- README "Active skills (always on)" wrongly listed Security Reviewer and
+  QA Engineer as always-on — both are on-demand per CLAUDE.md.
+
+### Known gaps (deferred)
+
+- Bash equivalents of the three PowerShell hooks (hooks remain Windows-only;
+  porting without a test environment risks repeating the L-01 encoding class
+  of bugs — deliberately deferred, not forgotten).
+- CHANGELOG [4.0] §A/§B section names and "Layer 7" reference don't match
+  current CLAUDE.md naming — left as historical record.
+
+---
+
 ## [4.2] — 2026-06-08
 
 ### Overview
@@ -311,4 +386,4 @@ by Claude Code — no manual file copying or separate skill repos required.
 
 ---
 
-G7 AI Development Methodology | SDAD v4.2
+G7 AI Development Methodology | SDAD v4.3

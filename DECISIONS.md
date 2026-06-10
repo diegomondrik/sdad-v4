@@ -6,7 +6,9 @@ Each `[LOCK]`-prefixed decision must not be reopened without explicit developer 
 ## [LOCK] decisions (carried into every COMPACT ANCHOR)
 - [LOCK] MCP-vs-CLI: security is a hard gate — never reduce it to a token/cost choice (C-011).
 - [LOCK] CLAUDE.md stays lean: short critical rules inline, voluminous content → on-demand skills (§2.0).
-- [LOCK] CLAUDE.md net line budget for v4.2 ≤ +40 (§2.0).
+- [LOCK] CLAUDE.md net line budget ≤ +60 per release (raised from +40 in v4.3 — the
+  Model & Effort Routing table gates every phase and belongs inline; the "stays lean"
+  rule above is unchanged: voluminous content still goes to on-demand skills) (§2.0).
 - [LOCK] Anchor survival = PreCompact writes to disk + SessionStart re-injects after compaction; PreCompact's own injection does NOT survive (verified vs docs).
 - [LOCK] No API dependency in the methodology — prompt caching is documentation + structure only (cost/team-reach) (C-004).
 
@@ -198,6 +200,36 @@ $agent at it (extended the existing $agent header line — net CLAUDE.md delta 0
 
 ---
 
+## Increment 11 — v4.3: Model & Effort Routing + installer repair
+
+════════════════════════════════════════════════════════
+📋 HUB BLOCK — DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-10
+Increment: 11 — v4.3 Model & Effort Routing + installer repair
+Model: claude-fable-5 · effort medium
+Decision: Add a Model & Effort Routing section to CLAUDE.md with model-agnostic
+tiers (FRONTIER/STANDARD/ECONOMY) and a per-phase routing table; generalize the
+🧠 MODEL announcement (C-015) from $build-only to $spec/$specout/$qa full/$docfinal
+(only $build blocks on mismatch); pin model+effort in agent frontmatter (Vía B,
+roadmap §2.1b). Repair installer drift: install.ps1/sh bumped from v4.1, now ship
+dev-setup, brand-design, HANDOFF template, hooks + settings.json (Windows, guarded).
+Rationale: Multi-model era (fable/opus/sonnet/haiku) — routing by tier survives
+releases; the announcement-in-flow pattern (C-015) is the only mechanism that works
+since the session never auto-switches. Installer had silently stopped matching the
+declared v4.2 feature set.
+Alternatives considered: hardcoding model names in the routing table — rejected
+(same reason C-015 rejected hardcoded "opus"); putting the table in a skill —
+kept inline because it gates every phase, but flagged vs the [LOCK] lean rule.
+Impact: CLAUDE.md +~46 net lines (routing section + brand-design listing + 1
+behavior rule) — within the §2.0 cap, raised to ≤ +60/release in v4.3 (developer
+decision 2026-06-10; lean [LOCK] unchanged). Agents frontmatter + security-reviewer
+skill apply via apply-v4.3.ps1 (one-shot, .claude/ write-protected in Cowork).
+install.ps1/sh, README, CHANGELOG, DEVELOPER_MANUAL updated.
+════════════════════════════════════════════════════════
+
+---
+
 ## §13 — AI Authorship Log (v4.2)
 
 | Increment | Feature | Model | Date | Notes |
@@ -212,6 +244,7 @@ $agent at it (extended the existing $agent header line — net CLAUDE.md delta 0
 | 8 | C-004 caching boundary (doc only) | claude-opus-4-8 · effort medium | 2026-06-07 | Documented cacheable vs volatile; no API (cost/reach). Implementation deferred (access-gated). |
 | 9 | C-006 lesson retrieval | claude-opus-4-8 · effort medium | 2026-06-07 | LESSON_LIBRARY.md created (+ L-01) + $lesson search + Phase 0 surfacing. CLAUDE.md net 0. |
 | 10 | C-010 agent handoff | claude-opus-4-8 · effort high | 2026-06-07 | HANDOFF_TEMPLATE.md + $agent pointer. Native delegation evaluated — no custom infra needed. CLAUDE.md net 0. |
+| 11 | v4.3 Model & Effort Routing + installer repair | claude-fable-5 · effort medium | 2026-06-10 | CLAUDE.md routing section (+~44 net) + agent frontmatter (staged) + install.ps1/sh repair + README/CHANGELOG v4.3. |
 
 ---
 

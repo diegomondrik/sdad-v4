@@ -1,6 +1,6 @@
-# SDAD v4.1 — Installer for Windows (PowerShell)
+# SDAD v4.3 — Installer for Windows (PowerShell)
 # Spec-Driven AI Development — G7 AI Development Methodology
-# Version: 4.1 | 2026
+# Version: 4.3 | 2026
 #
 # Run from inside the project repo where you want SDAD installed:
 #
@@ -18,7 +18,7 @@ $SKILLS_BASE = ".claude/skills"
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "  SDAD v4.1 — Installer" -ForegroundColor Cyan
+Write-Host "  SDAD v4.3 — Installer" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -79,6 +79,9 @@ $folders = @(
     ".claude/skills/pyplan/mcp",
     ".claude/skills/decision-architecture",
     ".claude/skills/data-discovery",
+    ".claude/skills/dev-setup",
+    ".claude/skills/brand-design",
+    ".claude/skills/security-reviewer",
     ".claude/agents",
     ".claude/hooks"
 )
@@ -109,9 +112,17 @@ $skillFiles = @{
     ".claude/skills/pyplan/mcp/SKILL.md"                 = "$REPO/.claude/skills/pyplan/mcp/SKILL.md"
     ".claude/skills/decision-architecture/SKILL.md"      = "$REPO/.claude/skills/decision-architecture/SKILL.md"
     ".claude/skills/data-discovery/SKILL.md"             = "$REPO/.claude/skills/data-discovery/SKILL.md"
+    ".claude/skills/dev-setup/SKILL.md"                  = "$REPO/.claude/skills/dev-setup/SKILL.md"
+    ".claude/skills/brand-design/SKILL.md"               = "$REPO/.claude/skills/brand-design/SKILL.md"
+    ".claude/skills/security-reviewer/SKILL.md"          = "$REPO/.claude/skills/security-reviewer/SKILL.md"
     ".claude/agents/code-reviewer.md"                    = "$REPO/.claude/agents/code-reviewer.md"
     ".claude/agents/security-auditor.md"                 = "$REPO/.claude/agents/security-auditor.md"
     ".claude/agents/test-generator.md"                   = "$REPO/.claude/agents/test-generator.md"
+    ".claude/agents/HANDOFF_TEMPLATE.md"                 = "$REPO/.claude/agents/HANDOFF_TEMPLATE.md"
+    ".claude/hooks/session-start.ps1"                    = "$REPO/.claude/hooks/session-start.ps1"
+    ".claude/hooks/pre-compact.ps1"                      = "$REPO/.claude/hooks/pre-compact.ps1"
+    ".claude/hooks/session-end.ps1"                      = "$REPO/.claude/hooks/session-end.ps1"
+    ".claude/hooks/README.md"                            = "$REPO/.claude/hooks/README.md"
 }
 
 foreach ($dest in $skillFiles.Keys) {
@@ -126,6 +137,18 @@ foreach ($dest in $skillFiles.Keys) {
     }
 }
 
+# .claude/settings.json — hook registration. Never overwrite an existing one.
+if (-not (Test-Path ".claude/settings.json")) {
+    try {
+        Invoke-WebRequest -Uri "$REPO/.claude/settings.json" -OutFile ".claude/settings.json" -UseBasicParsing
+        Write-Host "  OK     .claude/settings.json (hooks registered)" -ForegroundColor Green
+    } catch {
+        Write-Host "  ERROR  Could not download .claude/settings.json — hooks will be inactive." -ForegroundColor Red
+    }
+} else {
+    Write-Host "  SKIP   .claude/settings.json already exists — merge hook registration manually (see .claude/hooks/README.md)" -ForegroundColor Cyan
+}
+
 # ─── STEP 4: Install CLAUDE.md ───────────────────────────────────────────────
 
 Write-Host ""
@@ -136,12 +159,12 @@ $claudeMdUrl = "$REPO/Claude.md"
 if (Test-Path "CLAUDE.md") {
     $existing = Get-Content "CLAUDE.md" -Raw
     if ($existing -match "SDAD v4") {
-        Write-Host "  SKIP   SDAD v4.1 block already present in CLAUDE.md" -ForegroundColor Cyan
+        Write-Host "  SKIP   SDAD v4.x block already present in CLAUDE.md" -ForegroundColor Cyan
     } else {
         Write-Host "  WARNING  Existing CLAUDE.md found. Appending SDAD block." -ForegroundColor Yellow
         $sdadBlock = (Invoke-WebRequest -Uri $claudeMdUrl -UseBasicParsing).Content
         Add-Content "CLAUDE.md" "`n`n$sdadBlock"
-        Write-Host "  OK     SDAD v4.1 block appended to CLAUDE.md" -ForegroundColor Green
+        Write-Host "  OK     SDAD v4.3 block appended to CLAUDE.md" -ForegroundColor Green
     }
 } else {
     Invoke-WebRequest -Uri $claudeMdUrl -OutFile "CLAUDE.md" -UseBasicParsing
@@ -180,14 +203,14 @@ _No entries yet. Run `$`qa on your first completed increment._
 # .gitignore
 $gitignoreEntries = @(
     "",
-    "# SDAD v4.1",
+    "# SDAD v4.3",
     ".claude/.session_tmp",
     "*.tmp"
 )
 
 if (Test-Path ".gitignore") {
     $gitignoreContent = Get-Content ".gitignore" -Raw
-    if ($gitignoreContent -notmatch "SDAD v4.1") {
+    if ($gitignoreContent -notmatch "SDAD v4") {
         Add-Content ".gitignore" ($gitignoreEntries -join "`n")
         Write-Host "  OK     .gitignore updated" -ForegroundColor Green
     } else {
@@ -223,7 +246,7 @@ Write-Host ""
 Write-Host "[ 7/7 ] Installation complete" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Green
-Write-Host "  SDAD v4.1 installed successfully" -ForegroundColor Green
+Write-Host "  SDAD v4.3 installed successfully" -ForegroundColor Green
 Write-Host "============================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Files installed:" -ForegroundColor White
@@ -236,7 +259,10 @@ Write-Host "  .claude/skills/frontend/SKILL.md        — on-demand" -Foreground
 Write-Host "  .claude/skills/pyplan/*/SKILL.md        — Pyplan layer (5 skills)" -ForegroundColor White
 Write-Host "  .claude/skills/decision-architecture/   — transversal skill" -ForegroundColor White
 Write-Host "  .claude/skills/data-discovery/          — transversal skill" -ForegroundColor White
-Write-Host "  .claude/agents/                          — code-reviewer, security-auditor, test-generator" -ForegroundColor White
+Write-Host "  .claude/skills/dev-setup/               — on-demand (onboarding)" -ForegroundColor White
+Write-Host "  .claude/skills/brand-design/            — on-demand (visual identity)" -ForegroundColor White
+Write-Host "  .claude/agents/                          — code-reviewer, security-auditor, test-generator + HANDOFF template" -ForegroundColor White
+Write-Host "  .claude/hooks/                           — session-start, pre-compact, session-end (+ settings.json)" -ForegroundColor White
 Write-Host "  Pyplan MCP                               — registered globally (dev.pyplan.com)" -ForegroundColor White
 Write-Host "  SPEC.md                                  — blank template (if new)" -ForegroundColor White
 Write-Host "  LESSON_LIBRARY.md                        — blank template (if new)" -ForegroundColor White
