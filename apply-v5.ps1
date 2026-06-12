@@ -7,7 +7,9 @@
 #
 # What it does (idempotent -- safe to re-run):
 #   1. Registers PreToolUse spec-gate hook in .claude/settings.json
-#   2. Installs .claude/hooks/pre-tool-use-spec-gate.ps1
+#      (dispatcher form: sh run-hook.sh pre-tool-use-spec-gate -- cross-platform)
+#   2. Installs .claude/hooks/pre-tool-use-spec-gate.ps1 (Windows, tested)
+#      and .claude/hooks/pre-tool-use-spec-gate.sh (macOS/Linux, pending mac test)
 #   3. Creates checks/ directory and installs checks/ascii-ps1.ps1
 #   4. Removes _staging_v5/ when all steps succeed
 #   5. Self-deletes on success
@@ -38,13 +40,15 @@ if (-not (Test-Path $settingsPath)) {
     if ($hookAlreadyRegistered) {
         Write-Host "  SKIP   PreToolUse hook already registered in settings.json" -ForegroundColor Cyan
     } else {
-        # Build the new PreToolUse entry as a hashtable so we can inject it cleanly
+        # Build the new PreToolUse entry as a hashtable so we can inject it cleanly.
+        # Dispatcher form -- run-hook.sh detects the platform and delegates to
+        # the .ps1 (Windows) or .sh (macOS/Linux) variant of the gate script.
         $preToolEntry = @{
             matcher = "Write|Edit"
             hooks   = @(
                 @{
                     type    = "command"
-                    command = 'powershell -NoProfile -ExecutionPolicy Bypass -File "${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-tool-use-spec-gate.ps1"'
+                    command = 'sh "${CLAUDE_PROJECT_DIR}/.claude/hooks/run-hook.sh" pre-tool-use-spec-gate'
                 }
             )
         }
@@ -62,19 +66,23 @@ if (-not (Test-Path $settingsPath)) {
     }
 }
 
-# ---- 2: Install pre-tool-use-spec-gate.ps1 --------------------------------
+# ---- 2: Install pre-tool-use-spec-gate (.ps1 + .sh) -----------------------
 
-$hookSrc = "_staging_v5\hooks\pre-tool-use-spec-gate.ps1"
-$hookDst = ".claude\hooks\pre-tool-use-spec-gate.ps1"
+$gateScripts = @("pre-tool-use-spec-gate.ps1", "pre-tool-use-spec-gate.sh")
 
-if (Test-Path $hookDst) {
-    Write-Host "  SKIP   $hookDst already exists" -ForegroundColor Cyan
-} elseif (Test-Path $hookSrc) {
-    Copy-Item $hookSrc $hookDst
-    Write-Host "  OK     $hookDst installed" -ForegroundColor Green
-} else {
-    Write-Host "  ERROR  $hookSrc not found (staging missing)" -ForegroundColor Red
-    $ok = $false
+foreach ($script in $gateScripts) {
+    $hookSrc = "_staging_v5\hooks\$script"
+    $hookDst = ".claude\hooks\$script"
+
+    if (Test-Path $hookDst) {
+        Write-Host "  SKIP   $hookDst already exists" -ForegroundColor Cyan
+    } elseif (Test-Path $hookSrc) {
+        Copy-Item $hookSrc $hookDst
+        Write-Host "  OK     $hookDst installed" -ForegroundColor Green
+    } else {
+        Write-Host "  ERROR  $hookSrc not found (staging missing)" -ForegroundColor Red
+        $ok = $false
+    }
 }
 
 # ---- 3: Install checks/ascii-ps1.ps1 (I2 ratchet) ------------------------
