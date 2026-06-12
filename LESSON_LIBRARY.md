@@ -35,3 +35,20 @@ Transferable lessons captured across SDAD projects. Surfaced automatically in Ph
   "multi-author drift" (one maintainer today — the real value is an auto-reminder + future team
   scaling). Both rules stayed; their reasons changed. Keep the rule, fix the reason.
 - **Origin:** SDAD v4.2 §2.1 single-source validation, closed with the G7 source 2026-06-07.
+
+### L-03 — PS 5.1: native-command stderr under EAP Stop becomes a terminating error
+- **Category:** Environment
+- **Tags:** `#stack:powershell` `#stack:windows` `#phase:build` `#phase:qa`
+- **Signal:** A PowerShell 5.1 script that invokes a child native command (an `.exe`, or
+  `powershell -File child.ps1`) crashes with `NativeCommandError` exactly when the child
+  writes to stderr — even though the child's exit code is the expected one. Adding `2>$null`
+  makes it worse instead of fixing it (the redirection is what wraps stderr lines into
+  ErrorRecords).
+- **Principle:** In Windows PowerShell 5.1, any stderr line from a native command running
+  under `$ErrorActionPreference = "Stop"` becomes a terminating error. When the child's
+  stderr is *expected output* (e.g. a deny message from a gate hook), relax EAP to
+  `Continue` around that single call and validate by `$LASTEXITCODE`, not by absence of
+  error records. Sibling of L-01: same root cause family (PS 5.1 legacy semantics), so
+  test harnesses for hooks must run on real Windows.
+- **Origin:** SDAD v5 I1 — eval scenario 01 crashed while the gate hook under test behaved
+  correctly (deny + stderr message). Caught by the Windows test gate, fixed in the scenario.
