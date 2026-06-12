@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-start.ps1\""
+            "command": "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/run-hook.sh\" session-start"
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-compact.ps1\""
+            "command": "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/run-hook.sh\" pre-compact"
           }
         ]
       }
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-end.ps1\""
+            "command": "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/run-hook.sh\" session-end"
           }
         ]
       }
