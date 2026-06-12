@@ -212,6 +212,7 @@ empty/missing `agent_output.tmp` → surface the error, never proceed silently.
 | prep-1 | v5 brief + analysis + docs drafts + apply-v5 scaffold committed | claude-opus-4-8 | high | 7 files (091ca09) | n/a (docs) | — | 2026-06-12 |
 | prep-2 | hooks-bash-port merged into v5; dispatcher verified on Windows (mock stdin → exit 0) | claude-opus-4-8 | high | 9 files (fb141fa) | 1/1 manual dispatcher check | — | 2026-06-12 |
 | prep-3 | apply-v5.ps1 switched to dispatcher registration + dual gate variant | claude-opus-4-8 | high | apply-v5.ps1 (a65dd34) | ASCII check pass | — | 2026-06-12 |
+| I1 | PreToolUse spec-gate hook (ps1+sh) + 5 eval scenarios | claude-fable-5 | high | _staging_v5/hooks/ (2), .sdad/eval/scenarios/01-05 (5) | 5/5 pass (Windows) | 1 P2 (sh sed path edge, pending mac test) | 2026-06-12 |
 
 ---
 

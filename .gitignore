@@ -2,7 +2,9 @@
 mcp.json
 
 # SDAD runtime state (hook artifacts: compact anchor snapshot, autocommit hold sentinel)
-.sdad/
+# .sdad/eval/ is the exception: the methodology golden dataset is versioned (v5 I3)
+.sdad/*
+!.sdad/eval/
 
 # Windows
 Thumbs.db

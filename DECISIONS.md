@@ -326,3 +326,27 @@ resume/manual-edit audit, lesson reuse). See each increment's evidence line.
 DEFERRED (access-gated, not v4.3-by-choice): C-004 API-level caching implementation.
 OUT OF v4.2 (agreed): C-009 git worktrees.
 PENDING (developer): open the PR; live auto-compaction test of the anchor (verifiable only in real use).
+
+## Increment 13 — v5 I1: PreToolUse spec-gate hook
+
+════════════════════════════════════════════════════════
+📋 HUB BLOCK — DECISIONS_SDAD-v5.md
+════════════════════════════════════════════════════════
+Date: 2026-06-12
+Increment: 13 — v5 I1: PreToolUse spec-gate hook (R3)
+Model: claude-fable-5 · effort high
+Decision: Spec gate enforced in code — PreToolUse hook (ps1 + sh via dispatcher)
+denies Write/Edit on code files when SPEC.md is absent or lacks the exact marker
+'SPEC STATUS: APPROVED'. Allowlist (md/docs/.sdad/.claude/hub) and DOCFINAL_ACTIVE
+sentinel exempt; unknown extensions allow (fail-open bias); internal errors
+fail open with a gate.log trace.
+Rationale: Governance Axiom — "no code before approved Spec" moves from prompt
+instruction to structural guarantee, independent of model compliance.
+Alternatives considered: JSON permissionDecision output instead of exit 2 —
+rejected: exit-2-plus-stderr is the documented simple path and the brief's contract.
+Impact: _staging_v5/hooks/ (2 scripts), 5 eval scenarios (.sdad/eval/scenarios/01-05,
+doubling as the I3 golden dataset), apply-v5.ps1 already registers via dispatcher.
+Known trade-off: each Write/Edit pays PowerShell startup latency (~200-500ms) —
+accepted as the price of enforcement. Known limit: .sh variant pending macOS test.
+Test result: 5/5 scenarios pass on Windows; ASCII check 7/7 files clean.
+════════════════════════════════════════════════════════
