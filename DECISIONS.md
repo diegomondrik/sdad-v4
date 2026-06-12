@@ -350,3 +350,31 @@ Known trade-off: each Write/Edit pays PowerShell startup latency (~200-500ms) �
 accepted as the price of enforcement. Known limit: .sh variant pending macOS test.
 Test result: 5/5 scenarios pass on Windows; ASCII check 7/7 files clean.
 ════════════════════════════════════════════════════════
+
+## Increment 14 — v5 I2: Lesson-to-Guardrail ratchet (ASCII check)
+
+════════════════════════════════════════════════════════
+📋 HUB BLOCK — DECISIONS_SDAD-v5.md
+════════════════════════════════════════════════════════
+Date: 2026-06-12
+Increment: 14 — v5 I2: Lesson-to-Guardrail code ratchet (R2)
+Model: claude-fable-5 · effort high
+Decision: L-01 becomes executable — checks/ascii-ps1.{ps1,sh} (mirrored pair,
+one engine per platform context) wired into BOTH paths: session-end hooks warn
+and skip autocommit on violation (visibility), .git/hooks/pre-commit blocks the
+commit (enforcement — the deliberate hard stop). checks/ ships versioned at the
+repo root; pre-commit installs via apply-v5.ps1 (.git/hooks is unversioned).
+Rationale: the instructional ratchet failed (L-01 "confirmed twice") — a fixed
+failure mode must be structurally unable to recur.
+Alternatives considered: single canonical script called cross-context — rejected:
+calling powershell from git's sh on every commit is fragile; mirrored pair follows
+the established dispatcher precedent. SessionEnd-only wiring — rejected: L-01
+recurred in manual commit flow, which only pre-commit covers.
+Impact: checks/ (new, 2 files), _staging_v5/hooks/session-end.{ps1,sh} (patched,
+idempotency marker 'v5 I2 ratchet wired'), _staging_v5/git-hooks/pre-commit,
+apply-v5.ps1 steps 3-4, eval scenarios 06-07.
+Known limit: unquoted file lists in sh loops split on spaces (P2, relative paths
+make it moot for this repo). L-03 captured separately from I1.
+Test result: 7/7 eval scenarios pass (5 I1 regression + 2 new); pre-commit
+verified blocking dirty and allowing clean commits in a temp repo via git's sh.
+════════════════════════════════════════════════════════

@@ -10,9 +10,10 @@
 #      (dispatcher form: sh run-hook.sh pre-tool-use-spec-gate -- cross-platform)
 #   2. Installs .claude/hooks/pre-tool-use-spec-gate.ps1 (Windows, tested)
 #      and .claude/hooks/pre-tool-use-spec-gate.sh (macOS/Linux, pending mac test)
-#   3. Creates checks/ directory and installs checks/ascii-ps1.ps1
-#   4. Removes _staging_v5/ when all steps succeed
-#   5. Self-deletes on success
+#   3. Updates session-end hooks (.ps1 + .sh) with the L-01 ratchet call (v5 I2)
+#   4. Installs .git/hooks/pre-commit (ratchet hard stop -- .git/hooks is unversioned)
+#   5. Removes _staging_v5/ when all steps succeed, then self-deletes
+# Note: checks/ itself ships versioned at the repo root -- no staging needed.
 #
 # L-01 rule: this file is pure ASCII -- no em-dashes, accents, arrows, or section symbols.
 
@@ -85,26 +86,50 @@ foreach ($script in $gateScripts) {
     }
 }
 
-# ---- 3: Install checks/ascii-ps1.ps1 (I2 ratchet) ------------------------
+# ---- 3: Update session-end hooks with the L-01 ratchet call (v5 I2) -------
 
-$checksSrc = "_staging_v5\checks\ascii-ps1.ps1"
-$checksDst = "checks\ascii-ps1.ps1"
-$checksDir = "checks"
+foreach ($script in @("session-end.ps1", "session-end.sh")) {
+    $src = "_staging_v5\hooks\$script"
+    $dst = ".claude\hooks\$script"
 
-if (Test-Path $checksDst) {
-    Write-Host "  SKIP   $checksDst already exists" -ForegroundColor Cyan
-} elseif (Test-Path $checksSrc) {
-    if (-not (Test-Path $checksDir)) {
-        New-Item -ItemType Directory -Path $checksDir -Force | Out-Null
+    if (-not (Test-Path $src)) {
+        Write-Host "  ERROR  $src not found (staging missing)" -ForegroundColor Red
+        $ok = $false
+        continue
     }
-    Copy-Item $checksSrc $checksDst
-    Write-Host "  OK     $checksDst installed" -ForegroundColor Green
-} else {
-    Write-Host "  ERROR  $checksSrc not found (staging missing)" -ForegroundColor Red
-    $ok = $false
+    $dstHasRatchet = $false
+    if (Test-Path $dst) {
+        $existing = Get-Content $dst -Raw -Encoding UTF8
+        if ($existing -match 'v5 I2 ratchet wired') { $dstHasRatchet = $true }
+    }
+    if ($dstHasRatchet) {
+        Write-Host "  SKIP   $dst already has the v5 I2 ratchet" -ForegroundColor Cyan
+    } else {
+        Copy-Item $src $dst -Force
+        Write-Host "  OK     $dst updated (L-01 ratchet wired)" -ForegroundColor Green
+    }
 }
 
-# ---- 4+5: Cleanup ---------------------------------------------------------
+# ---- 4: Install .git/hooks/pre-commit (ratchet hard stop) -----------------
+
+$pcSrc = "_staging_v5\git-hooks\pre-commit"
+$pcDst = ".git\hooks\pre-commit"
+
+if (-not (Test-Path $pcSrc)) {
+    Write-Host "  ERROR  $pcSrc not found (staging missing)" -ForegroundColor Red
+    $ok = $false
+} elseif ((Test-Path $pcDst) -and ((Get-Content $pcDst -Raw -Encoding UTF8) -match 'SDAD v5 -- pre-commit ratchet')) {
+    Write-Host "  SKIP   $pcDst already installed" -ForegroundColor Cyan
+} else {
+    if (Test-Path $pcDst) {
+        Copy-Item $pcDst "$pcDst.backup-pre-v5"
+        Write-Host "  NOTE   existing pre-commit backed up to pre-commit.backup-pre-v5" -ForegroundColor Yellow
+    }
+    Copy-Item $pcSrc $pcDst -Force
+    Write-Host "  OK     $pcDst installed" -ForegroundColor Green
+}
+
+# ---- 5: Cleanup -----------------------------------------------------------
 
 if ($ok) {
     if (Test-Path "_staging_v5") {
