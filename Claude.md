@@ -601,11 +601,14 @@ If nothing is lesson-worthy: skip silently — never mention it.
 
 ## Required Environment Tool
 
-cc-status-line provides a real-time status bar: model, context %, session cost, git branch.
-Install via the SDAD installer, or run manually:
+ccstatusline provides a real-time status bar inside Claude Code: model, thinking effort,
+context %, session cost, git branch. Configure once per machine (interactive TUI — enable
+the Model, Thinking Effort, Context %, Session Cost and Git Branch widgets; writes statusLine into
+~/.claude/settings.json):
 
-  npx cc-status-line@latest
+  npx ccstatusline@latest
 
+The bar then renders automatically in every session.
 Use as primary context budget indicator — shows the 50% / 65% thresholds.
 
 ---

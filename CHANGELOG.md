@@ -121,6 +121,12 @@ before pulling v4.3 to preserve prior state.
   identity, brand tokens, §C).
 - README "Active skills (always on)" wrongly listed Security Reviewer and
   QA Engineer as always-on — both are on-demand per CLAUDE.md.
+- Status bar tool: CLAUDE.md said `npx cc-status-line@latest` — the npm package
+  is `ccstatusline` (no hyphens). Docs also described it as a monitor kept open
+  in a separate terminal; it is actually a one-time TUI setup that writes
+  `statusLine` into `~/.claude/settings.json` and renders inside Claude Code.
+  Corrected in CLAUDE.md, README, INSTALL_GUIDE, USAGE_AND_SHORTCUTS,
+  DEVELOPER_GUIDE and DEVELOPER_MANUAL.
 
 ### Known gaps (deferred)
 

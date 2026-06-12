@@ -528,18 +528,19 @@
     <!-- ── SESSION SETUP ── -->
     <h2 id="session-setup">Session setup</h2>
 
-    <p>Before every Claude Code session, run two commands in separate terminal windows:</p>
+    <p>Configure the status bar once per machine, then just start Claude Code:</p>
 
-    <pre><code># Terminal 1 — context budget monitor
+    <pre><code># Once per machine — interactive TUI: enable Model, Thinking Effort, Context %, Session Cost, Git Branch
 npx ccstatusline@latest
 
-# Terminal 2 — Claude Code
+# Every session — Claude Code (the bar renders at the bottom automatically)
 claude</code></pre>
 
     <p>
-      <code>ccstatusline</code> shows the current model, context usage percentage, session cost,
-      and git branch in real time. Keep it visible — it is the primary indicator for context
-      budget warnings at 50% and 65%.
+      <code>ccstatusline</code> writes the <code>statusLine</code> entry into
+      <code>~/.claude/settings.json</code> and shows the current model, thinking effort, context usage percentage,
+      session cost, and git branch in real time inside Claude Code. It is the primary indicator
+      for context budget warnings at 50% and 65%. Re-run the command to change widgets.
     </p>
 
     <!-- ── PHASE OVERVIEW ── -->

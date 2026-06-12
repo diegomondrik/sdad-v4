@@ -339,10 +339,13 @@ bash &lt;(curl -fsSL https://raw.githubusercontent.com/diegomondrik/sdad-v4/main
 <code>.claude/</code> with skills, agents and hooks (Windows); and initializes
 <code>SPEC.md</code>, <code>LESSON_LIBRARY.md</code> and <code>.gitignore</code>.</p>
 
-<h3>Before every session</h3>
+<h3>Status bar (once per machine)</h3>
 
-<pre><code>npx ccstatusline@latest   # terminal 1 — context %, model, cost, branch
-claude                    # terminal 2 — Claude Code</code></pre>
+<pre><code>npx ccstatusline@latest   # one-time TUI setup — enable Model, Thinking Effort, Context %, Cost, Git Branch</code></pre>
+
+<p>This writes <code>statusLine</code> into <code>~/.claude/settings.json</code>; the bar then
+renders automatically at the bottom of every Claude Code session (terminal and Code tab).
+After that, just run <code>claude</code> — nothing else to launch per session.</p>
 
 <h3>New project: the happy path</h3>
 

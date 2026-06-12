@@ -481,17 +481,20 @@ Invoke-Expression $init</code></pre>
   <h2>Context budget monitor</h2>
 
   <p>
-    Before every Claude Code session, run <code>cc-status-line</code> in a separate terminal window.
-    It displays the current model, context usage percentage, session cost, and git branch in real time.
+    Configure <code>ccstatusline</code> <strong>once per machine</strong>. It renders a status bar
+    at the bottom of Claude Code itself (terminal and Code tab alike) with the current model,
+    thinking effort, context usage percentage, session cost, and git branch in real time.
     SDAD uses context percentages at 50% and 65% as thresholds for session warnings.
   </p>
 
   <pre><code>npx ccstatusline@latest</code></pre>
 
   <div class="alert">
-    <strong>Keep it open in a separate terminal</strong>
-    Run <code>ccstatusline</code> in one terminal tab, then start <code>claude</code> in a second tab.
-    The status line updates automatically as you work.
+    <strong>One-time interactive setup — not a separate monitor</strong>
+    The command opens a TUI configurator. Enable the <em>Model</em>, <em>Context %</em>,
+    <em>Session Cost</em> and <em>Git Branch</em> widgets and save: it writes the
+    <code>statusLine</code> entry into <code>~/.claude/settings.json</code>, and the bar then
+    appears automatically in every Claude Code session. Re-run the same command to change widgets.
   </div>
 
   <!-- ── VERIFICATION ── -->

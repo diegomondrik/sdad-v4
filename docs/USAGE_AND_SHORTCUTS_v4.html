@@ -566,13 +566,13 @@
   <!-- ── SESSION SETUP ── -->
   <h2 id="session">Session setup</h2>
 
-  <p>Run these two commands at the start of every working session — in two separate terminal tabs.</p>
-
-  <h3>Terminal 1 — context monitor</h3>
+  <h3>Status bar — once per machine</h3>
   <pre><code>npx ccstatusline@latest</code></pre>
-  <p>Displays model, context usage %, session cost, and git branch. Keep it visible while working.</p>
+  <p>Interactive TUI: enable the Model, Thinking Effort, Context %, Session Cost and Git Branch widgets and save.
+  This writes <code>statusLine</code> into <code>~/.claude/settings.json</code>; the bar then
+  renders automatically at the bottom of every Claude Code session.</p>
 
-  <h3>Terminal 2 — Claude Code</h3>
+  <h3>Every session — Claude Code</h3>
   <pre><code>claude</code></pre>
 
   <h3>Resuming a previous session</h3>

@@ -143,12 +143,14 @@ Creates `SPEC.md`, `LESSON_LIBRARY.md`, `DECISIONS.md`, and `.sdad/` in your rep
 
 ---
 
-## Before every session
+## Status bar (once per machine)
 
 ```bash
-npx ccstatusline@latest   # terminal 1 — context %, model, cost, git branch
-claude                    # terminal 2 — start Claude Code
+npx ccstatusline@latest   # one-time TUI setup — enable Model, Thinking Effort, Context %, Cost, Git Branch
 ```
+
+Writes `statusLine` into `~/.claude/settings.json`; the bar then renders
+automatically inside every Claude Code session. After that, just run `claude`.
 
 ---
 
