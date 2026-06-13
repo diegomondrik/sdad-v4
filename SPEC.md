@@ -224,6 +224,8 @@ empty/missing `agent_output.tmp` → surface the error, never proceed silently.
 | I2 | Lesson ratchet: checks/ascii pair + session-end wiring + pre-commit | claude-fable-5 | high | checks/ (2), _staging_v5/ (3), apply-v5.ps1, scenarios 06-07 | 7/7 pass (incl. I1 regression) | 1 P2 (sh word-splitting on spaced paths) | 2026-06-12 |
 | I3 | $eval runner + golden dataset; OD-1/OD-2 resolved; 3 v4.2 hooks ascii-cleaned via staging | claude-fable-5 | high | .sdad/eval/ (5: runner, llm-smoke, lib, scenarios 08-09), _staging_v5/hooks/ (3), apply-v5.ps1, .gitignore | 9/9 core + 6/6 OD-2 + release guard fail-closed | 1 P3 (LLM replay end-to-end pending: claude CLI not installed); installers L-01 debt deferred to I10 | 2026-06-12 |
 | I4 | $agent liveness wrapper (timeout + empty-output guard); OD-3 resolved (600s) | claude-opus-4-8 | high | .sdad/lib/agent-run.ps1+.sh, scenario 10, .gitignore | 10/10 core (ps1); sh engine verified via Git Bash (timeout->2, empty->1) | none | 2026-06-13 |
+| I5 | Typed §13 schema locked by eval (8-column assert); protocol edit deferred to I9 | claude-opus-4-8 | high | scenario 11 | 11/11 core | none | 2026-06-13 |
+| I6 | $build E-termination contract: session-end honors .sdad/HOLD_AUTOCOMMIT (eval-locked); $build rule deferred to I9 | claude-opus-4-8 | high | scenario 12 | 12/12 core (HOLD suppresses + resumes) | none | 2026-06-13 |
 
 ---
 

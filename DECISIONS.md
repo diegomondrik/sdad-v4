@@ -452,3 +452,34 @@ never set it.
 Test result: eval core 10/10 on Windows (ps1 engine: timeout->2, empty->1);
 sh engine verified directly via Git Bash (timeout->2, empty->1). ASCII clean.
 ================================================================
+
+## Increment 17-18 -- v5 I5 (typed s13) + I6 (E-termination), eval-locked
+
+================================================================
+HUB BLOCK -- DECISIONS_SDAD-v5.md
+================================================================
+Date: 2026-06-13
+Increment: 17-18 -- v5 I5 typed s13 (R5) + I6 E-termination on tool error (R6)
+Model: claude-opus-4-8 . effort high
+Decision: Both supporting increments lock their contract in code now; their
+CLAUDE.md protocol text lands in the I9 consolidated reframe (respects the +60
+budget -- no mid-build CLAUDE.md churn). I5: scenario 11 asserts SPEC.md s13
+carries the 8-column schema (Increment, Feature, Model, Effort, Files, Tests,
+QA findings, Date) in order with 8 cells per data row -- a free-form regression
+now fails $eval. I6: scenario 12 proves the E-termination contract (SPEC F4) on
+the staged session-end.ps1 -- autocommit is suppressed while .sdad/HOLD_AUTOCOMMIT
+exists and resumes once removed.
+Rationale: the typed log and the recovery sentinel already exist (the schema in
+SPEC s4/s13, the sentinel honored by session-end since v4.2). v5's job is to make
+them regression-proof before the I9 prose codifies the workflow. Test-first locks
+the behavior so the I9 edit cannot silently break it.
+Alternatives considered: write the CLAUDE.md protocol now per increment --
+rejected, repeated CLAUDE.md edits churn the +60 budget and risk version-stamp
+drift; I9 consolidates all I1-I6 prose in one controlled pass. Separate commits
+per increment -- folded into one: both are the eval-assert halves of rules whose
+prose ships together in I9; two s13 rows preserve per-increment traceability.
+Impact: .sdad/eval/scenarios/11-typed-section13, 12-hold-autocommit (new);
+SPEC.md s13 (two typed rows). No code surface beyond eval.
+Test result: eval core 12/12. Scenario 12 needed EAP=Continue around git (L-03,
+native stderr) and core.autocrlf=false in the temp repo.
+================================================================
