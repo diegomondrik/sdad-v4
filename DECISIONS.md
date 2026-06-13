@@ -419,3 +419,36 @@ subcases (ps1 + sh engines, temp fixtures); -Release wiring verified
 fail-closed (claude CLI absent on this machine -- full LLM replay pending,
 runs at the I10 release gate after CLI install).
 ================================================================
+
+## Increment 16 -- v5 I4: $agent liveness wrapper (heartbeat)
+
+================================================================
+HUB BLOCK -- DECISIONS_SDAD-v5.md
+================================================================
+Date: 2026-06-13
+Increment: 16 -- v5 I4: $agent heartbeat / liveness (R4)
+Model: claude-opus-4-8 . effort high
+Decision: $agent delegation gains .sdad/lib/agent-run.{ps1,sh} -- a wrapper that
+runs `claude --print` with a timeout (OD-3 RESOLVED: 600s / 10 min default) and
+an empty-output check. Exit contract surfaced to the caller: 0 ok, 1 empty/
+missing output, 2 timeout (process killed), 3 claude CLI absent. Never proceeds
+silently on non-zero. The CLAUDE.md $agent protocol rewire to call the wrapper
+is deferred to I9 (consolidated reframe, +60 budget).
+Rationale: raw `claude --print` only detected empty output; a zombie sub-agent
+(running, zero progress) stalled indefinitely. A timeout converts a hang into a
+fast, visible failure -- consistent with the existing empty/missing rule.
+Alternatives considered: true output-progress liveness (watch bytes over time)
+-- rejected as overkill for SPEC F5, which requires only timeout + empty
+detection; GNU `timeout(1)` dependency -- rejected, not portable to BSD/macOS,
+so the sh port polls with kill -0 instead.
+Location decision: .sdad/lib/ (methodology code, testable in-repo, not the
+write-protected .claude/ harness namespace), versioned via a !.sdad/lib/
+gitignore exemption mirroring the .sdad/eval/ precedent. agent_output.tmp stays
+gitignored (runtime state).
+Impact: .sdad/lib/agent-run.ps1+.sh (new), .sdad/eval/scenarios/10-agent-timeout
+(new), .gitignore (lib exemption + agent_output.tmp). Testability hook:
+SDAD_AGENT_EXE env override injects a self-contained stand-in; real callers
+never set it.
+Test result: eval core 10/10 on Windows (ps1 engine: timeout->2, empty->1);
+sh engine verified directly via Git Bash (timeout->2, empty->1). ASCII clean.
+================================================================

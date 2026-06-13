@@ -208,7 +208,10 @@ empty/missing `agent_output.tmp` → surface the error, never proceed silently.
 - OD-2: ~~whether SessionStart prints an `$eval` reminder~~ — **RESOLVED (I3): yes.**
   One fail-open line when `git hash-object CLAUDE.md` differs from the
   `.sdad/eval/last-run` stamp (written by the runner on all-pass). Non-blocking.
-- OD-3: timeout default for `$agent` liveness — 10 min proposed (confirm in I4).
+- OD-3: ~~timeout default for `$agent` liveness — 10 min proposed~~ —
+  **RESOLVED (I4): 10 min (600s).** Implemented in `.sdad/lib/agent-run.{ps1,sh}`
+  as the `-TimeoutSec` / 3rd-arg default; on timeout the wrapper kills the
+  delegation and exits 2, on empty/missing output exits 1 — never proceeds silently.
 
 ## §13 AI Authorship Log
 
@@ -220,6 +223,7 @@ empty/missing `agent_output.tmp` → surface the error, never proceed silently.
 | I1 | PreToolUse spec-gate hook (ps1+sh) + 5 eval scenarios | claude-fable-5 | high | _staging_v5/hooks/ (2), .sdad/eval/scenarios/01-05 (5) | 5/5 pass (Windows) | 1 P2 (sh sed path edge, pending mac test) | 2026-06-12 |
 | I2 | Lesson ratchet: checks/ascii pair + session-end wiring + pre-commit | claude-fable-5 | high | checks/ (2), _staging_v5/ (3), apply-v5.ps1, scenarios 06-07 | 7/7 pass (incl. I1 regression) | 1 P2 (sh word-splitting on spaced paths) | 2026-06-12 |
 | I3 | $eval runner + golden dataset; OD-1/OD-2 resolved; 3 v4.2 hooks ascii-cleaned via staging | claude-fable-5 | high | .sdad/eval/ (5: runner, llm-smoke, lib, scenarios 08-09), _staging_v5/hooks/ (3), apply-v5.ps1, .gitignore | 9/9 core + 6/6 OD-2 + release guard fail-closed | 1 P3 (LLM replay end-to-end pending: claude CLI not installed); installers L-01 debt deferred to I10 | 2026-06-12 |
+| I4 | $agent liveness wrapper (timeout + empty-output guard); OD-3 resolved (600s) | claude-opus-4-8 | high | .sdad/lib/agent-run.ps1+.sh, scenario 10, .gitignore | 10/10 core (ps1); sh engine verified via Git Bash (timeout->2, empty->1) | none | 2026-06-13 |
 
 ---
 
