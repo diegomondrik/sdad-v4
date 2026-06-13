@@ -483,3 +483,41 @@ SPEC.md s13 (two typed rows). No code surface beyond eval.
 Test result: eval core 12/12. Scenario 12 needed EAP=Continue around git (L-03,
 native stderr) and core.autocrlf=false in the temp repo.
 ================================================================
+
+## Increment 19 -- v5 I9: CLAUDE.md v5.0 reframe + Control Layer (Harness skill)
+
+================================================================
+HUB BLOCK -- DECISIONS_SDAD-v5.md
+================================================================
+Date: 2026-06-13
+Increment: 19 -- v5 I9: CLAUDE.md v5.0 reframe + Control Layer
+Model: claude-opus-4-8 . effort high
+Decision: CLAUDE.md becomes v5.0-coherent. Inline (net +12 this increment, +55
+cumulative vs v4.3 baseline 589, within the +60 [LOCK], headroom 5): $eval
+command registered; Harness added to the on-demand skill list; five behavior
+rules added as single physical lines (Governance Axiom, $eval/ratchet trigger,
+$agent liveness via agent-run, E-termination + HOLD_AUTOCOMMIT, atomic commit +
+model pin); version + footer bumped to 5.0. The voluminous Control Layer detail
+(the H=(E,T,C,S,L,V) enforcement table, the two hard stops, determinism, what
+$eval checks) ships as a new on-demand skill .claude/skills/harness/ via
+apply-v5.ps1 step 5 -- the R4 escape hatch, keeping the inline footprint lean.
+Rationale: I1-I8 added machinery the methodology file did not yet describe; I9
+makes CLAUDE.md describe and govern it without breaching the line budget. The
+budget [LOCK] is the binding constraint, so detail goes to a skill, not inline.
+Alternatives considered: full mapping table inline -- rejected, would blow the
++60 [LOCK] (~+30 lines); no skill, prose-only behavior rules -- rejected, loses
+the conceptual frame the v5 identity change needs.
+Side fix: the budget assert (.sdad/eval/lib/assert-claude-md.ps1, from I3) queried
+'git show v4.3:CLAUDE.md' but the tag tracks 'Claude.md' -- the gate silently
+no-opped. Now resolves the name via git ls-tree case-insensitively, so the +60
+[LOCK] is actually enforced (it caught this increment at 651>649 mid-edit).
+PROJECT_LANGUAGE: deliberately NOT hardcoded into the shippable template (would
+force 'es' on every downstream install); this project's language stays recorded
+in SPEC.md only.
+Impact: CLAUDE.md (version, $sdad, $eval block, Harness skill line, 5 behavior
+rules), _staging_v5/skills/harness/SKILL.md (new), apply-v5.ps1 (step 5 + header),
+SPEC.md s13.
+Test result: eval core 12/12; CLAUDE.md 644 lines (delta +55 of 60); version
+stamp 5.0 header==footer; self-test scenarios 08 (asserts) + 09 (planted
+regression) pass -- language-first rule and build gate still trigger post-edit.
+================================================================

@@ -226,6 +226,7 @@ empty/missing `agent_output.tmp` → surface the error, never proceed silently.
 | I4 | $agent liveness wrapper (timeout + empty-output guard); OD-3 resolved (600s) | claude-opus-4-8 | high | .sdad/lib/agent-run.ps1+.sh, scenario 10, .gitignore | 10/10 core (ps1); sh engine verified via Git Bash (timeout->2, empty->1) | none | 2026-06-13 |
 | I5 | Typed §13 schema locked by eval (8-column assert); protocol edit deferred to I9 | claude-opus-4-8 | high | scenario 11 | 11/11 core | none | 2026-06-13 |
 | I6 | $build E-termination contract: session-end honors .sdad/HOLD_AUTOCOMMIT (eval-locked); $build rule deferred to I9 | claude-opus-4-8 | high | scenario 12 | 12/12 core (HOLD suppresses + resumes) | none | 2026-06-13 |
+| I9 | CLAUDE.md v5.0 reframe: $eval command, Governance Axiom + I3-I8 behavior rules, Harness skill (Control Layer detail), version bump; budget assert fix | claude-opus-4-8 | high | CLAUDE.md, _staging_v5/skills/harness/SKILL.md, apply-v5.ps1 (step 5) | 12/12 core; CLAUDE.md 644 (+55/+60); version 5.0/5.0; self-test 08+09 pass | none (budget headroom 5) | 2026-06-13 |
 
 ---
 

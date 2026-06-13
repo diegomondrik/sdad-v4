@@ -14,7 +14,8 @@
 #      session-end .ps1/.sh (L-01 ratchet call), session-start .ps1/.sh
 #      (OD-2 $eval reminder + ascii-clean), pre-compact.ps1 (ascii-clean)
 #   4. Installs .git/hooks/pre-commit (ratchet hard stop -- .git/hooks is unversioned)
-#   5. Removes _staging_v5/ when all steps succeed, then self-deletes
+#   5. Installs on-demand skills from _staging_v5/skills/ (v5 I9: harness)
+#   6. Removes _staging_v5/ when all steps succeed, then self-deletes
 # Note: checks/ itself ships versioned at the repo root -- no staging needed.
 #
 # L-01 rule: this file is pure ASCII -- no em-dashes, accents, arrows, or section symbols.
@@ -138,7 +139,24 @@ if (-not (Test-Path $pcSrc)) {
     Write-Host "  OK     $pcDst installed" -ForegroundColor Green
 }
 
-# ---- 5: Cleanup -----------------------------------------------------------
+# ---- 5: Install on-demand skills (v5 I9: harness) -------------------------
+
+$skillSrcRoot = "_staging_v5\skills"
+if (Test-Path $skillSrcRoot) {
+    foreach ($skillDir in (Get-ChildItem -Path $skillSrcRoot -Directory)) {
+        $dst = ".claude\skills\$($skillDir.Name)"
+        if (Test-Path (Join-Path $dst "SKILL.md")) {
+            Copy-Item (Join-Path $skillDir.FullName "SKILL.md") (Join-Path $dst "SKILL.md") -Force
+            Write-Host "  OK     $dst\SKILL.md refreshed" -ForegroundColor Green
+        } else {
+            New-Item -ItemType Directory -Path $dst -Force | Out-Null
+            Copy-Item (Join-Path $skillDir.FullName "*") $dst -Recurse -Force
+            Write-Host "  OK     $dst installed" -ForegroundColor Green
+        }
+    }
+}
+
+# ---- 6: Cleanup -----------------------------------------------------------
 
 if ($ok) {
     if (Test-Path "_staging_v5") {
