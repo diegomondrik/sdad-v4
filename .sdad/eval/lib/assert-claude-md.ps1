@@ -54,8 +54,15 @@ if (-not $SkipBudget) {
     $baseline = $null
     try {
         Push-Location (Split-Path $Path -Parent)
-        $baseRaw = git show v4.3:CLAUDE.md 2>$null
-        if ($LASTEXITCODE -eq 0 -and $baseRaw) { $baseline = @($baseRaw).Count }
+        # Resolve the tag's tracked name case-insensitively: git is case-sensitive
+        # but the file ships as 'Claude.md' on some refs and 'CLAUDE.md' on others.
+        $leaf = Split-Path $Path -Leaf
+        $tracked = @(git ls-tree -r --name-only v4.3 2>$null) |
+            Where-Object { (Split-Path $_ -Leaf) -ieq $leaf } | Select-Object -First 1
+        if ($tracked) {
+            $baseRaw = git show "v4.3:$tracked" 2>$null
+            if ($LASTEXITCODE -eq 0 -and $baseRaw) { $baseline = @($baseRaw).Count }
+        }
         Pop-Location
     } catch { try { Pop-Location } catch {} }
     if ($null -eq $baseline) {
