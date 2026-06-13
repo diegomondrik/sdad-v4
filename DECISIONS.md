@@ -378,3 +378,44 @@ make it moot for this repo). L-03 captured separately from I1.
 Test result: 7/7 eval scenarios pass (5 I1 regression + 2 new); pre-commit
 verified blocking dirty and allowing clean commits in a temp repo via git's sh.
 ════════════════════════════════════════════════════════
+
+## Increment 15 -- v5 I3: $eval runner + golden dataset (V component)
+
+================================================================
+HUB BLOCK -- DECISIONS_SDAD-v5.md
+================================================================
+Date: 2026-06-12
+Increment: 15 -- v5 I3: $eval runner + golden dataset
+Model: claude-fable-5 . effort high
+Decision: SDAD gains its V component. .sdad/eval/run-eval.ps1 aggregates every
+scenario (one PASS/FAIL line each; exit 0 only on all-pass; stamps
+.sdad/eval/last-run with the CLAUDE.md git blob hash). Structural asserts live
+in shared lib/assert-claude-md.ps1, consumed by scenario 08 (real CLAUDE.md)
+and 09 (planted-regression self-test per SPEC s8). OD-1 RESOLVED: three LLM
+smoke scenarios (spec-language, build-gate, sdad-surface) as a data table in
+llm-smoke.ps1 -- release gate only, via run-eval.ps1 -Release. OD-2 RESOLVED
+(default yes): SessionStart appends one fail-open reminder line when the
+CLAUDE.md hash differs from the last green stamp.
+Rationale: methodology regressions must surface before release, not inside a
+client project. Deterministic core on every CLAUDE.md/skill change; LLM replay
+only at release because it is non-deterministic by nature (R8).
+Alternatives considered: scenario-per-folder for the LLM smoke -- rejected, a
+single data table keeps OD-1 wording/regex auditable at a glance; mtime-based
+reminder -- rejected, the git blob hash survives checkout/pull mtime noise.
+Impact: .sdad/eval/ (run-eval.ps1, llm-smoke.ps1, lib/assert-claude-md.ps1,
+scenarios 08-09), _staging_v5/hooks/ (session-start .ps1+.sh with OD-2,
+pre-compact.ps1 ascii-clean), apply-v5.ps1 step 3 now marker-driven (5 hooks),
+.gitignore (last-run is machine state).
+Finding surfaced (scoped): the repo-wide ratchet run exposed 5 pre-existing
+L-01 violations (3 v4.2 .claude hooks + install.ps1 + project-init.ps1). The
+3 hooks are fixed by this increment's staged ASCII copies; install.ps1 and
+project-init.ps1 defer to I10 (their rework increment -- the 14 section signs
+sit inside the generated SPEC template and need templating care, not a blind
+replace). Interim degradation is visible, not silent: session-end skips
+autocommit with a gate.log warning; pre-commit only blocks when a dirty .ps1
+is actually staged.
+Test result: eval core 9/9 (includes I1+I2 regression); OD-2 reminder 6/6
+subcases (ps1 + sh engines, temp fixtures); -Release wiring verified
+fail-closed (claude CLI absent on this machine -- full LLM replay pending,
+runs at the I10 release gate after CLI install).
+================================================================

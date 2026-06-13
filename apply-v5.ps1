@@ -10,7 +10,9 @@
 #      (dispatcher form: sh run-hook.sh pre-tool-use-spec-gate -- cross-platform)
 #   2. Installs .claude/hooks/pre-tool-use-spec-gate.ps1 (Windows, tested)
 #      and .claude/hooks/pre-tool-use-spec-gate.sh (macOS/Linux, pending mac test)
-#   3. Updates session-end hooks (.ps1 + .sh) with the L-01 ratchet call (v5 I2)
+#   3. Updates session hooks (marker-driven, v5 I2 + I3):
+#      session-end .ps1/.sh (L-01 ratchet call), session-start .ps1/.sh
+#      (OD-2 $eval reminder + ascii-clean), pre-compact.ps1 (ascii-clean)
 #   4. Installs .git/hooks/pre-commit (ratchet hard stop -- .git/hooks is unversioned)
 #   5. Removes _staging_v5/ when all steps succeed, then self-deletes
 # Note: checks/ itself ships versioned at the repo root -- no staging needed.
@@ -86,27 +88,34 @@ foreach ($script in $gateScripts) {
     }
 }
 
-# ---- 3: Update session-end hooks with the L-01 ratchet call (v5 I2) -------
+# ---- 3: Update session hooks (marker-driven: skip when marker present) ----
 
-foreach ($script in @("session-end.ps1", "session-end.sh")) {
-    $src = "_staging_v5\hooks\$script"
-    $dst = ".claude\hooks\$script"
+$hookUpdates = @(
+    @{ file = "session-end.ps1";   marker = "v5 I2 ratchet wired" },
+    @{ file = "session-end.sh";    marker = "v5 I2 ratchet wired" },
+    @{ file = "session-start.ps1"; marker = "v5 I3 eval reminder" },
+    @{ file = "session-start.sh";  marker = "v5 I3 eval reminder" },
+    @{ file = "pre-compact.ps1";   marker = "v5 I3 ascii-clean" }
+)
+foreach ($u in $hookUpdates) {
+    $src = "_staging_v5\hooks\$($u.file)"
+    $dst = ".claude\hooks\$($u.file)"
 
     if (-not (Test-Path $src)) {
         Write-Host "  ERROR  $src not found (staging missing)" -ForegroundColor Red
         $ok = $false
         continue
     }
-    $dstHasRatchet = $false
+    $dstCurrent = $false
     if (Test-Path $dst) {
         $existing = Get-Content $dst -Raw -Encoding UTF8
-        if ($existing -match 'v5 I2 ratchet wired') { $dstHasRatchet = $true }
+        if ($existing -match [regex]::Escape($u.marker)) { $dstCurrent = $true }
     }
-    if ($dstHasRatchet) {
-        Write-Host "  SKIP   $dst already has the v5 I2 ratchet" -ForegroundColor Cyan
+    if ($dstCurrent) {
+        Write-Host "  SKIP   $dst already at marker '$($u.marker)'" -ForegroundColor Cyan
     } else {
         Copy-Item $src $dst -Force
-        Write-Host "  OK     $dst updated (L-01 ratchet wired)" -ForegroundColor Green
+        Write-Host "  OK     $dst updated ($($u.marker))" -ForegroundColor Green
     }
 }
 

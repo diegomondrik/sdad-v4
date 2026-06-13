@@ -200,9 +200,14 @@ empty/missing `agent_output.tmp` → surface the error, never proceed silently.
 
 ## §12 Open Decisions
 
-- OD-1: exact wording + regex set of the 2–3 LLM smoke scenarios (resolve in I3).
-- OD-2: whether SessionStart prints an `$eval` reminder when CLAUDE.md changed
-  since last run (resolve in I3 — default: yes, one line, non-blocking).
+- OD-1: ~~exact wording + regex set of the 2–3 LLM smoke scenarios~~ —
+  **RESOLVED (I3):** three scenarios as a data table in `.sdad/eval/llm-smoke.ps1`:
+  `spec-language` (`$spec` → `(language|idioma)` + `(English|Spanish|ingl|espa)`),
+  `build-gate` (`$build` w/o SPEC.md → `\$spec` + `\$docfinal`),
+  `sdad-surface` (`$sdad` → `spec`,`build`,`qa`). All case-insensitive, lax by design.
+- OD-2: ~~whether SessionStart prints an `$eval` reminder~~ — **RESOLVED (I3): yes.**
+  One fail-open line when `git hash-object CLAUDE.md` differs from the
+  `.sdad/eval/last-run` stamp (written by the runner on all-pass). Non-blocking.
 - OD-3: timeout default for `$agent` liveness — 10 min proposed (confirm in I4).
 
 ## §13 AI Authorship Log
@@ -214,6 +219,7 @@ empty/missing `agent_output.tmp` → surface the error, never proceed silently.
 | prep-3 | apply-v5.ps1 switched to dispatcher registration + dual gate variant | claude-opus-4-8 | high | apply-v5.ps1 (a65dd34) | ASCII check pass | — | 2026-06-12 |
 | I1 | PreToolUse spec-gate hook (ps1+sh) + 5 eval scenarios | claude-fable-5 | high | _staging_v5/hooks/ (2), .sdad/eval/scenarios/01-05 (5) | 5/5 pass (Windows) | 1 P2 (sh sed path edge, pending mac test) | 2026-06-12 |
 | I2 | Lesson ratchet: checks/ascii pair + session-end wiring + pre-commit | claude-fable-5 | high | checks/ (2), _staging_v5/ (3), apply-v5.ps1, scenarios 06-07 | 7/7 pass (incl. I1 regression) | 1 P2 (sh word-splitting on spaced paths) | 2026-06-12 |
+| I3 | $eval runner + golden dataset; OD-1/OD-2 resolved; 3 v4.2 hooks ascii-cleaned via staging | claude-fable-5 | high | .sdad/eval/ (5: runner, llm-smoke, lib, scenarios 08-09), _staging_v5/hooks/ (3), apply-v5.ps1, .gitignore | 9/9 core + 6/6 OD-2 + release guard fail-closed | 1 P3 (LLM replay end-to-end pending: claude CLI not installed); installers L-01 debt deferred to I10 | 2026-06-12 |
 
 ---
 
