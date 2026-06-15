@@ -640,3 +640,24 @@ Test result: Windows + Git Bash - 9/9 hardening subcases (incl. spaced paths +
 Cost note: if the repo is private, the macOS leg burns Actions minutes (~10x);
   prefer public, or limit the macOS leg to release/schedule.
 ================================================================
+
+### CI-failure reporting convention (decided 2026-06-15; ratify in CLAUDE.md/harness at INC-4)
+- The GitHub Actions run is the primary, append-only audit trail (Tier 2 §9): no
+  manual copying of pass/fail. The email is only a notification.
+- A CI failure that reflects a real defect is registered as a QA finding H-XX in
+  DECISIONS.md (same register as $qa) and noted in the §13 "QA findings" column.
+- The fix lands in the increment that owns the failing surface; that increment's
+  DECISIONS entry records the resolution + the green run.
+
+### Open QA findings (v5.1)
+- H-01 (C-P1) self-modifying-gate bypass -- RESOLVED in INC-2a (gate runs from base ref).
+- H-02 (eval not hermetic) -- OPEN, owner INC-2b. First real CI run (PR, two runs)
+  shows: spec-gate + ascii-ps1 + claude-md-case GREEN on real runners; "SDAD eval
+  (deterministic core)" FAILED on windows-latest (~1.5 min, 2 annotations). The eval
+  passes 14/14 locally, so it assumes machine state a clean runner lacks (likely the
+  `claude` CLI for scenario 10-agent-timeout, and/or installer-provided state). Fix in
+  INC-2b: make the eval hermetic (skip/stub scenarios needing un-installed tooling, or
+  set their prerequisites up within the scenario) BEFORE the pwsh/POSIX port + matrix.
+  Need the failing job's red lines to pinpoint which scenarios (gh CLI not installed
+  locally; awaiting log detail from the developer).
+================================================================
