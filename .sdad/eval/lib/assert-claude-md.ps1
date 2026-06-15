@@ -54,8 +54,8 @@ if (-not $SkipBudget) {
     $baseline = $null
     try {
         Push-Location (Split-Path $Path -Parent)
-        # Resolve the tag's tracked name case-insensitively: git is case-sensitive
-        # but the file ships as 'Claude.md' on some refs and 'CLAUDE.md' on others.
+        # Resolve the tag's tracked name case-insensitively: git is case-sensitive,
+        # and the methodology file's leaf name has varied in case across older refs.
         $leaf = Split-Path $Path -Leaf
         $tracked = @(git ls-tree -r --name-only v4.3 2>$null) |
             Where-Object { (Split-Path $_ -Leaf) -ieq $leaf } | Select-Object -First 1

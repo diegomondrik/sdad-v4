@@ -52,3 +52,19 @@ Transferable lessons captured across SDAD projects. Surfaced automatically in Ph
   test harnesses for hooks must run on real Windows.
 - **Origin:** SDAD v5 I1 — eval scenario 01 crashed while the gate hook under test behaved
   correctly (deny + stderr message). Caught by the Windows test gate, fixed in the scenario.
+
+### L-04 — Reference CLAUDE.md by its exact case on case-sensitive surfaces
+- **Category:** Environment
+- **Tags:** `#stack:git` `#stack:github` `#stack:powershell` `#phase:build`
+- **Signal:** A path, URL, or git ref to the methodology file written as `Claude.md` (mixed
+  case) instead of `CLAUDE.md` (all caps). On a case-*insensitive* dev machine (Windows/macOS
+  default) it works, so the bug is invisible locally — then fails silently on a case-*sensitive*
+  surface: GitHub raw 404s the download, `git show <tag>:Claude.md` / `git ls-tree` find nothing,
+  a Linux CI checkout misses the file. The failure is a no-op, not an error, so it hides.
+- **Principle:** On case-sensitive surfaces (GitHub raw, git object refs, Linux FS) reference the
+  file by its exact tracked name, `CLAUDE.md`. This recurred twice in v5 — the I9 budget assert
+  (`git show v4.3:Claude.md` silently no-opped, so the +60-line gate never ran) and the I10
+  installer URL (`$REPO/Claude.md` would 404 on a fresh install). Like L-01, a recurrence is the
+  signal to move the rule from prose to code: `checks/claude-md-case.{ps1,sh}` flags the wrong
+  case in code/config (prose may name it), wired as eval scenario 13.
+- **Origin:** SDAD v5 I9 (budget assert) + I10 (installer fetch). Mechanically ratcheted in I10.
