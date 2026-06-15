@@ -1,11 +1,13 @@
 #!/bin/sh
-# SDAD v4.3 -- SessionStart hook (macOS/Linux, POSIX sh)
+# SDAD v5 -- SessionStart hook (macOS/Linux, POSIX sh)  [v5 I3 eval reminder]
 # 1:1 port of session-start.ps1.
 # Purpose:
 #   1) Inject the COMPACT ANCHOR ([LOCK] decisions from DECISIONS.md) into context.
 #      Because SessionStart fires AFTER compaction (source=compact), this is what makes
 #      the anchor SURVIVE compaction -- PreCompact's own injection does not persist.
 #   2) Guarded fast-forward git pull.
+#   3) v5 I3 (OD-2): one-line $eval reminder when CLAUDE.md changed since the
+#      last green eval run (stamp written by .sdad/eval/run-eval.ps1 on all-pass).
 # Safety: must NEVER block session start. Always exits 0. All git ops are guarded.
 
 raw=$(cat 2>/dev/null) || raw=''
@@ -44,6 +46,22 @@ else
   append_note 'git pull skipped (error)'
 fi
 
+# --- $eval reminder (v5 I3, OD-2): fires when CLAUDE.md hash differs from the
+#     last green-run stamp (or no stamp exists). Fail-open: any error -> no note.
+eval_note=''
+if [ -f "$root/.sdad/eval/run-eval.ps1" ] && [ -f "$root/CLAUDE.md" ]; then
+  cur=$(cd "$root" 2>/dev/null && git hash-object CLAUDE.md 2>/dev/null)
+  if [ -n "$cur" ]; then
+    last=''
+    if [ -f "$root/.sdad/eval/last-run" ]; then
+      last=$(head -n 1 "$root/.sdad/eval/last-run" 2>/dev/null | tr -d '[:space:]')
+    fi
+    if [ "$cur" != "$last" ]; then
+      eval_note='CLAUDE.md changed since the last green $eval -- run: powershell -ExecutionPolicy Bypass -File .sdad/eval/run-eval.ps1'
+    fi
+  fi
+fi
+
 # --- Build the anchor: prefer PreCompact snapshot on compact, else DECISIONS.md [LOCK] ---
 anchor=''
 snap="$root/.sdad/compact_anchor.md"
@@ -66,6 +84,9 @@ ctx="SDAD session restored (source=$src). $notes."
 if [ -n "$anchor" ]; then
   ctx=$(printf '%s\n\n%s\n%s' "$ctx" \
     'COMPACT ANCHOR - [LOCK] decisions that must not be reopened:' "$anchor")
+fi
+if [ -n "$eval_note" ]; then
+  ctx=$(printf '%s\n\n%s' "$ctx" "$eval_note")
 fi
 
 # --- Emit hook JSON (jq when available, manual escaping as fallback) ---

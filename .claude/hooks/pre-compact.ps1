@@ -1,9 +1,10 @@
-# SDAD v4.2 — PreCompact hook (Windows / PowerShell)
+# SDAD v5 -- PreCompact hook (Windows / PowerShell)  [v5 I3 ascii-clean]
 # Purpose: snapshot the COMPACT ANCHOR to .sdad/compact_anchor.md at compaction time,
 #   so the SessionStart(compact) hook can re-inject it AFTER compaction. PreCompact's own
 #   additionalContext does NOT survive compaction (verified against Claude Code docs), so
 #   the durable hand-off is this file, not an inline injection.
 # Safety: must NOT block compaction. Always exits 0 (never 2).
+# v5 I3: header normalized to pure ASCII (L-01) -- logic unchanged from v4.2.
 
 $ErrorActionPreference = 'SilentlyContinue'
 try { $null = [Console]::In.ReadToEnd() } catch {}

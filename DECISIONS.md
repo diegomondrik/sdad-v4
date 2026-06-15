@@ -1,6 +1,7 @@
-# DECISIONS — SDAD v4.2 Development
+# DECISIONS — SDAD v4.2 → v5.0 Development
 
-Decision log for the v4.2 roadmap execution (spec: `SDAD_v42_ROADMAP_FINAL.md`).
+Decision log for the v4.2 roadmap and the v5.0 "Harness Edition" build
+(specs: `SDAD_v42_ROADMAP_FINAL.md`, `SDAD_v5_BUILD_BRIEF.md`).
 Each `[LOCK]`-prefixed decision must not be reopened without explicit developer override.
 
 ## [LOCK] decisions (carried into every COMPACT ANCHOR)

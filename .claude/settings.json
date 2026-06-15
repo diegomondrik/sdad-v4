@@ -1,36 +1,47 @@
-{
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "startup|resume|clear|compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/run-hook.sh\" session-start"
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "matcher": "manual|auto",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/run-hook.sh\" pre-compact"
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/run-hook.sh\" session-end"
-          }
-        ]
-      }
-    ]
-  }
+﻿{
+    "hooks":  {
+                  "PreToolUse":  [
+                                     {
+                                         "hooks":  [
+                                                       {
+                                                           "command":  "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/run-hook.sh\" pre-tool-use-spec-gate",
+                                                           "type":  "command"
+                                                       }
+                                                   ],
+                                         "matcher":  "Write|Edit"
+                                     }
+                                 ],
+                  "SessionStart":  [
+                                       {
+                                           "matcher":  "startup|resume|clear|compact",
+                                           "hooks":  [
+                                                         {
+                                                             "type":  "command",
+                                                             "command":  "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/run-hook.sh\" session-start"
+                                                         }
+                                                     ]
+                                       }
+                                   ],
+                  "SessionEnd":  [
+                                     {
+                                         "hooks":  [
+                                                       {
+                                                           "type":  "command",
+                                                           "command":  "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/run-hook.sh\" session-end"
+                                                       }
+                                                   ]
+                                     }
+                                 ],
+                  "PreCompact":  [
+                                     {
+                                         "matcher":  "manual|auto",
+                                         "hooks":  [
+                                                       {
+                                                           "type":  "command",
+                                                           "command":  "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/run-hook.sh\" pre-compact"
+                                                       }
+                                                   ]
+                                     }
+                                 ]
+              }
 }
