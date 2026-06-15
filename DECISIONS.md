@@ -651,13 +651,13 @@ Cost note: if the repo is private, the macOS leg burns Actions minutes (~10x);
 
 ### Open QA findings (v5.1)
 - H-01 (C-P1) self-modifying-gate bypass -- RESOLVED in INC-2a (gate runs from base ref).
-- H-02 (eval not hermetic) -- OPEN, owner INC-2b. First real CI run (PR, two runs)
-  shows: spec-gate + ascii-ps1 + claude-md-case GREEN on real runners; "SDAD eval
-  (deterministic core)" FAILED on windows-latest (~1.5 min, 2 annotations). The eval
-  passes 14/14 locally, so it assumes machine state a clean runner lacks (likely the
-  `claude` CLI for scenario 10-agent-timeout, and/or installer-provided state). Fix in
-  INC-2b: make the eval hermetic (skip/stub scenarios needing un-installed tooling, or
-  set their prerequisites up within the scenario) BEFORE the pwsh/POSIX port + matrix.
-  Need the failing job's red lines to pinpoint which scenarios (gh CLI not installed
-  locally; awaiting log detail from the developer).
+- H-02 (eval not hermetic) -- FIX LANDED, awaiting CI confirmation. Root cause (from
+  the failing log): scenario 07-precommit-blocks copied an INSTALLED .git/hooks/pre-commit,
+  which a clean runner lacks (Copy-Item PathNotFound). NOT scenario 10 (earlier guess was
+  wrong). Fix: 07 now CONSTRUCTS the pre-commit hook itself (mirror of install.ps1's body)
+  and is cross-platform (OS temp dir, forward-slash paths, exec bit on POSIX). Local: eval
+  14/14, scenario 07 PASS. Expected to green the windows-latest eval leg on the next run.
+  Remaining INC-2b (separate from H-02): pwsh host port for the other scenarios + run-eval
+  + the .ps1 hook policy call, fix $env:TEMP / backslash paths, add the 3-OS matrix -- those
+  surface when the macOS/Linux legs are added.
 ================================================================
