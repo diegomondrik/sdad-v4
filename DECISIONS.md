@@ -651,8 +651,10 @@ Cost note: if the repo is private, the macOS leg burns Actions minutes (~10x);
 
 ### Open QA findings (v5.1)
 - H-01 (C-P1) self-modifying-gate bypass -- RESOLVED in INC-2a (gate runs from base ref).
-- H-02 (eval not hermetic) -- FIX LANDED, awaiting CI confirmation. Root cause (from
-  the failing log): scenario 07-precommit-blocks copied an INSTALLED .git/hooks/pre-commit,
+- H-02 (eval not hermetic) -- RESOLVED, confirmed green on GitHub CI (all 4 jobs pass on
+  the re-run). Lesson L-06 captured (hermetic self-tests; the clean-runner CI is its own
+  ratchet). Root cause (from the failing log): scenario 07-precommit-blocks copied an
+  INSTALLED .git/hooks/pre-commit,
   which a clean runner lacks (Copy-Item PathNotFound). NOT scenario 10 (earlier guess was
   wrong). Fix: 07 now CONSTRUCTS the pre-commit hook itself (mirror of install.ps1's body)
   and is cross-platform (OS temp dir, forward-slash paths, exec bit on POSIX). Local: eval

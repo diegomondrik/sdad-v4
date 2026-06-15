@@ -84,3 +84,19 @@ Transferable lessons captured across SDAD projects. Surfaced automatically in Ph
   private repos it is advisory, so the run-from-base mitigation is the portable one.
 - **Origin:** SDAD v5.1 INC-1 ($qa finding H-01). Fix (run gate from base ref) + its check
   deferred to INC-2 — guardrail lands with the fix, per the lesson-to-ratchet protocol.
+
+### L-06 — Self-tests must be hermetic: never depend on installed or machine state
+- **Category:** Environment
+- **Tags:** `#stack:ci` `#stack:github` `#phase:build`
+- **Signal:** A test or eval passes on the author's machine but fails on a clean CI runner
+  because it reads artifacts that only an installed/used environment has — an installed git
+  hook, a globally-installed CLI, prior-run state — instead of building its own fixtures.
+  The failure looks like a CI flake but is really a hidden dependency on local state.
+- **Principle:** A regression suite must construct everything it needs inside the test
+  (build the hook from a known body, stub the CLI, create the scratch repo) and depend only
+  on what ships in the repo checkout. The clean-runner CI matrix is itself the ratchet: it
+  fails any non-hermetic scenario automatically, so no extra check is needed — the guardrail
+  is "run the suite on a freshly checked-out runner."
+- **Origin:** SDAD v5.1 INC-2b ($qa finding H-02). Scenario 07-precommit-blocks copied an
+  installed `.git/hooks/pre-commit` (absent on a clean runner); fixed to construct the hook
+  itself. Confirmed green on the GitHub Actions windows runner.
