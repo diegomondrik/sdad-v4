@@ -4,14 +4,17 @@
 # Usage: sh checks/ascii-ps1.sh [files...]   (default: all git-tracked .ps1)
 # Exit 0 = clean, 1 = violations (commit-time guard fails CLOSED, see SPEC R3).
 
-if [ $# -gt 0 ]; then
-  files="$@"
-else
-  files=$(git ls-files -- '*.ps1' 2>/dev/null)
+# Build the file list as positional params so paths with spaces survive (INC-2 P2).
+if [ $# -eq 0 ]; then
+  oldIFS=$IFS
+  IFS='
+'
+  set -- $(git ls-files -- '*.ps1' 2>/dev/null)
+  IFS=$oldIFS
 fi
 
 bad=0
-for f in $files; do
+for f in "$@"; do
   [ -f "$f" ] || continue
   n=$(LC_ALL=C tr -d '\000-\177' < "$f" | wc -c | tr -d ' ')
   if [ "$n" -gt 0 ]; then

@@ -19,8 +19,10 @@ proj=${2:-${CLAUDE_PROJECT_DIR:-$(pwd)}}
 
 [ -z "$target" ] && exit 0
 
-proj_norm=$(printf '%s' "$proj" | sed 's:/*$::')
-rel=$(printf '%s' "$target" | sed "s|^$proj_norm/||")
+# Path normalization via POSIX parameter expansion -- no sed (BSD/GNU parity, L-05
+# sibling) and safe for paths containing spaces (INC-2 P2 hardening).
+proj_norm=${proj%/}
+rel=${target#"$proj_norm/"}
 rel_low=$(printf '%s' "$rel" | tr 'A-Z' 'a-z')
 name=$(basename "$rel_low")
 

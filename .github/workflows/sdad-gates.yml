@@ -20,10 +20,25 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Apply spec-gate policy to changed files
+      # H-01 (L-05): run the gate logic from the TRUSTED base ref, not the PR's
+      # checkout, so a PR cannot edit the policy to pass itself. The changed-file
+      # list and the SPEC.md approval state still come from the PR. Falls back to
+      # the in-repo gate when the base predates the gate (the PR that adds it).
+      - name: Run the spec gate from the trusted base ref
         env:
           BASE_REF: ${{ github.base_ref }}
-        run: sh checks/spec-gate-ci.sh "$BASE_REF"
+        run: |
+          set -e
+          git fetch --no-tags --quiet origin "$BASE_REF"
+          tmp=$(mktemp -d)
+          if git show "origin/$BASE_REF:checks/spec-gate-ci.sh" > "$tmp/spec-gate-ci.sh" 2>/dev/null \
+             && git show "origin/$BASE_REF:checks/spec-gate-policy.sh" > "$tmp/spec-gate-policy.sh" 2>/dev/null; then
+            echo "Gate from trusted base ref origin/$BASE_REF"
+            SPEC_GATE_POLICY="$tmp/spec-gate-policy.sh" sh "$tmp/spec-gate-ci.sh" "$BASE_REF"
+          else
+            echo "Base ref lacks the gate scripts (bootstrap PR); using the in-repo gate."
+            sh checks/spec-gate-ci.sh "$BASE_REF"
+          fi
 
   ascii-ps1:
     name: ASCII ratchet (L-01)
