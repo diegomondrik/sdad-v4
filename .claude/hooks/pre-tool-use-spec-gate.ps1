@@ -1,11 +1,12 @@
-# SDAD v5 -- PreToolUse spec gate (Windows / PowerShell 5.1)
-# Denies Write/Edit on code files when SPEC.md is absent or not approved.
+# SDAD v5.1 -- PreToolUse spec gate (Windows / PowerShell 5.1).
+# Thin adapter: parse the PreToolUse stdin JSON, then delegate the allow/deny
+# decision to the shared policy module (checks/spec-gate-policy.ps1) so the local
+# gate and the CI gate share one source of truth (SPEC F4). The decision logic
+# itself lives in the policy module, not here.
 # Registered via run-hook.sh dispatcher: sh run-hook.sh pre-tool-use-spec-gate
 # Exit codes: 0 = allow, 2 = deny (stderr message is fed back to the model).
 # Fail-open: any internal error allows the action and logs to .sdad/gate.log
-# (a broken guard never freezes the developer). Parse-level failures also fail
-# open at the harness layer: exit codes other than 0/2 do not block the tool.
-# L-01: this file is pure ASCII.
+# (a broken guard never freezes the developer). L-01: pure ASCII.
 
 $ErrorActionPreference = "Stop"
 
@@ -18,49 +19,18 @@ try {
 
     $proj = $env:CLAUDE_PROJECT_DIR
     if (-not $proj) { $proj = (Get-Location).Path }
-    $proj = ($proj -replace '\\', '/').TrimEnd('/')
-    $t = $target -replace '\\', '/'
 
-    # Path relative to the project root, lowercase for comparison
-    $rel = $t
-    if ($rel.ToLower().StartsWith($proj.ToLower())) {
-        $rel = $rel.Substring($proj.Length).TrimStart('/')
-    }
-    $relLow = $rel.ToLower()
-    $name = [System.IO.Path]::GetFileName($relLow)
-    $ext  = [System.IO.Path]::GetExtension($relLow)
+    # Locate the shared policy relative to this hook (.claude/hooks -> repo/checks),
+    # not relative to the project dir (eval scenarios run the hook in a temp dir).
+    $policy = Join-Path $PSScriptRoot '..\..\checks\spec-gate-policy.ps1'
+    if (-not (Test-Path $policy)) { exit 0 }   # policy missing -> fail open
 
-    # SPEC R1 -- allowlist: methodology state and docs are never blocked
-    $allowNames = @('spec.md', 'spec_retroactive.md', 'decisions.md',
-                    'lesson_library.md', 'changelog.md', 'readme.md')
-    if ($allowNames -contains $name) { exit 0 }
-    if ($ext -eq '.md') { exit 0 }
-    foreach ($prefix in @('docs/', '.sdad/', '.claude/', 'hub/')) {
-        if ($relLow.StartsWith($prefix)) { exit 0 }
-    }
-
-    # $docfinal legitimately runs without a Spec (sentinel file)
-    if (Test-Path (Join-Path $proj '.sdad/DOCFINAL_ACTIVE')) { exit 0 }
-
-    # SPEC R2 -- code-file denylist; unknown extensions default to allow
-    $codeExt = @('.py', '.js', '.ts', '.jsx', '.tsx', '.ps1', '.psm1', '.sh',
-                 '.bat', '.cmd', '.sql', '.html', '.css', '.json', '.yaml',
-                 '.yml', '.toml', '.ini', '.cs', '.java', '.go', '.rs',
-                 '.rb', '.php')
-    if ($codeExt -notcontains $ext) { exit 0 }
-
-    # The gate itself
-    $specPath = Join-Path $proj 'SPEC.md'
-    if (-not (Test-Path $specPath)) {
-        [Console]::Error.WriteLine("SDAD gate: no SPEC.md in this project -- code writes are blocked until a Spec is approved. Run `$spec (or `$docfinal for retroactive documentation).")
-        exit 2
-    }
-    $spec = Get-Content $specPath -Raw -Encoding UTF8
-    if ($spec -notmatch 'SPEC STATUS: APPROVED') {
-        [Console]::Error.WriteLine("SDAD gate: SPEC.md is not approved (missing 'SPEC STATUS: APPROVED' marker). Get developer approval before writing code.")
-        exit 2
-    }
-    exit 0
+    $ErrorActionPreference = "Continue"
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $policy -Path $target -ProjectDir $proj
+    $code = $LASTEXITCODE
+    $ErrorActionPreference = "Stop"
+    if ($null -eq $code) { exit 0 }
+    exit $code
 }
 catch {
     # Fail-open path: allow the action, leave a trace

@@ -574,3 +574,28 @@ structurally). Both documented.
 Test result: eval core 12/12; ascii ratchet 5->3 (expected); install.ps1 +
 project-init.ps1 ASCII-clean and parse with 0 errors.
 ================================================================
+
+---
+
+# DECISIONS - SDAD v5.1 "CI Foundation" (spec: SDAD_v6_BUILD_BRIEF.md I1-I3, SPEC.md)
+
+## [LOCK] decisions (v5.1)
+- [LOCK] D1 - CI platform is GitHub Actions (remote on GitHub; pwsh on all 3 runners reuses checks/ + run-eval.ps1 without reimplementation).
+- [LOCK] D2 - The CI foundation ships as its own release (v5.1) BEFORE v6, self-hosted on this repo as the reference implementation.
+- D3 (provisional, revisit in v6) - distribution stays the versioned installer (raw-download pinned to a tag), same shape as v5; reevaluate submodule/package at portfolio scale.
+
+## Increment 1 - Shared spec-gate policy module + CI gate workflow (I1)
+
+================================================================
+HUB BLOCK - DECISIONS_SDAD-v4.md
+================================================================
+Date: 2026-06-15
+Increment: 1 - shared spec-gate policy module + CI gate workflow (v5.1 I1)
+Model: claude-opus-4-8 (FRONTIER) - effort high
+Decision: Factor the spec-gate decision into one shared module (checks/spec-gate-policy.{sh,ps1}) consumed by BOTH the local PreToolUse hook (per tool call) and a new CI runner (checks/spec-gate-ci.sh, per changed file in a PR), plus a GitHub Actions workflow (.github/workflows/sdad-gates.yml) that re-runs the gate + ascii-ps1 + claude-md-case on ubuntu and the $eval core on windows for every pull request.
+Rationale: A gate that lives only on each developer's machine is per-machine, not per-repo; moving it to the pipeline where all commits converge makes it a team guarantee. One shared policy module means local and server enforcement cannot drift (SPEC F4).
+Alternatives considered: (a) reimplement gate logic in the workflow YAML - rejected (drift between local and CI); (b) keep the local hook's inline logic and add a conformance test - rejected (catches drift but does not prevent it structurally); (c) run $eval core on ubuntu in INC-1 - deferred: run-eval.ps1 + the 14 scenarios hardcode the Windows `powershell` host, so eval runs on windows-latest now and INC-2 ports it to pwsh + the 3-OS matrix (tested on real POSIX, not faked).
+Impact: NEW checks/spec-gate-policy.sh, checks/spec-gate-policy.ps1, checks/spec-gate-ci.sh, .github/workflows/sdad-gates.yml, .sdad/eval/scenarios/14-ci-spec-gate-policy/. REFACTOR .claude/hooks/pre-tool-use-spec-gate.{ps1,sh} to delegate to the policy module (behavior-preserving). No CLAUDE.md change yet (version bump + behavior rules are INC-4). .claude written directly here (methodology repo is not Cowork write-protected); distribution to consumer repos via apply-v5.1 in INC-3/INC-4.
+Test result: eval core 14/14 PASS (gate scenarios 01-05 unchanged after refactor); ascii-ps1 + claude-md-case clean on new files; spec-gate-ci.sh in a scratch repo denies code-without-approved-spec (exit 1) and allows it once SPEC.md is approved (exit 0).
+Open QA finding: H-01 (C-P1) self-modifying-gate bypass - a PR can edit the gate scripts it runs under. Mitigation pending developer decision (CODEOWNERS/required-review on checks/ + .github/, and/or run the gate from the base ref). Proposed for INC-2.
+================================================================

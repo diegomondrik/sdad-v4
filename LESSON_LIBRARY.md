@@ -68,3 +68,19 @@ Transferable lessons captured across SDAD projects. Surfaced automatically in Ph
   signal to move the rule from prose to code: `checks/claude-md-case.{ps1,sh}` flags the wrong
   case in code/config (prose may name it), wired as eval scenario 13.
 - **Origin:** SDAD v5 I9 (budget assert) + I10 (installer fetch). Mechanically ratcheted in I10.
+
+### L-05 — A CI gate that runs repo-resident scripts from the PR checkout can be neutered by the same PR
+- **Category:** Architecture
+- **Tags:** `#stack:github` `#stack:ci` `#phase:build`
+- **Signal:** A pipeline runs a control script (lint, gate, ratchet, policy) that lives in the
+  repo and, on a `pull_request` event, executes *from the PR's own checkout*. The control looks
+  authoritative but a single malicious or careless PR can edit the control script to always pass
+  AND introduce the very change the control exists to block — the neutered gate approves itself.
+- **Principle:** A server-side control is only trustworthy if it runs from a *trusted ref* (check
+  out the base branch's version of the control and run that against the PR's diff) or is protected
+  from same-PR edits (CODEOWNERS + required review on the control's files). Branch protection
+  alone is not enough; the code that enforces it must itself be out of the PR's reach. Note:
+  CODEOWNERS/required-review only enforces under a GitHub Organization on a paid plan — on free
+  private repos it is advisory, so the run-from-base mitigation is the portable one.
+- **Origin:** SDAD v5.1 INC-1 ($qa finding H-01). Fix (run gate from base ref) + its check
+  deferred to INC-2 — guardrail lands with the fix, per the lesson-to-ratchet protocol.
