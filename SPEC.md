@@ -285,6 +285,7 @@ The typed §13 log is the per-increment authorship record.
 |---|---|---|---|---|---|---|---|
 | SPEC v5.1 | CI Foundation spec (I1+I2+I3-versioning) | claude-opus-4-8[1m] | high | SPEC.md | n/a | n/a | 2026-06-15 |
 | INC-1 | Shared spec-gate policy module + CI gate workflow (I1) | claude-opus-4-8[1m] | high | checks/spec-gate-policy.{sh,ps1}, checks/spec-gate-ci.sh, .github/workflows/sdad-gates.yml, .sdad/eval/scenarios/14-ci-spec-gate-policy, .claude/hooks/pre-tool-use-spec-gate.{ps1,sh} | eval 14/14; ascii+case clean; CI runner deny/allow verified | 1 open: H-01 C-P1 (self-modifying-gate) | 2026-06-15 |
+| INC-2a | POSIX edge-case hardening + H-01 gate-from-base (I2 partial) | claude-opus-4-8[1m] | high | checks/spec-gate-policy.sh, checks/ascii-ps1.sh, checks/spec-gate-ci.sh, .github/workflows/sdad-gates.yml | Win+GitBash 9/9 (spaced paths + base-policy override); eval 14/14 | H-01 resolved; INC-2b (matrix) pending | 2026-06-15 |
 
 ---
 

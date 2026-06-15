@@ -599,3 +599,44 @@ Impact: NEW checks/spec-gate-policy.sh, checks/spec-gate-policy.ps1, checks/spec
 Test result: eval core 14/14 PASS (gate scenarios 01-05 unchanged after refactor); ascii-ps1 + claude-md-case clean on new files; spec-gate-ci.sh in a scratch repo denies code-without-approved-spec (exit 1) and allows it once SPEC.md is approved (exit 0).
 Open QA finding: H-01 (C-P1) self-modifying-gate bypass - a PR can edit the gate scripts it runs under. Mitigation pending developer decision (CODEOWNERS/required-review on checks/ + .github/, and/or run the gate from the base ref). Proposed for INC-2.
 ================================================================
+
+## Increment 2 - Cross-OS parity + CI matrix + H-01 fix (I2) [IN PROGRESS]
+
+### INC-2a (done, committed 2b0eb87) - POSIX hardening + H-01 end-to-end
+================================================================
+HUB BLOCK - DECISIONS_SDAD-v4.md
+================================================================
+Date: 2026-06-15
+Increment: 2a - POSIX hardening + H-01 gate-from-base (v5.1 I2, partial)
+Model: claude-opus-4-8 (FRONTIER) - effort high
+Decision: (1) Resolve the two known P2 POSIX edge cases - spec-gate-policy.sh
+  uses POSIX parameter expansion instead of sed (BSD/GNU parity, spaces-safe);
+  ascii-ps1.sh builds its file list as positional params with newline IFS.
+  (2) Fix H-01 (L-05): the CI gate runs its decision logic from the TRUSTED base
+  ref, not the PR checkout. spec-gate-ci.sh honors a SPEC_GATE_POLICY override;
+  the workflow extracts the base-ref spec-gate-ci.sh + policy and runs them, with
+  a bootstrap fallback for the PR that first introduces the gate.
+Rationale: a control that runs from the PR's own checkout can be neutered by the
+  same PR (L-05); running it from base closes that. CODEOWNERS (the other option)
+  only enforces under a paid GitHub Org, which the team does not have yet (OD-6).
+Impact: checks/spec-gate-policy.sh, checks/ascii-ps1.sh, checks/spec-gate-ci.sh,
+  .github/workflows/sdad-gates.yml.
+Test result: Windows + Git Bash - 9/9 hardening subcases (incl. spaced paths +
+  base-policy override); eval core 14/14. True cross-OS proof is INC-2b (matrix).
+================================================================
+
+### INC-2b (REMAINING - resume here next session)
+- Port the eval to pwsh: run-eval.ps1 (lines 38, 58) and the scenarios that spawn
+  `powershell` (01,02,03,04,05,06,08,09,10,12,13,14) + pre-tool-use-spec-gate.ps1
+  (the policy call) -> host-detected exe ($PSVersionTable.PSEdition Core -> pwsh).
+  Also fix Windows-only constructs in scenarios for POSIX: `$env:TEMP` ->
+  [IO.Path]::GetTempPath(); literal `.claude\hooks\...` backslash paths -> forward
+  slashes. These only verify on the real matrix.
+- Add the 3-OS eval matrix (ubuntu/windows/macos) to sdad-gates.yml.
+- Open a PR to run the matrix; iterate to green; record platform deltas here.
+- Live /compact PreCompact verification on a POSIX OS: INTERACTIVE manual test,
+  not CI-automatable; needs a human on macOS/Linux (see TASK_HOOKS_MACOS_PORT.md).
+- On INC-2 close: write the full DECISIONS entry + §13 row + re-run $eval.
+Cost note: if the repo is private, the macOS leg burns Actions minutes (~10x);
+  prefer public, or limit the macOS leg to release/schedule.
+================================================================
