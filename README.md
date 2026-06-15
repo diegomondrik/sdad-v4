@@ -1,12 +1,46 @@
-# G7 SDAD v4.3
+# G7 SDAD v5.0 — "Harness Edition"
 ## Spec-Driven AI Development for Claude Code
 
 SDAD is G7's development methodology for teams using Claude Code as their
 primary AI development tool. It brings spec-first discipline, vertical
 increments, integrated QA, compliance tiers, and a shared Lesson Library
-to AI-assisted development.
+to AI-assisted development. As of v5, the rules that matter most are enforced
+in code — not merely requested in a prompt.
 
 ---
+
+## What's new in v5.0
+
+v5 is an identity change: from *prompt methodology* to *prompt + enforced
+harness*. A v4.3 audit against harness-engineering theory (H = E, T, C, S, L, V)
+found SDAD governing critical gates by instruction in the prompt rather than
+enforcement in code. v5 moves them into code. **v4.x projects stay fully
+compatible** — run `git tag v4.3` before pulling, then `apply-v5.ps1`.
+
+- **Spec gate enforced in code (I1)** — a `PreToolUse` hook
+  (`pre-tool-use-spec-gate`) refuses a code-file write/edit when `SPEC.md` is
+  absent or unapproved. Allowlists docs, `.sdad/`, `.claude/`, and the
+  `$docfinal` path; fails open (allow + log) on its own error. "Code without an
+  approved Spec" becomes structurally impossible, not just discouraged.
+- **Lesson-to-guardrail ratchet (I2)** — a captured lesson with a mechanically
+  verifiable pattern now generates a check in `checks/`, not only a prose rule.
+  First check: `ascii-ps1` (L-01), wired into `session-end` and a git
+  `pre-commit` hook.
+- **`$eval` — methodology self-evaluation (I3)** — the V component SDAD lacked.
+  A `.sdad/eval/` golden dataset (12 deterministic scenarios + an LLM smoke)
+  replays the methodology and flags regressions before release. Runs on any
+  CLAUDE.md/skill change and as the release gate; SessionStart reminds when
+  CLAUDE.md drifts from the last green run.
+- **`$agent` liveness (I4)** — delegation goes through `.sdad/lib/agent-run`
+  with a 600s timeout and an empty-output guard; it fails loud, never silent.
+- **Typed §13 + error-recovery + atomic commits (I5, I6, I8)** — §13 rows use an
+  8-column schema; a tool/test error sets `.sdad/HOLD_AUTOCOMMIT` and stops the
+  increment cleanly; DECISIONS.md + §13 + SPEC.md commit atomically.
+- **Harness skill** — a new on-demand `harness` skill carries the Control Layer
+  detail (the H mapping, the Governance Axiom, `$eval`) so CLAUDE.md stays lean.
+- **bash hooks (merged)** — the three session hooks now have POSIX `.sh` ports
+  behind a `run-hook.sh` dispatcher; the new spec-gate ships a `.sh` variant too
+  (macOS testing tracked in `docs/TASK_HOOKS_MACOS_PORT.md`).
 
 ## What's new in v4.3
 
@@ -172,6 +206,7 @@ automatically inside every Claude Code session. After that, just run `claude`.
 | `$lesson` | Any | View and manage the Lesson Library |
 | `$pause` | Any | Session state — Spec, tier, budget, findings |
 | `$pause compress` | Any | Generate snapshot for next session |
+| `$eval` | Any | Methodology self-evaluation — replays the golden dataset (v5) |
 
 ---
 
@@ -228,21 +263,31 @@ features work standalone.
 
 ```
 sdad-v4/
-├── Claude.md                          # Core Claude Code config
+├── CLAUDE.md                          # Core Claude Code config (v5.0)
 ├── SPEC_blank.md                      # Blank spec template
 ├── install.sh                         # Mac/Linux methodology installer
 ├── install.ps1                        # Windows methodology installer
 ├── project-init.sh                    # Mac/Linux project initializer
 ├── project-init.ps1                   # Windows project initializer
-├── apply-v4.3.ps1                     # One-shot v4.3 migration (self-deletes)
-├── apply-v4.3-pyplan-html.ps1         # One-shot Pyplan HTML Interfaces patch (self-deletes)
+├── apply-v5.ps1                       # One-shot v5 migration (self-deletes)
 ├── README.md                          # This file
 ├── CHANGELOG.md                       # Version history
+├── checks/                            # Lesson-to-guardrail ratchet (v5)
+│   ├── ascii-ps1.ps1                  # L-01 check: tracked .ps1 must be pure ASCII
+│   └── ascii-ps1.sh
+├── .sdad/
+│   ├── eval/                          # $eval golden dataset + runner (v5)
+│   │   ├── run-eval.ps1
+│   │   ├── llm-smoke.ps1              # release-gate only
+│   │   └── scenarios/                 # 12 deterministic scenarios
+│   └── lib/
+│       └── agent-run.ps1 / .sh        # $agent liveness wrapper (600s timeout)
 ├── .claude/
-│   ├── settings.json                  # Hook registration
+│   ├── settings.json                  # Hook registration (incl. PreToolUse gate)
 │   ├── skills/
 │   │   ├── ai-architect/SKILL.md
 │   │   ├── ai-engineer/SKILL.md
+│   │   ├── harness/SKILL.md           # Control Layer detail (v5)
 │   │   ├── security-reviewer/SKILL.md
 │   │   ├── compliance/SKILL.md
 │   │   ├── qa-engineer/SKILL.md
@@ -263,17 +308,25 @@ sdad-v4/
 │   │   ├── security-auditor.md
 │   │   └── HANDOFF_TEMPLATE.md
 │   └── hooks/
-│       ├── README.md                  # Hooks active since v4.2 (Windows/PowerShell)
-│       ├── session-start.ps1
-│       ├── pre-compact.ps1
-│       └── session-end.ps1
+│       ├── README.md                  # Hooks active since v4.2
+│       ├── run-hook.sh                # Cross-platform dispatcher
+│       ├── session-start.ps1 / .sh
+│       ├── pre-compact.ps1 / .sh
+│       ├── session-end.ps1 / .sh
+│       └── pre-tool-use-spec-gate.ps1 / .sh   # Spec gate (v5)
 └── docs/
-    ├── DEVELOPER_MANUAL_v4.3.html     # Didactic manual — SDAD + Pyplan + usage
+    ├── SDAD_v5_WHAT_IS_SDAD.md / .html   # What SDAD is and why (v5)
+    ├── SDAD_v5_INSTALL.md / .html         # v5 install guide
+    ├── SDAD_v5_USER_GUIDE.md / .html      # v5 everyday-use guide
+    ├── DEVELOPER_MANUAL_v4.3.html
     ├── INSTALL_GUIDE_v4.html
     ├── USAGE_AND_SHORTCUTS_v4.html
     ├── DEVELOPER_GUIDE_v4.html
     └── ONBOARDING_PYPLAN_v4.html
 ```
+
+> Note: the git pre-commit ratchet is installed into `.git/hooks/pre-commit`
+> by `apply-v5.ps1` / the installers — it is not tracked by git itself.
 
 ---
 
@@ -283,11 +336,11 @@ After installing, start `claude` and verify:
 
 | Command | Expected |
 |---------|----------|
-| `$sdad` | All phases + active skills listed |
-| `$skills` | AI Architect, AI Engineer, Security Reviewer, QA Engineer active |
-| `$spec` | First requirements question with proposed default |
+| `$sdad` | All phases + active skills listed; version 5.0 |
+| `$skills` | AI Architect, AI Engineer always active; on-demand skills available |
+| `$spec` | First requirements question with proposed default (language first) |
 | `$pause` | Session state including context budget |
-| `$SM hello` | ⚡ SIMPLE MODE — prompt returned immediately |
+| `$eval` | Golden-dataset scenarios run; pass/fail report returned (v5) |
 
 ---
 
@@ -295,12 +348,18 @@ After installing, start `claude` and verify:
 
 | File | Contents |
 |------|----------|
-| `docs/DEVELOPER_MANUAL_v4.3.html` | **Start here** — didactic manual: SDAD, SDAD for Pyplan, day-to-day usage |
-| `docs/INSTALL_GUIDE_v4.html` | Full installation guide |
+| `docs/SDAD_v5_WHAT_IS_SDAD.html` | **Start here** — what SDAD is, harness engineering, why governance-by-code |
+| `docs/SDAD_v5_INSTALL.html` | v5 installation + migration guide |
+| `docs/SDAD_v5_USER_GUIDE.html` | v5 everyday-use guide (the v5 gate, ratchet, `$eval`) |
+| `docs/DEVELOPER_MANUAL_v4.3.html` | Didactic manual: SDAD, SDAD for Pyplan, day-to-day usage |
+| `docs/INSTALL_GUIDE_v4.html` | Full installation guide (v4.3) |
 | `docs/USAGE_AND_SHORTCUTS_v4.html` | All commands and workflows |
 | `docs/DEVELOPER_GUIDE_v4.html` | Full methodology reference |
 | `docs/ONBOARDING_PYPLAN_v4.html` | Pyplan project onboarding guide |
 
+The Markdown sources (`SDAD_v5_*.md`) are the machine-readable copies; the
+`.html` files are the human-readable renders (ADR-005).
+
 ---
 
-G7 AI Development Methodology | SDAD v4.3
+G7 AI Development Methodology | SDAD v5.0 "Harness Edition"

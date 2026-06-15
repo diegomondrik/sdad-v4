@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDAD v5 — Installation Guide</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #FAFAFA;
+      color: #0F172A;
+      line-height: 1.6;
+      padding: 48px 24px;
+    }
+
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      border-bottom: 2px solid #2563EB;
+      padding-bottom: 24px;
+      margin-bottom: 48px;
+    }
+
+    header .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #2563EB;
+      margin-bottom: 8px;
+    }
+
+    header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 16px;
+      color: #475569;
+    }
+
+    /* Section headings */
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 28px 0 10px;
+    }
+
+    p {
+      margin-bottom: 14px;
+      font-size: 15px;
+      color: #1E293B;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #1E1E2E;
+      color: #CDD6F4;
+      border-radius: 8px;
+      padding: 20px 24px;
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin: 12px 0 20px;
+    }
+
+    code {
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      background: #E2E8F0;
+      color: #1E293B;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 28px;
+      font-size: 14px;
+    }
+
+    thead th {
+      background: #1E293B;
+      color: #FFFFFF;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+    }
+
+    tbody tr:nth-child(odd) { background: #F8FAFC; }
+    tbody tr:nth-child(even) { background: #FFFFFF; }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #E2E8F0;
+      vertical-align: top;
+    }
+
+    /* Alerts */
+    .alert {
+      border-left: 4px solid #2563EB;
+      background: #EFF6FF;
+      padding: 14px 18px;
+      border-radius: 0 6px 6px 0;
+      margin: 20px 0;
+      font-size: 14px;
+      color: #1E293B;
+    }
+
+    .alert.warn { border-left-color: #D97706; background: #FFFBEB; }
+    .alert.success { border-left-color: #16A34A; background: #F0FDF4; }
+
+    .alert strong {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    /* v5 badge */
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #FFFFFF;
+      background: #7C3AED;
+      padding: 2px 8px;
+      border-radius: 999px;
+      vertical-align: middle;
+      margin-left: 6px;
+    }
+
+    /* File tree */
+    .file-tree {
+      background: #1E1E2E;
+      color: #CDD6F4;
+      border-radius: 8px;
+      padding: 20px 24px;
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      line-height: 1.9;
+      margin: 12px 0 20px;
+    }
+
+    .file-tree .dim { color: #6C7086; }
+    .file-tree .hi  { color: #89DCEB; }
+    .file-tree .ok  { color: #A6E3A1; }
+    .file-tree .new { color: #F9E2AF; }
+
+    /* Tab switcher */
+    .os-tabs {
+      display: flex;
+      gap: 0;
+      margin: 24px 0 0;
+      border-bottom: 2px solid #E2E8F0;
+    }
+
+    .os-tab-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #64748B;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .os-tab-btn.active {
+      color: #2563EB;
+      border-bottom-color: #2563EB;
+    }
+
+    .os-panel { display: none; padding: 20px 0; }
+    .os-panel.active { display: block; }
+
+    /* Footer */
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid #E2E8F0;
+      font-size: 13px;
+      color: #94A3B8;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <p class="eyebrow">G7 AI Development Methodology</p>
+    <h1>SDAD v5 &mdash; Installation Guide</h1>
+    <p>"Harness Edition" &mdash; install the methodology, apply the v5 migration, and initialize your first project.</p>
+  </header>
+
+  <div class="alert">
+    <strong>What is new to install in v5</strong>
+    On top of v4.3, v5 ships three enforced components: a <code>PreToolUse</code> spec-gate hook,
+    a <code>checks/</code> lesson ratchet, and a <code>.sdad/eval/</code> golden-dataset harness.
+    On an existing v4.3 checkout these arrive through <code>apply-v5.ps1</code>; a fresh install
+    already includes them.
+  </div>
+
+  <!-- 0 -->
+  <h2>0. What you are installing</h2>
+  <p>SDAD ships in two layers, same as prior versions:</p>
+  <table>
+    <thead><tr><th>Layer</th><th>Script</th><th>Run</th></tr></thead>
+    <tbody>
+      <tr><td>Methodology install</td><td><code>install.ps1</code> / <code>install.sh</code></td><td>Once per machine, refreshed per version &mdash; places SDAD config and the <code>.claude/</code> folder (skills, agents, hooks).</td></tr>
+      <tr><td>Project init</td><td><code>project-init.ps1</code> / <code>project-init.sh</code></td><td>Once per project &mdash; scaffolds <code>SPEC.md</code>, <code>LESSON_LIBRARY.md</code>, <code>DECISIONS.md</code>, and <code>.sdad/</code>.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 1 -->
+  <h2>1. Prerequisites</h2>
+  <table>
+    <thead><tr><th>Requirement</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Node.js 18+ and Claude Code</td><td>The installer checks for these and installs them if missing.</td></tr>
+      <tr><td>Windows with PowerShell</td><td>The hook layer is Windows/PowerShell only; the macOS/bash port is tracked in <code>docs/TASK_HOOKS_MACOS_PORT.md</code>. On macOS/Linux the methodology works fully &mdash; the hook-based enforcement (including the v5 spec-gate) waits on that port.</td></tr>
+      <tr><td>ccstatusline</td><td>The context-budget status bar, configured once per machine.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 2 -->
+  <h2>2. Install the methodology</h2>
+
+  <div class="os-tabs">
+    <button class="os-tab-btn active" onclick="switchTab(event, 'win-m')">Windows (PowerShell)</button>
+    <button class="os-tab-btn" onclick="switchTab(event, 'mac-m')">Mac / Linux</button>
+  </div>
+
+  <div id="win-m" class="os-panel active">
+    <h3>Paste directly (recommended)</h3>
+    <pre><code>$install = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/install.ps1" -UseBasicParsing).Content
+Invoke-Expression $install</code></pre>
+    <h3>Or download first, then run</h3>
+    <pre><code>Invoke-WebRequest -Uri "https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/install.ps1" -OutFile "install-sdad.ps1"
+powershell -ExecutionPolicy Bypass -File ".\install-sdad.ps1"</code></pre>
+  </div>
+
+  <div id="mac-m" class="os-panel">
+    <pre><code>bash &lt;(curl -fsSL https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/install.sh)</code></pre>
+  </div>
+
+  <p>
+    The installer checks/installs Node.js 18+, Claude Code, and ccstatusline, and places the SDAD
+    skills, agents, the agent HANDOFF template, and the hook scripts plus their
+    <code>settings.json</code> registration. <code>settings.json</code> is never overwritten if it
+    already exists.
+  </p>
+
+  <!-- 3 -->
+  <h2>3. Apply the v5 migration <span class="badge">built in v5</span></h2>
+  <p>
+    Because <code>.claude/</code> is write-protected in Cowork mode, v5's changes to hooks, skills,
+    and <code>settings.json</code> ship as a one-shot script &mdash; the same pattern as
+    <code>apply-v4.3.ps1</code>.
+  </p>
+  <pre><code># from the repo root, after pulling v5
+git tag v4.3            # preserve prior state before upgrading
+powershell -ExecutionPolicy Bypass -File ".\apply-v5.ps1"</code></pre>
+  <p><code>apply-v5.ps1</code> is idempotent, pure ASCII, and self-deletes after a successful run. It:</p>
+  <ul style="margin: 0 0 20px 22px; font-size: 15px; color: #1E293B;">
+    <li>installs <code>pre-tool-use-spec-gate.ps1</code> and registers it on <code>PreToolUse</code> in <code>settings.json</code>;</li>
+    <li>scaffolds the <code>checks/</code> directory and the first ratchet check (<code>ascii-ps1</code>);</li>
+    <li>seeds <code>.sdad/eval/</code> with the golden-dataset scenarios and the <code>$eval</code> runner;</li>
+    <li>installs the <code>$agent</code> liveness wrapper under <code>.sdad/lib/</code> and the <code>harness</code> skill;</li>
+    <li>installs the git <code>pre-commit</code> ratchet and bumps skill/agent version stamps to 5.0.</li>
+  </ul>
+  <div class="alert success">
+    <strong>Fresh machines skip this step</strong>
+    The updated <code>install.ps1</code> / <code>install.sh</code> already include these components.
+    You only need <code>apply-v5.ps1</code> when upgrading an existing v4.3 checkout.
+  </div>
+
+  <!-- 4 -->
+  <h2>4. Initialize a project</h2>
+
+  <div class="os-tabs">
+    <button class="os-tab-btn active" onclick="switchTab(event, 'win-i')">Windows (PowerShell)</button>
+    <button class="os-tab-btn" onclick="switchTab(event, 'mac-i')">Mac / Linux</button>
+  </div>
+
+  <div id="win-i" class="os-panel active">
+    <pre><code>$init = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/project-init.ps1" -UseBasicParsing).Content
+Invoke-Expression $init</code></pre>
+  </div>
+
+  <div id="mac-i" class="os-panel">
+    <pre><code>bash &lt;(curl -fsSL https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/project-init.sh)</code></pre>
+  </div>
+
+  <p>
+    Creates <code>SPEC.md</code>, <code>LESSON_LIBRARY.md</code>, <code>DECISIONS.md</code>, and
+    <code>.sdad/</code> in the repo. In v5 it also scaffolds the <code>checks/</code> directory and a
+    <code>.sdad/eval/</code> seed so the ratchet and the evaluation harness are available per project.
+  </p>
+
+  <!-- 5 -->
+  <h2>5. Configure the status bar (once per machine)</h2>
+  <pre><code>npx ccstatusline@latest</code></pre>
+  <p>
+    Enable the Model, Thinking Effort, Context %, Session Cost, and Git Branch widgets. This is a
+    one-time TUI setup that writes <code>statusLine</code> into <code>~/.claude/settings.json</code>;
+    the bar then renders inside every Claude Code session. Use it as your primary context-budget
+    indicator &mdash; it shows the 50% and 65% thresholds SDAD acts on.
+  </p>
+
+  <!-- 6 -->
+  <h2>6. What the new hooks do</h2>
+  <table>
+    <thead><tr><th>Hook</th><th>Event</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>session-start.ps1</code></td><td>SessionStart</td><td>Re-injects the COMPACT ANCHOR (locked decisions) and does a guarded fast-forward <code>git pull</code>. Survives compaction.</td></tr>
+      <tr><td><code>pre-compact.ps1</code></td><td>PreCompact</td><td>Writes the anchor snapshot to disk so SessionStart can re-inject it after compaction.</td></tr>
+      <tr><td><code>session-end.ps1</code></td><td>SessionEnd</td><td>Whitelisted autocommit of <code>DECISIONS.md</code> + <code>LESSON_LIBRARY.md</code> only &mdash; never code. Skipped if <code>.sdad/HOLD_AUTOCOMMIT</code> exists.</td></tr>
+      <tr><td><code>pre-tool-use-spec-gate.ps1</code> <span class="badge">built in v5</span></td><td>PreToolUse</td><td>Refuses a code-file write/edit when <code>SPEC.md</code> is absent or unapproved. Allowlists docs, <code>.sdad/</code>, the SDAD docs, and the <code>$docfinal</code> path. Fails open (allows + logs) if the gate itself errors.</td></tr>
+    </tbody>
+  </table>
+  <div class="alert warn">
+    <strong>Pausing autocommit</strong>
+    To pause autocommit during an open P0 finding or a failing increment, create an empty file
+    <code>.sdad/HOLD_AUTOCOMMIT</code>; delete it to resume.
+  </div>
+
+  <!-- 7 -->
+  <h2>7. Verify the install</h2>
+  <p>Start <code>claude</code> in a project and check:</p>
+  <table>
+    <thead><tr><th>Command</th><th>Expected</th></tr></thead>
+    <tbody>
+      <tr><td><code>$sdad</code></td><td>All phases + active skills listed; version 5.0</td></tr>
+      <tr><td><code>$skills</code></td><td>AI Architect and AI Engineer active; on-demand skills available</td></tr>
+      <tr><td><code>$spec</code></td><td>First question asks project language (English/Spanish)</td></tr>
+      <tr><td><code>$pause</code></td><td>Session state including context budget %</td></tr>
+      <tr><td><code>$eval</code> <span class="badge">built in v5</span></td><td>Golden-dataset scenarios run; pass/fail report returned</td></tr>
+    </tbody>
+  </table>
+  <div class="alert success">
+    <strong>Confirm the v5 gate is live</strong>
+    In a repo with no approved <code>SPEC.md</code>, ask Claude to write a code file &mdash; it should
+    be refused by <code>pre-tool-use-spec-gate.ps1</code>. Editing a doc under <code>docs/</code>
+    should still be allowed.
+  </div>
+
+  <!-- 8 -->
+  <h2>8. Upgrading from v4.3</h2>
+  <pre><code>git tag v4.3            # preserve prior state
+git pull                # fetch v5
+powershell -ExecutionPolicy Bypass -File ".\apply-v5.ps1"</code></pre>
+  <p>
+    v4.3 projects are compatible: existing <code>SPEC.md</code> files still load and all commands
+    keep working. The only behavioral change you will notice is the new build gate &mdash; which is
+    the point of v5.
+  </p>
+
+  <footer>
+    G7 AI Development Methodology &nbsp;&middot;&nbsp; SDAD v5 "Harness Edition" &nbsp;&middot;&nbsp; SDAD_v5_INSTALL.html
+  </footer>
+
+</div>
+
+<script>
+  function switchTab(e, panelId) {
+    const allBtns = e.target.parentElement.querySelectorAll('.os-tab-btn');
+    allBtns.forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    let el = e.target.parentElement.nextElementSibling;
+    while (el && el.classList.contains('os-panel')) {
+      el.classList.remove('active');
+      el = el.nextElementSibling;
+    }
+    document.getElementById(panelId).classList.add('active');
+  }
+</script>
+</body>
+</html>

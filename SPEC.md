@@ -180,15 +180,15 @@ empty/missing `agent_output.tmp` → surface the error, never proceed silently.
 
 ## §10 Definition of Done (release gate for 5.0)
 
-- [ ] I1 gate denies code-write without approved Spec; fails open on its own error (tested on Windows).
-- [ ] I2 ASCII check blocks a non-ASCII `.ps1` commit (tested).
-- [ ] I3 `$eval` catches a deliberately planted methodology regression (tested).
-- [ ] `$eval` passes clean on the final v5 state.
-- [ ] All `.ps1` pure ASCII; `apply-v5.ps1` idempotent and self-deletes.
-- [ ] CLAUDE.md within +60-line budget; version + footer = 5.0; PROJECT_LANGUAGE recorded.
-- [ ] CHANGELOG `[5.0]`, README "what's new", three HTML docs (per ADR-005) consistent.
-- [ ] v4.3 compatibility verified (existing SPEC.md loads, `$pause` reports).
-- [ ] `docs/TASK_HOOKS_MACOS_PORT.md` updated: spec-gate.sh test + live `/compact` check.
+- [x] I1 gate denies code-write without approved Spec; fails open on its own error (tested on Windows; eval 01-05).
+- [x] I2 ASCII check blocks a non-ASCII `.ps1` commit (tested; eval 06-07).
+- [x] I3 `$eval` catches a deliberately planted methodology regression (tested; eval 09).
+- [x] `$eval` passes clean on the final v5 state (12/12, I10).
+- [x] All `.ps1` pure ASCII (installers ASCII-clean at I10; the 3 `.claude` session hooks are ASCII in `_staging_v5/`, applied to disk by `apply-v5.ps1`); `apply-v5.ps1` idempotent and self-deletes (I9). Ratchet on disk is 5->3 until `apply-v5` runs (`.claude/` write-protected in Cowork).
+- [x] CLAUDE.md within +60-line budget; version + footer = 5.0; PROJECT_LANGUAGE recorded (I9).
+- [x] CHANGELOG `[5.0]`, README "what's new", three HTML docs (per ADR-005) consistent (I10).
+- [x] v4.3 compatibility verified structurally (no SPEC schema break; `$pause`/gate read fields present in v4 SPECs). Live `$pause` is a runtime methodology check.
+- [x] `docs/TASK_HOOKS_MACOS_PORT.md` updated: spec-gate.sh test + live `/compact` check (I10).
 
 ## §11 Out of Scope
 
@@ -227,6 +227,7 @@ empty/missing `agent_output.tmp` → surface the error, never proceed silently.
 | I5 | Typed §13 schema locked by eval (8-column assert); protocol edit deferred to I9 | claude-opus-4-8 | high | scenario 11 | 11/11 core | none | 2026-06-13 |
 | I6 | $build E-termination contract: session-end honors .sdad/HOLD_AUTOCOMMIT (eval-locked); $build rule deferred to I9 | claude-opus-4-8 | high | scenario 12 | 12/12 core (HOLD suppresses + resumes) | none | 2026-06-13 |
 | I9 | CLAUDE.md v5.0 reframe: $eval command, Governance Axiom + I3-I8 behavior rules, Harness skill (Control Layer detail), version bump; budget assert fix | claude-opus-4-8 | high | CLAUDE.md, _staging_v5/skills/harness/SKILL.md, apply-v5.ps1 (step 5) | 12/12 core; CLAUDE.md 644 (+55/+60); version 5.0/5.0; self-test 08+09 pass | none (budget headroom 5) | 2026-06-13 |
+| I10 | Release-closer: 3 v5 docs to HTML (ADR-005), CHANGELOG [5.0], README v5 reframe + repo-structure, installers ship the harness layer + inline git pre-commit, L-01 debt closed (install.ps1 + project-init.ps1 ASCII) | claude-opus-4-8 | high | 10 files: docs/SDAD_v5_*.html (3 new), TASK_HOOKS_MACOS_PORT.md, CHANGELOG.md, README.md, install.ps1, install.sh, project-init.ps1, project-init.sh, SPEC_blank.md | 12/12 core; ascii ratchet 5->3 (3 = .claude hooks, clean in staging); installers parse 0 errors | 1 P1 fixed in-increment (pre-commit CRLF->LF on Windows); 2 P2 carried to macOS task (sh sed path edge, word-splitting) | 2026-06-15 |
 
 ---
 

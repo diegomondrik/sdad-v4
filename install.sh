@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# SDAD v4.3 — Installer for Mac / Linux
+# SDAD v5.0 — Installer for Mac / Linux
 # Spec-Driven AI Development — G7 AI Development Methodology
-# Version: 4.3 | 2026
+# Version: 5.0 | 2026
 #
 # Run from inside the project repo where you want SDAD installed:
 #
@@ -18,7 +18,7 @@ NC='\033[0m'
 
 echo ""
 echo "============================================"
-echo "  SDAD v4.3 — Installer"
+echo "  SDAD v5.0 — Installer"
 echo "============================================"
 echo ""
 
@@ -70,6 +70,7 @@ echo -e "${YELLOW}[ 2/7 ] Creating .claude/ folder structure...${NC}"
 mkdir -p \
     .claude/skills/ai-architect \
     .claude/skills/ai-engineer \
+    .claude/skills/harness \
     .claude/skills/qa-engineer \
     .claude/skills/compliance \
     .claude/skills/frontend \
@@ -84,7 +85,10 @@ mkdir -p \
     .claude/skills/brand-design \
     .claude/skills/security-reviewer \
     .claude/agents \
-    .claude/hooks
+    .claude/hooks \
+    checks \
+    .sdad/lib \
+    .sdad/eval
 
 echo -e "${GREEN}  OK     Folder structure created${NC}"
 
@@ -96,6 +100,7 @@ echo -e "${YELLOW}[ 3/7 ] Downloading skill files...${NC}"
 download_skill() {
     local dest="$1"
     local url="$REPO/$dest"
+    mkdir -p "$(dirname "$dest")"
     if curl -fsSL "$url" -o "$dest" 2>/dev/null; then
         echo -e "${GREEN}  OK     $dest${NC}"
     else
@@ -106,6 +111,7 @@ download_skill() {
 
 download_skill ".claude/skills/ai-architect/SKILL.md"
 download_skill ".claude/skills/ai-engineer/SKILL.md"
+download_skill ".claude/skills/harness/SKILL.md"
 download_skill ".claude/skills/qa-engineer/SKILL.md"
 download_skill ".claude/skills/compliance/SKILL.md"
 download_skill ".claude/skills/frontend/SKILL.md"
@@ -131,7 +137,56 @@ download_skill ".claude/hooks/session-end.sh"
 download_skill ".claude/hooks/session-start.ps1"
 download_skill ".claude/hooks/pre-compact.ps1"
 download_skill ".claude/hooks/session-end.ps1"
+# v5 PreToolUse spec-gate (both variants)
+download_skill ".claude/hooks/pre-tool-use-spec-gate.ps1"
+download_skill ".claude/hooks/pre-tool-use-spec-gate.sh"
 chmod +x .claude/hooks/*.sh 2>/dev/null
+
+# v5 harness layer: lesson ratchet, $agent wrapper, $eval golden-dataset seed
+download_skill "checks/ascii-ps1.ps1"
+download_skill "checks/ascii-ps1.sh"
+download_skill ".sdad/lib/agent-run.ps1"
+download_skill ".sdad/lib/agent-run.sh"
+download_skill ".sdad/eval/run-eval.ps1"
+download_skill ".sdad/eval/llm-smoke.ps1"
+download_skill ".sdad/eval/lib/assert-claude-md.ps1"
+for n in 01-gate-deny-no-spec 02-gate-allow-approved 03-gate-allow-docs \
+         04-gate-allow-docfinal 05-gate-fail-open 06-ascii-check \
+         07-precommit-blocks 08-claude-md-structural 09-eval-detects-regression \
+         10-agent-timeout 11-typed-section13 12-hold-autocommit; do
+    download_skill ".sdad/eval/scenarios/$n/run.ps1"
+done
+chmod +x checks/*.sh .sdad/lib/*.sh 2>/dev/null
+
+# git pre-commit ratchet -- .git/hooks is not versioned by git, so write inline.
+GIT_DIR=$(git rev-parse --git-dir 2>/dev/null || true)
+if [ -n "$GIT_DIR" ]; then
+    PC="$GIT_DIR/hooks/pre-commit"
+    if [ -f "$PC" ] && grep -q 'SDAD v5 -- pre-commit ratchet' "$PC" 2>/dev/null; then
+        echo -e "${CYAN}  SKIP   git pre-commit ratchet already installed${NC}"
+    else
+        [ -f "$PC" ] && cp "$PC" "$PC.backup-pre-sdad"
+        mkdir -p "$GIT_DIR/hooks"
+        cat > "$PC" << 'PCEOF'
+#!/bin/sh
+# SDAD v5 -- pre-commit ratchet (.git/hooks is not versioned by git itself).
+# Blocks commits that stage a non-ASCII .ps1 (L-01). Bypass: --no-verify.
+staged=$(git diff --cached --name-only --diff-filter=ACM -- '*.ps1' 2>/dev/null)
+[ -n "$staged" ] || exit 0
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+check="$repo_root/checks/ascii-ps1.sh"
+[ -f "$check" ] || exit 0
+if ! sh "$check" $staged; then
+  echo "pre-commit: blocked by SDAD L-01 ratchet (non-ASCII .ps1 staged)." >&2
+  echo "Fix the offending bytes (see output above) or use --no-verify if intentional." >&2
+  exit 1
+fi
+exit 0
+PCEOF
+        chmod +x "$PC"
+        echo -e "${GREEN}  OK     git pre-commit ratchet installed${NC}"
+    fi
+fi
 
 # settings.json registers the three hooks via the cross-platform dispatcher
 # (.claude/hooks/run-hook.sh — .sh on macOS/Linux, .ps1 on Windows/Git Bash).
@@ -148,16 +203,16 @@ echo ""
 echo -e "${YELLOW}[ 4/7 ] Installing CLAUDE.md...${NC}"
 
 if [ -f "CLAUDE.md" ]; then
-    if grep -q "SDAD v4" CLAUDE.md 2>/dev/null; then
-        echo -e "${CYAN}  SKIP   SDAD v4.x block already present in CLAUDE.md${NC}"
+    if grep -q "SDAD v" CLAUDE.md 2>/dev/null; then
+        echo -e "${CYAN}  SKIP   SDAD block already present in CLAUDE.md${NC}"
     else
         echo -e "${YELLOW}  WARNING  Existing CLAUDE.md found. Appending SDAD block.${NC}"
         echo "" >> CLAUDE.md
-        curl -fsSL "$REPO/Claude.md" >> CLAUDE.md
-        echo -e "${GREEN}  OK     SDAD v4.3 block appended to CLAUDE.md${NC}"
+        curl -fsSL "$REPO/CLAUDE.md" >> CLAUDE.md
+        echo -e "${GREEN}  OK     SDAD v5.0 block appended to CLAUDE.md${NC}"
     fi
 else
-    curl -fsSL "$REPO/Claude.md" -o CLAUDE.md
+    curl -fsSL "$REPO/CLAUDE.md" -o CLAUDE.md
     echo -e "${GREEN}  OK     CLAUDE.md installed${NC}"
 fi
 
@@ -192,14 +247,14 @@ fi
 
 # .gitignore
 if [ -f ".gitignore" ]; then
-    if ! grep -q "SDAD v4" .gitignore 2>/dev/null; then
-        printf "\n# SDAD v4.3\n.claude/.session_tmp\n*.tmp\n" >> .gitignore
+    if ! grep -q "SDAD v" .gitignore 2>/dev/null; then
+        printf "\n# SDAD v5.0\n.claude/.session_tmp\n.sdad/agent_output.tmp\n.sdad/gate.log\n*.tmp\n" >> .gitignore
         echo -e "${GREEN}  OK     .gitignore updated${NC}"
     else
         echo -e "${CYAN}  SKIP   .gitignore already has SDAD entries${NC}"
     fi
 else
-    printf "# SDAD v4.3\n.claude/.session_tmp\n*.tmp\n" > .gitignore
+    printf "# SDAD v5.0\n.claude/.session_tmp\n.sdad/agent_output.tmp\n.sdad/gate.log\n*.tmp\n" > .gitignore
     echo -e "${GREEN}  OK     .gitignore created${NC}"
 fi
 
@@ -226,27 +281,21 @@ echo ""
 echo -e "${YELLOW}[ 7/7 ] Installation complete${NC}"
 echo ""
 echo -e "${GREEN}============================================${NC}"
-echo -e "${GREEN}  SDAD v4.3 installed successfully${NC}"
+echo -e "${GREEN}  SDAD v5.0 installed successfully${NC}"
 echo -e "${GREEN}============================================${NC}"
 echo ""
 echo "Files installed:"
-echo "  CLAUDE.md                                — core instructions"
-echo "  .claude/skills/ai-architect/SKILL.md    — always active"
-echo "  .claude/skills/ai-engineer/SKILL.md     — always active"
-echo "  .claude/skills/qa-engineer/SKILL.md     — on-demand"
-echo "  .claude/skills/compliance/SKILL.md      — on-demand (auto Tier 2/3)"
-echo "  .claude/skills/frontend/SKILL.md        — on-demand"
-echo "  .claude/skills/pyplan/*/SKILL.md        — Pyplan layer (5 skills)"
-echo "  .claude/skills/decision-architecture/   — transversal skill"
-echo "  .claude/skills/data-discovery/          — transversal skill"
-echo "  .claude/skills/dev-setup/               — on-demand (onboarding)"
-echo "  .claude/skills/brand-design/            — on-demand (visual identity)"
-echo "  .claude/agents/                          — code-reviewer, security-auditor, test-generator + HANDOFF template"
-echo "  .claude/hooks/                           — SessionStart/PreCompact/SessionEnd (cross-platform .sh + .ps1)"
+echo "  CLAUDE.md                                — core instructions (v5.0)"
+echo "  .claude/skills/                          — AI Architect, AI Engineer, harness + on-demand skills"
+echo "  .claude/agents/                          — code-reviewer, security-auditor, test-generator + HANDOFF"
+echo "  .claude/hooks/                           — session hooks + PreToolUse spec-gate (.sh + .ps1)"
 echo "  .claude/settings.json                    — hook registration (if new)"
+echo "  checks/ascii-ps1                          — lesson-to-guardrail ratchet (L-01)"
+echo "  .git/hooks/pre-commit                     — ASCII ratchet hard stop"
+echo "  .sdad/lib/agent-run                       — \$agent liveness wrapper (600s timeout)"
+echo "  .sdad/eval/                               — \$eval golden dataset + runner"
 echo "  Pyplan MCP                               — registered globally (dev.pyplan.com)"
-echo "  SPEC.md                                  — blank template (if new)"
-echo "  LESSON_LIBRARY.md                        — blank template (if new)"
+echo "  SPEC.md / LESSON_LIBRARY.md               — blank templates (if new)"
 echo ""
 echo -e "${CYAN}Next step:${NC}"
 echo "  Start Claude Code: claude"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SDAD v4.0 — Project Initializer (Mac / Linux)
+# SDAD v5.0 — Project Initializer (Mac / Linux)
 # Run from inside the project repo you want to initialize.
 #
 # Usage:
@@ -7,6 +7,7 @@
 
 set -e
 
+REPO="https://raw.githubusercontent.com/diegomondrik/sdad-v4/main"
 CYAN='\033[0;36m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -15,7 +16,7 @@ NC='\033[0m' # No Color
 
 echo ""
 echo -e "${CYAN}======================================"
-echo -e "  SDAD v4.1 — Project Initializer"
+echo -e "  SDAD v5.0 — Project Initializer"
 echo -e "======================================${NC}"
 echo ""
 
@@ -203,9 +204,9 @@ An increment is complete when:
 
 ## §13 — AI Authorship Log
 
-| Increment | Feature | Model | Date | Notes |
-|-----------|---------|-------|------|-------|
-| SPEC v1.0 | Initial spec | — | $TODAY | project-init |
+| Increment | Feature | Model | Effort | Files | Tests | QA findings | Date |
+|-----------|---------|-------|--------|-------|-------|-------------|------|
+| SPEC v1.0 | Initial spec | n/a | n/a | n/a | n/a | n/a | $TODAY |
 SPECEOF
     echo -e "  ${GREEN}SPEC.md created.${NC}"
 fi
@@ -219,7 +220,7 @@ else
 # LESSON_LIBRARY.md — $PROJECT_NAME
 # Transferable patterns captured during development.
 # Entries are proposed by Claude after \$qa runs and added with your approval.
-# Version: 4.1 | Created: $TODAY
+# Version: 5.0 | Created: $TODAY
 
 ---
 
@@ -247,13 +248,13 @@ else
     cat > DECISIONS.md << DECEOF
 # DECISIONS.md — $PROJECT_NAME
 # Design decisions log. Written automatically by \$build after each increment.
-# Version: 4.1 | Created: $TODAY
+# Version: 5.0 | Created: $TODAY
 
 ---
 
 | # | Date | Decision | Rationale | Status |
 |---|------|----------|-----------|--------|
-| D-001 | $TODAY | Project initialized with SDAD v4.1 | $TIER | Active |
+| D-001 | $TODAY | Project initialized with SDAD v5.0 | $TIER | Active |
 DECEOF
     echo -e "  ${GREEN}DECISIONS.md created.${NC}"
 fi
@@ -271,7 +272,7 @@ Created: $TODAY
 Developer: $DEV_NAME
 Client: $CLIENT_LINE
 Compliance tier: $TIER
-SDAD version: 4.1
+SDAD version: 5.0
 
 ## Session log
 
@@ -281,7 +282,36 @@ SDAD version: 4.1
 PROJEOF
 echo -e "  ${GREEN}.sdad/project.md created.${NC}"
 
-# ── 8. Update .gitignore ──────────────────────────────────────────────────────
+# ── 8. Seed the v5 harness layer (download-if-missing) ─────────────────────────
+
+echo ""
+echo -e "${YELLOW}Seeding the v5 harness layer...${NC}"
+
+seed_file() {
+    local dest="$1"
+    [ -f "$dest" ] && return 0
+    mkdir -p "$(dirname "$dest")"
+    curl -fsSL "$REPO/$dest" -o "$dest" 2>/dev/null \
+        || echo -e "  ${YELLOW}WARNING  could not fetch $dest (run install.sh to complete the harness).${NC}"
+}
+
+seed_file "checks/ascii-ps1.ps1"
+seed_file "checks/ascii-ps1.sh"
+seed_file ".sdad/lib/agent-run.ps1"
+seed_file ".sdad/lib/agent-run.sh"
+seed_file ".sdad/eval/run-eval.ps1"
+seed_file ".sdad/eval/llm-smoke.ps1"
+seed_file ".sdad/eval/lib/assert-claude-md.ps1"
+for n in 01-gate-deny-no-spec 02-gate-allow-approved 03-gate-allow-docs \
+         04-gate-allow-docfinal 05-gate-fail-open 06-ascii-check \
+         07-precommit-blocks 08-claude-md-structural 09-eval-detects-regression \
+         10-agent-timeout 11-typed-section13 12-hold-autocommit; do
+    seed_file ".sdad/eval/scenarios/$n/run.ps1"
+done
+chmod +x checks/*.sh .sdad/lib/*.sh 2>/dev/null || true
+echo -e "  ${GREEN}harness layer ready (checks/, .sdad/eval/, .sdad/lib/).${NC}"
+
+# ── 9. Update .gitignore ──────────────────────────────────────────────────────
 
 IGNORE_ENTRY=".sdad/agent_output.tmp"
 
@@ -289,15 +319,15 @@ if [ -f ".gitignore" ]; then
     if grep -qF "$IGNORE_ENTRY" .gitignore; then
         echo -e "  ${YELLOW}.gitignore already up to date.${NC}"
     else
-        printf "\n# SDAD v4.0\n%s\n" "$IGNORE_ENTRY" >> .gitignore
+        printf "\n# SDAD v5.0\n%s\n.sdad/gate.log\n" "$IGNORE_ENTRY" >> .gitignore
         echo -e "  ${GREEN}.gitignore updated.${NC}"
     fi
 else
-    printf "# SDAD v4.0\n%s\n" "$IGNORE_ENTRY" > .gitignore
+    printf "# SDAD v5.0\n%s\n.sdad/gate.log\n" "$IGNORE_ENTRY" > .gitignore
     echo -e "  ${GREEN}.gitignore created.${NC}"
 fi
 
-# ── 9. Done ───────────────────────────────────────────────────────────────────
+# ── 10. Done ──────────────────────────────────────────────────────────────────
 
 echo ""
 echo -e "${GREEN}======================================"
@@ -315,11 +345,11 @@ echo "  LESSON_LIBRARY.md"
 echo "  DECISIONS.md"
 echo "  .sdad/project.md"
 echo "  .sdad/flows/"
+echo "  checks/ + .sdad/eval/ + .sdad/lib/   (v5 harness seed)"
 echo ""
 echo -e "${CYAN}Next step: open Claude Code and run${NC}"
 echo -e "${WHITE}  claude${NC}"
 echo ""
 echo -e "${CYAN}Then start with:${NC}"
 echo -e "${WHITE}  \$spec   — define requirements${NC}"
-echo -e "${WHITE}  \$nuevo  — if describing a new project from scratch${NC}"
 echo ""

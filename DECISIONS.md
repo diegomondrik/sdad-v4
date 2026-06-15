@@ -521,3 +521,55 @@ Test result: eval core 12/12; CLAUDE.md 644 lines (delta +55 of 60); version
 stamp 5.0 header==footer; self-test scenarios 08 (asserts) + 09 (planted
 regression) pass -- language-first rule and build gate still trigger post-edit.
 ================================================================
+
+## Increment 20 -- v5 I10: docs, CHANGELOG, README, installers, L-01 debt (closes release)
+
+================================================================
+HUB BLOCK -- DECISIONS_SDAD-v5.md
+================================================================
+Date: 2026-06-15
+Increment: 20 -- v5 I10: release-closer (docs + installers + L-01 debt)
+Model: claude-opus-4-8 . effort high
+Decision: ship the v5.0 release surface. (1) Three v5 docs rendered to
+self-contained HTML5 from their MD sources, matching the v4 doc style
+(INSTALL, USER_GUIDE, WHAT_IS_SDAD) -- ADR-005 (human-readable HTML, machine-
+readable MD). (2) CHANGELOG [5.0] entry (Keep a Changelog: Overview, upgrade
+note, Added/Changed/Fixed, Known gaps) folding the merged bash-hook port out of
+[Unreleased]. (3) README reframed to v5.0: what's-new section, repo-structure
+updated (checks/, .sdad/eval, .sdad/lib, harness skill, gate hook, apply-v5),
+$eval in commands, verification + docs tables. (4) install.ps1/.sh and
+project-init.ps1/.sh ship the harness layer (gate hook pair, checks/ ratchet,
+.sdad/eval seed via auto-mkdir download loop, .sdad/lib wrapper, harness skill)
+and install the git pre-commit inline. (5) L-01 debt closed: install.ps1 +
+project-init.ps1 are now pure ASCII -- ratchet went 5->3 (the 3 remaining are the
+.claude session hooks, ASCII-clean in staging, applied by apply-v5).
+Rationale: I1-I9 built and governed the harness; I10 makes it installable by
+downstream projects and consistent across every release artifact.
+Alternatives considered: download the pre-commit from the repo -- rejected, its
+staging source is deleted by apply-v5, so the installer writes it inline instead;
+enumerate eval scenario dirs in a mkdir list -- rejected for an auto-mkdir
+download loop (handles arbitrary nesting, no drift).
+Templating note (careful L-01 fix, not blind replace): the 14 section signs in
+project-init's generated SPEC template are emitted via [char]0x00A7 so the .ps1
+source stays ASCII while the produced SPEC.md keeps SDAD's section notation;
+em-dashes in generated content downgraded to ASCII '-'.
+Side fixes found during the increment: (a) install.ps1/.sh fetched the
+methodology file as '$REPO/Claude.md' but GitHub raw is case-sensitive and the
+tracked file is CLAUDE.md -- it would 404 on a fresh install; corrected, and the
+"SDAD v4" presence grep generalized to "SDAD v". (b) QA P1: the inline pre-commit
+written by install.ps1 used Set-Content (CRLF) -- a CRLF shebang breaks sh on
+Windows ("bad interpreter"); now written LF via [IO.File]::WriteAllText. (c)
+SPEC_blank.md s13 aligned to the I5 typed 8-column schema (install.ps1 seeds
+SPEC.md from it). (d) README verification table had a stale $SM line and listed
+on-demand skills as always-on -- corrected.
+Impact: docs/SDAD_v5_{INSTALL,USER_GUIDE,WHAT_IS_SDAD}.html (new),
+docs/TASK_HOOKS_MACOS_PORT.md (rescoped to spec-gate.sh + live /compact),
+CHANGELOG.md, README.md, install.ps1, install.sh, project-init.ps1,
+project-init.sh, SPEC_blank.md, SPEC.md s13.
+Residuals (honest, non-blocking): "all .ps1 ASCII" completes when the developer
+runs apply-v5 (the 3 .claude hooks; .claude is write-protected in Cowork, staging
+verified 0); live v4.x $pause is a runtime check (no schema break -- verified
+structurally). Both documented.
+Test result: eval core 12/12; ascii ratchet 5->3 (expected); install.ps1 +
+project-init.ps1 ASCII-clean and parse with 0 errors.
+================================================================
