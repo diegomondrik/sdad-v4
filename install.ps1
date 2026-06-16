@@ -1,6 +1,6 @@
-# SDAD v5.0 -- Installer for Windows (PowerShell)
+# SDAD v5.1 -- Installer for Windows (PowerShell)
 # Spec-Driven AI Development -- G7 AI Development Methodology
-# Version: 5.0 | 2026
+# Version: 5.1 | 2026
 #
 # L-01 rule: this file is pure ASCII -- no em-dashes, accents, arrows, or section symbols.
 #
@@ -19,7 +19,7 @@ $REPO = "https://raw.githubusercontent.com/diegomondrik/sdad-v4/main"
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "  SDAD v5.0 -- Installer" -ForegroundColor Cyan
+Write-Host "  SDAD v5.1 -- Installer" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -250,7 +250,7 @@ if (Test-Path "CLAUDE.md") {
         Write-Host "  WARNING  Existing CLAUDE.md found. Appending SDAD block." -ForegroundColor Yellow
         $sdadBlock = (Invoke-WebRequest -Uri $claudeMdUrl -UseBasicParsing).Content
         Add-Content "CLAUDE.md" "`n`n$sdadBlock"
-        Write-Host "  OK     SDAD v5.0 block appended to CLAUDE.md" -ForegroundColor Green
+        Write-Host "  OK     SDAD v5.1 block appended to CLAUDE.md" -ForegroundColor Green
     }
 } else {
     Invoke-WebRequest -Uri $claudeMdUrl -OutFile "CLAUDE.md" -UseBasicParsing
@@ -289,7 +289,7 @@ _No entries yet. Run `$`qa on your first completed increment._
 # .gitignore
 $gitignoreEntries = @(
     "",
-    "# SDAD v5.0",
+    "# SDAD v5.1",
     ".claude/.session_tmp",
     ".sdad/agent_output.tmp",
     ".sdad/gate.log",
@@ -334,11 +334,11 @@ Write-Host ""
 Write-Host "[ 7/7 ] Installation complete" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Green
-Write-Host "  SDAD v5.0 installed successfully" -ForegroundColor Green
+Write-Host "  SDAD v5.1 installed successfully" -ForegroundColor Green
 Write-Host "============================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Files installed:" -ForegroundColor White
-Write-Host "  CLAUDE.md                                core instructions (v5.0)" -ForegroundColor White
+Write-Host "  CLAUDE.md                                core instructions (v5.1)" -ForegroundColor White
 Write-Host "  .claude/skills/                          AI Architect, AI Engineer, harness + on-demand skills" -ForegroundColor White
 Write-Host "  .claude/agents/                          code-reviewer, security-auditor, test-generator + HANDOFF" -ForegroundColor White
 Write-Host "  .claude/hooks/                           session hooks + PreToolUse spec-gate (.ps1 + .sh)" -ForegroundColor White

@@ -1,4 +1,4 @@
-# G7 SDAD v5.0 — "Harness Edition"
+# G7 SDAD v5.1 — "Harness Edition"
 ## Spec-Driven AI Development for Claude Code
 
 SDAD is G7's development methodology for teams using Claude Code as their
@@ -6,6 +6,28 @@ primary AI development tool. It brings spec-first discipline, vertical
 increments, integrated QA, compliance tiers, and a shared Lesson Library
 to AI-assisted development. As of v5, the rules that matter most are enforced
 in code — not merely requested in a prompt.
+
+---
+
+## What's new in v5.1
+
+v5.1 hardens the CI harness introduced in v5.0. All changes are backward-compatible —
+no command surface or SPEC.md format changes.
+
+- **Server-side spec-gate (INC-1)** — the `checks/spec-gate-policy.{ps1,sh}` module
+  extracts the gate logic into a shared policy file tested independently of the hook.
+  `checks/spec-gate-ci.sh` runs it from the **base branch** ref on every pull request via
+  `.github/workflows/sdad-gates.yml` — a PR can no longer neuter the gate it is being
+  checked against (L-05 guardrail).
+- **POSIX hardening (INC-2a)** — CI workflow, `ascii-ps1.sh`, and `spec-gate-ci.sh`
+  hardened for strict POSIX shells; `gate-from-base` pattern wired into the workflow.
+- **Hermetic eval scenarios (INC-2b)** — scenario 07 (pre-commit block) no longer
+  depends on an installed `.git/hooks/pre-commit`; it constructs its own fixture, so the
+  full suite passes on a clean CI runner (L-06 guardrail).
+- **14 deterministic eval scenarios** — up from 12 in v5.0; scenarios 13
+  (`claude-md-case`) and 14 (`ci-spec-gate-policy`) added.
+- **Lessons L-05 and L-06** — CI gate self-neutering pattern and hermetic test
+  requirement captured in `LESSON_LIBRARY.md`.
 
 ---
 
@@ -263,7 +285,7 @@ features work standalone.
 
 ```
 sdad-v4/
-├── CLAUDE.md                          # Core Claude Code config (v5.0)
+├── CLAUDE.md                          # Core Claude Code config (v5.1)
 ├── SPEC_blank.md                      # Blank spec template
 ├── install.sh                         # Mac/Linux methodology installer
 ├── install.ps1                        # Windows methodology installer
@@ -273,13 +295,17 @@ sdad-v4/
 ├── README.md                          # This file
 ├── CHANGELOG.md                       # Version history
 ├── checks/                            # Lesson-to-guardrail ratchet (v5)
-│   ├── ascii-ps1.ps1                  # L-01 check: tracked .ps1 must be pure ASCII
-│   └── ascii-ps1.sh
+│   ├── ascii-ps1.ps1                  # L-01: tracked .ps1 must be pure ASCII
+│   ├── ascii-ps1.sh
+│   ├── spec-gate-policy.ps1           # L-05: shared gate policy (base-ref safe)
+│   ├── spec-gate-policy.sh
+│   ├── spec-gate-ci.sh                # CI runner — runs policy from base ref
+│   └── claude-md-case.ps1 / .sh      # L-04: CLAUDE.md case check
 ├── .sdad/
 │   ├── eval/                          # $eval golden dataset + runner (v5)
 │   │   ├── run-eval.ps1
 │   │   ├── llm-smoke.ps1              # release-gate only
-│   │   └── scenarios/                 # 12 deterministic scenarios
+│   │   └── scenarios/                 # 14 deterministic scenarios
 │   └── lib/
 │       └── agent-run.ps1 / .sh        # $agent liveness wrapper (600s timeout)
 ├── .claude/
@@ -318,6 +344,8 @@ sdad-v4/
     ├── SDAD_v5_WHAT_IS_SDAD.md / .html   # What SDAD is and why (v5)
     ├── SDAD_v5_INSTALL.md / .html         # v5 install guide
     ├── SDAD_v5_USER_GUIDE.md / .html      # v5 everyday-use guide
+    ├── SDAD_Visual_Manual_v2.html         # Visual manual — diagrams + flows
+    ├── sdad-harness-diagrams.html         # Harness engineering diagrams
     ├── DEVELOPER_MANUAL_v4.3.html
     ├── INSTALL_GUIDE_v4.html
     ├── USAGE_AND_SHORTCUTS_v4.html
@@ -336,7 +364,7 @@ After installing, start `claude` and verify:
 
 | Command | Expected |
 |---------|----------|
-| `$sdad` | All phases + active skills listed; version 5.0 |
+| `$sdad` | All phases + active skills listed; version 5.1 |
 | `$skills` | AI Architect, AI Engineer always active; on-demand skills available |
 | `$spec` | First requirements question with proposed default (language first) |
 | `$pause` | Session state including context budget |
@@ -349,8 +377,10 @@ After installing, start `claude` and verify:
 | File | Contents |
 |------|----------|
 | `docs/SDAD_v5_WHAT_IS_SDAD.html` | **Start here** — what SDAD is, harness engineering, why governance-by-code |
-| `docs/SDAD_v5_INSTALL.html` | v5 installation + migration guide |
-| `docs/SDAD_v5_USER_GUIDE.html` | v5 everyday-use guide (the v5 gate, ratchet, `$eval`) |
+| `docs/SDAD_v5_INSTALL.html` | v5.1 installation + migration guide |
+| `docs/SDAD_v5_USER_GUIDE.html` | v5.1 everyday-use guide (the gate, ratchet, `$eval`, CI harness) |
+| `docs/SDAD_Visual_Manual_v2.html` | Visual manual — diagrams and flows |
+| `docs/sdad-harness-diagrams.html` | Harness engineering diagrams |
 | `docs/DEVELOPER_MANUAL_v4.3.html` | Didactic manual: SDAD, SDAD for Pyplan, day-to-day usage |
 | `docs/INSTALL_GUIDE_v4.html` | Full installation guide (v4.3) |
 | `docs/USAGE_AND_SHORTCUTS_v4.html` | All commands and workflows |
@@ -362,4 +392,4 @@ The Markdown sources (`SDAD_v5_*.md`) are the machine-readable copies; the
 
 ---
 
-G7 AI Development Methodology | SDAD v5.0 "Harness Edition"
+G7 AI Development Methodology | SDAD v5.1 "Harness Edition"

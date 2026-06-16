@@ -1,11 +1,6 @@
 # SDAD v5 — Installation Guide
 
-**G7 AI Development Methodology · SDAD v5 "Harness Edition"**
-
-> This guide documents the v5 install target. Some v5 components (the PreTool spec-gate
-> hook, the `checks/` ratchet, the `.sdad/eval/` harness) are produced by the v5 build
-> driven by `SDAD_v5_BUILD_BRIEF.md`. Steps that depend on a not-yet-built artifact are
-> marked **[built in v5]**. Until the build runs, the v4.3 installer remains valid.
+**G7 AI Development Methodology · SDAD v5.1 "Harness Edition"**
 
 ---
 
@@ -64,7 +59,7 @@ SDAD skills, agents, the agent HANDOFF template, and the hook scripts plus their
 
 ---
 
-## 3. Apply the v5 migration  **[built in v5]**
+## 3. Apply the v5 migration (upgrading from v4.3)
 
 Because `.claude/` is write-protected in Cowork mode, v5's changes to hooks, skills, and
 `settings.json` ship as a one-shot script — the same pattern as `apply-v4.3.ps1`.
@@ -128,7 +123,7 @@ indicator — it shows the 50% and 65% thresholds SDAD acts on.
 | `session-start.ps1` | SessionStart | Re-injects the COMPACT ANCHOR (locked decisions) and does a guarded fast-forward `git pull`. Survives compaction. |
 | `pre-compact.ps1` | PreCompact | Writes the anchor snapshot to disk so SessionStart can re-inject it after compaction. |
 | `session-end.ps1` | SessionEnd | Whitelisted autocommit of `DECISIONS.md` + `LESSON_LIBRARY.md` only — never code. Skipped if `.sdad/HOLD_AUTOCOMMIT` exists. |
-| `pre-tool-use-spec-gate.ps1` **[built in v5]** | PreToolUse | Refuses a code-file write/edit when `SPEC.md` is absent or unapproved. Allowlists docs, `.sdad/`, the SDAD docs, and the `$docfinal` path. Fails open (allows + logs) if the gate itself errors. |
+| `pre-tool-use-spec-gate.ps1` | PreToolUse | Refuses a code-file write/edit when `SPEC.md` is absent or unapproved. Allowlists docs, `.sdad/`, the SDAD docs, and the `$docfinal` path. Fails open (allows + logs) if the gate itself errors. |
 
 To pause autocommit during an open P0 finding or a failing increment, create an empty file
 `.sdad/HOLD_AUTOCOMMIT`; delete it to resume.
@@ -141,11 +136,11 @@ Start `claude` in a project and check:
 
 | Command | Expected |
 |---|---|
-| `$sdad` | All phases + active skills listed; version 5.0 |
+| `$sdad` | All phases + active skills listed; version 5.1 |
 | `$skills` | AI Architect and AI Engineer active; on-demand skills available |
 | `$spec` | First question asks project language (English/Spanish) |
 | `$pause` | Session state including context budget % |
-| `$eval` **[built in v5]** | Golden-dataset scenarios run; pass/fail report returned |
+| `$eval` | Golden-dataset scenarios run (14 deterministic); pass/fail report returned |
 
 To confirm the v5 gate is live, in a repo with no approved `SPEC.md` ask Claude to write a
 code file — it should be refused by `pre-tool-use-spec-gate.ps1`. Editing a doc under
@@ -167,4 +162,4 @@ point of v5.
 
 ---
 
-G7 AI Development Methodology | SDAD v5 Install Guide | 2026
+G7 AI Development Methodology | SDAD v5.1 Install Guide | 2026

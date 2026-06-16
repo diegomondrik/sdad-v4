@@ -1,10 +1,7 @@
 # SDAD v5 — User Guide
 
-**G7 AI Development Methodology · SDAD v5 "Harness Edition"**
+**G7 AI Development Methodology · SDAD v5.1 "Harness Edition"**
 *For everyday use. No programming required — you answer questions and approve steps.*
-
-> v5 components that change daily use (the build gate, the lesson ratchet, `$eval`) are
-> produced by the v5 build. Where a behavior is new in v5, it is marked **[v5]**.
 
 ---
 
@@ -138,4 +135,4 @@ it is enforcing the one discipline that matters most.
 
 ---
 
-G7 AI Development Methodology | SDAD v5 User Guide | 2026
+G7 AI Development Methodology | SDAD v5.1 User Guide | 2026

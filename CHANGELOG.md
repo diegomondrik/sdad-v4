@@ -7,6 +7,59 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [5.1] — 2026-06-16
+
+### Overview
+
+SDAD v5.1 hardens the CI harness introduced in v5.0. No command surface or SPEC.md
+format changes — fully backward-compatible with all v5.0 and v4.x projects.
+
+Core theme: a control that runs from the PR's own checkout can be neutered by that same PR.
+v5.1 moves the spec-gate policy to a shared base-ref-safe module and wires it into a
+GitHub Actions workflow, closes the hermetic test gap found in `$eval`, and captures two
+new lessons.
+
+**Upgrade note:** fresh installs use v5.1 automatically. Existing v5.0 checkouts: pull
+`v5` (or `main` after merge) to get the new `checks/` files and workflow. No migration
+script needed — all changes are additive.
+
+---
+
+### Added
+
+**Server-side spec-gate + shared policy module (INC-1)**
+- `checks/spec-gate-policy.ps1` and `checks/spec-gate-policy.sh` — the allowlist/deny
+  logic extracted from the hook into a standalone testable module. Single source of truth
+  for what the gate permits.
+- `checks/spec-gate-ci.sh` — CI runner that checks out the policy file from the **base
+  branch** ref and runs it against the PR diff. A PR cannot modify the policy that
+  evaluates it.
+- `.github/workflows/sdad-gates.yml` — GitHub Actions workflow: runs `ascii-ps1`,
+  `claude-md-case`, and `spec-gate-ci` on every push and pull request. Provides the
+  server-side enforcement layer (L-05 guardrail: base-ref isolation).
+
+**Hermetic eval scenario 07 (INC-2b)**
+- Scenario `07-precommit-blocks` now constructs its own `.git/hooks/pre-commit` fixture
+  instead of depending on an installed one. Passes on a clean CI runner without any
+  prior `install.ps1` run.
+
+**Lessons L-05 and L-06**
+- L-05 — A CI gate that runs repo-resident scripts from the PR checkout can be neutered
+  by the same PR. Fix: run from base ref or protect via CODEOWNERS.
+- L-06 — Self-tests must be hermetic: never depend on installed or machine state.
+  A clean CI runner is itself the ratchet.
+
+### Changed
+
+- `checks/ascii-ps1.sh` and `checks/spec-gate-ci.sh` POSIX-hardened for strict shells
+  (INC-2a): removed bashisms, fixed quoting, replaced `[[` with `[`.
+- `.github/workflows/sdad-gates.yml` adds `gate-from-base` pattern to the CI step
+  (INC-2a): checks out `$GITHUB_BASE_REF` before running `spec-gate-ci.sh`.
+- `$eval` golden dataset grows from 12 to 14 deterministic scenarios:
+  scenario 13 (`claude-md-case`) and 14 (`ci-spec-gate-policy`).
+
+---
+
 ## [5.0] — 2026-06-13
 
 ### Overview
@@ -577,4 +630,4 @@ by Claude Code — no manual file copying or separate skill repos required.
 
 ---
 
-G7 AI Development Methodology | SDAD v4.3
+G7 AI Development Methodology | SDAD v5.1
