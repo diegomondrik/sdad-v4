@@ -7,6 +7,193 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [5.1] — 2026-06-16
+
+### Overview
+
+SDAD v5.1 hardens the CI harness introduced in v5.0. No command surface or SPEC.md
+format changes — fully backward-compatible with all v5.0 and v4.x projects.
+
+Core theme: a control that runs from the PR's own checkout can be neutered by that same PR.
+v5.1 moves the spec-gate policy to a shared base-ref-safe module and wires it into a
+GitHub Actions workflow, closes the hermetic test gap found in `$eval`, and captures two
+new lessons.
+
+**Upgrade note:** fresh installs use v5.1 automatically. Existing v5.0 checkouts: pull
+`v5` (or `main` after merge) to get the new `checks/` files and workflow. No migration
+script needed — all changes are additive.
+
+---
+
+### Added
+
+**Server-side spec-gate + shared policy module (INC-1)**
+- `checks/spec-gate-policy.ps1` and `checks/spec-gate-policy.sh` — the allowlist/deny
+  logic extracted from the hook into a standalone testable module. Single source of truth
+  for what the gate permits.
+- `checks/spec-gate-ci.sh` — CI runner that checks out the policy file from the **base
+  branch** ref and runs it against the PR diff. A PR cannot modify the policy that
+  evaluates it.
+- `.github/workflows/sdad-gates.yml` — GitHub Actions workflow: runs `ascii-ps1`,
+  `claude-md-case`, and `spec-gate-ci` on every push and pull request. Provides the
+  server-side enforcement layer (L-05 guardrail: base-ref isolation).
+
+**Hermetic eval scenario 07 (INC-2b)**
+- Scenario `07-precommit-blocks` now constructs its own `.git/hooks/pre-commit` fixture
+  instead of depending on an installed one. Passes on a clean CI runner without any
+  prior `install.ps1` run.
+
+**Lessons L-05 and L-06**
+- L-05 — A CI gate that runs repo-resident scripts from the PR checkout can be neutered
+  by the same PR. Fix: run from base ref or protect via CODEOWNERS.
+- L-06 — Self-tests must be hermetic: never depend on installed or machine state.
+  A clean CI runner is itself the ratchet.
+
+### Changed
+
+- `checks/ascii-ps1.sh` and `checks/spec-gate-ci.sh` POSIX-hardened for strict shells
+  (INC-2a): removed bashisms, fixed quoting, replaced `[[` with `[`.
+- `.github/workflows/sdad-gates.yml` adds `gate-from-base` pattern to the CI step
+  (INC-2a): checks out `$GITHUB_BASE_REF` before running `spec-gate-ci.sh`.
+- `$eval` golden dataset grows from 12 to 14 deterministic scenarios:
+  scenario 13 (`claude-md-case`) and 14 (`ci-spec-gate-policy`).
+
+---
+
+## [5.0] — 2026-06-13
+
+### Overview
+
+SDAD v5.0 "Harness Edition" is an identity change: from *prompt methodology* to
+*prompt + enforced harness*. A v4.3 audit against harness-engineering theory
+(H = E, T, C, S, L, V) found SDAD strong where it owns the layer — Context (C)
+and State (S) — but governing critical gates by **instruction in the prompt**
+rather than **enforcement in code**. v5 moves the rules that matter into code.
+
+Three core moves:
+- **Governance by code (I1, I2):** the Spec gate and the lesson ratchet become
+  executable checks — a `PreToolUse` hook and a `checks/` directory — instead of
+  prose a model can drift past.
+- **Self-evaluation (I3):** SDAD gains the V component it lacked entirely — a
+  golden dataset + `$eval` runner that detects methodology regressions before
+  release instead of in a client project.
+- **Hardening (I4–I9):** sub-agent liveness, typed §13, formal `$build`
+  error-recovery state, model pinning, atomic state commits, and a CLAUDE.md
+  reframe with a Control Layer skill.
+
+**Upgrade note:** v4.x projects are fully compatible — no SPEC.md or command
+surface breaks; an existing SPEC.md still loads and `$pause` reports correctly.
+The only behavioral change is the new build gate, which is the point of v5.
+Run `git tag v4.3` before pulling v5 to preserve prior state, then run
+`apply-v5.ps1` (idempotent, ASCII, self-deleting) to apply the `.claude/` changes.
+
+---
+
+### Added
+
+**PreTool spec-gate hook — governance by code (I1)**
+- `pre-tool-use-spec-gate.ps1` / `.sh` registered on `PreToolUse` (matcher
+  `Write|Edit`). Denies a code-file write/edit (exit 2 + message) when `SPEC.md`
+  is absent or not marked `SPEC STATUS: APPROVED`. Allowlists `*.md`, `docs/`,
+  `.sdad/`, `.claude/`, `hub/`, and the `$docfinal` path (`.sdad/DOCFINAL_ACTIVE`
+  sentinel). Fails open (allow + `.sdad/gate.log` entry) on its own internal
+  error — a broken guard never freezes the developer.
+- "Code written without an approved Spec" becomes structurally impossible,
+  independent of model compliance.
+
+**Lesson-to-guardrail code ratchet (I2)**
+- New `checks/` directory: a captured lesson with a mechanically verifiable
+  pattern now generates a check, not only a prose rule.
+- First check `checks/ascii-ps1.ps1` / `.sh` — fails when any tracked `.ps1`
+  contains non-ASCII bytes (L-01, recurred twice). Wired into `session-end`
+  (skip autocommit + warn on failure, fail-open) and `.git/hooks/pre-commit`
+  (block the commit, deliberate hard stop).
+
+**Methodology evaluation harness — the V component (I3, `$eval`)**
+- `.sdad/eval/` golden dataset: a deterministic core of 12 scenarios (gate
+  allow/deny/fail-open, ASCII check, pre-commit block, CLAUDE.md structural
+  asserts, `$eval` self-regression, `$agent` timeout, typed §13, HOLD_AUTOCOMMIT)
+  plus an LLM replay smoke (`llm-smoke.ps1`, release-gate only).
+- `$eval` runner replays the dataset and emits a pass/fail report per scenario.
+  Runs on any CLAUDE.md/skill change and as the release gate.
+- SessionStart prints a non-blocking `$eval` reminder when `git hash-object
+  CLAUDE.md` differs from the `.sdad/eval/last-run` stamp.
+
+**`$agent` liveness wrapper (I4)**
+- `.sdad/lib/agent-run.ps1` / `.sh` wraps `claude --print` with a 600s timeout
+  and an empty/missing-output guard — on timeout exit 2, on empty output exit 1,
+  never proceeds silently.
+
+**Harness skill — Control Layer detail (I9)**
+- `.claude/skills/harness/SKILL.md`: the H = (E, T, C, S, L, V) mapping of where
+  SDAD enforces each function (code vs prompt), the Governance Axiom, and the
+  `$eval` / ratchet / gate detail kept out of CLAUDE.md to respect the line budget.
+
+**Hooks ported to bash — macOS/Linux support (merged into v5)**
+- `session-start.sh`, `pre-compact.sh`, `session-end.sh` — 1:1 POSIX sh ports of
+  the three PowerShell hooks, same safeguards (guarded ff-only pull, anchor
+  snapshot, autocommit whitelist + HOLD sentinel, no empty commits).
+- `run-hook.sh` — cross-platform dispatcher. `settings.json` registers one
+  shell-form command per hook; on Windows it runs under Git Bash and delegates
+  to the `.ps1` scripts, on macOS/Linux it runs the `.sh` ports.
+- Test gate passed on macOS for the three legacy hooks: valid JSON (`jq`),
+  unicode round-trip without mojibake, pull guard, hold sentinel, whitelist
+  isolation, no empty commits, real-session integration.
+
+**v5 documentation**
+- Three new docs in Markdown (machine-readable) and HTML5 (human-readable) per
+  ADR-005: `SDAD_v5_INSTALL`, `SDAD_v5_USER_GUIDE`, `SDAD_v5_WHAT_IS_SDAD`.
+
+### Changed
+
+**CLAUDE.md v5.0 reframe (I9)**
+- New `$eval` command registered in Commands and `$sdad` overview. Governance
+  Axiom added as a behavior rule ("hard gates live in code; prompt rules are the
+  fallback, not the guarantee"). New behavior rules for I3–I8 enforcement.
+  Version + footer bumped to 5.0. Net footprint +55 of the +60 budget.
+
+**Typed §13 AI Authorship Log (I5)**
+- §13 rows are now a structured 8-column schema: Increment · Feature · Model ·
+  Effort · Files · Tests (pass/fail/count) · QA findings (count/max severity) ·
+  Date. Locked by an `$eval` structural assert. Enables causal attribution across
+  projects.
+
+**`$build` error-recovery contract (I6)**
+- On a tool/test error mid-increment: report → stop the increment cleanly →
+  create `.sdad/HOLD_AUTOCOMMIT` → never autocommit, never enter an undefined
+  retry loop. Recovery clears when the developer resumes. `session-end` honors
+  the sentinel (eval-locked).
+
+**Determinism and atomic state (I7, I8)**
+- `$verify` / §5 record the exact model string used per release when
+  reproducibility matters. DECISIONS.md + §13 + SPEC.md updates for one increment
+  are committed as a single atomic commit (R6).
+
+**Installers**
+- `install.ps1` / `install.sh` and `project-init.ps1` / `.sh` now ship the
+  PreTool spec-gate hook, the `checks/` scaffold, the `.sdad/eval/` seed, the
+  `.sdad/lib/` agent wrapper, the `harness` skill, and the git pre-commit hook.
+
+### Fixed
+
+- CLAUDE.md line-budget `$eval` assert resolved the methodology filename
+  case-insensitively — on disk it is `CLAUDE.md` but the assert looked for
+  `Claude.md`, so the budget gate had never actually run. Now enforced.
+- `install.ps1` and `project-init.ps1` made pure ASCII (L-01): the section signs
+  and em-dashes in the generated SPEC template were re-templated to ASCII, not
+  blind-replaced. The `checks/ascii-ps1` ratchet now reports zero violations.
+
+### Known gaps (deferred)
+
+- macOS testing of the new `.sh` spec-gate variant: shipped untested alongside a
+  live `/compact` PreCompact verification — both tracked in
+  `docs/TASK_HOOKS_MACOS_PORT.md`. Porting without a test environment risks
+  repeating the L-01 class of bugs — deliberately deferred, not forgotten.
+- LLM replay smoke runs as a release gate only (non-deterministic by nature),
+  never as a daily/per-change gate.
+
+---
+
 ## [4.3] — 2026-06-10
 
 ### Overview
@@ -132,7 +319,8 @@ before pulling v4.3 to preserve prior state.
 
 - Bash equivalents of the three PowerShell hooks (hooks remain Windows-only;
   porting without a test environment risks repeating the L-01 encoding class
-  of bugs — deliberately deferred, not forgotten).
+  of bugs — deliberately deferred, not forgotten). → CLOSED in [Unreleased]:
+  ported and tested on macOS.
 - CHANGELOG [4.0] §A/§B section names and "Layer 7" reference don't match
   current CLAUDE.md naming — left as historical record.
 
@@ -442,4 +630,4 @@ by Claude Code — no manual file copying or separate skill repos required.
 
 ---
 
-G7 AI Development Methodology | SDAD v4.3
+G7 AI Development Methodology | SDAD v5.1

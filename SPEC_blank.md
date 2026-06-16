@@ -190,6 +190,10 @@ An increment is complete when:
 
 ## §13 — AI Authorship Log
 
-| Increment | Feature | Model | Date | Notes |
-|-----------|---------|-------|------|-------|
-| SPEC v1.0 | Initial spec | [model] | [date] | [$spec guided / $docfinal / manual] |
+> Typed schema (v5, I5): one row per increment. Columns — Increment · Feature ·
+> Model (exact string) · Effort · Files · Tests (pass/fail/count) · QA findings
+> (count/max severity) · Date.
+
+| Increment | Feature | Model | Effort | Files | Tests | QA findings | Date |
+|-----------|---------|-------|--------|-------|-------|-------------|------|
+| SPEC v1.0 | Initial spec | [model] | n/a | n/a | n/a | n/a | [date] |

@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDAD v5 &mdash; The Visual Manual</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0F172A; --body: #1E293B; --muted: #475569; --faint: #94A3B8;
+      --blue: #2563EB; --blue-ink: #1E3A8A; --blue-bg: #EFF6FF; --blue-soft: #DBEAFE;
+      --line: #E2E8F0; --line2: #CBD5E1; --surface: #FFFFFF; --bg: #FAFAFA;
+      --amber-bd: #FDE68A; --amber-bg: #FFFBEB; --amber-ink: #B45309;
+      --green-bd: #BBF7D0; --green-bg: #F0FDF4; --green-ink: #15803D;
+      --purple: #7C3AED; --purple-ink: #6D28D9; --purple-bg: #F5F3FF;
+      --teal: #0D9488; --teal-ink: #0F766E; --teal-bg: #F0FDFA;
+      --red-ink: #B91C1C; --red-bg: #FEF2F2; --red-bd: #FECACA;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg); color: var(--ink); line-height: 1.65;
+    }
+
+    /* reading progress */
+    #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--blue); z-index: 200; transition: width .08s linear; }
+
+    /* sticky control bar */
+    .topbar {
+      position: sticky; top: 0; z-index: 100; background: rgba(250,250,250,.92);
+      backdrop-filter: saturate(150%) blur(6px); border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner {
+      max-width: 880px; margin: 0 auto; display: flex; align-items: center; flex-wrap: wrap;
+      gap: 10px; padding: 10px 24px;
+    }
+    .brand { font-size: 13px; font-weight: 700; color: var(--blue); letter-spacing: .03em; margin-right: auto; }
+    .brand span { color: var(--faint); font-weight: 500; }
+    .pill {
+      font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+      border: 1px solid var(--line2); background: var(--surface); color: var(--muted);
+      border-radius: 999px; padding: 6px 14px; transition: all .12s ease; line-height: 1.2;
+    }
+    .pill:hover { border-color: var(--blue); color: var(--blue); }
+    .pill[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .pill .sub { display: block; font-size: 10px; font-weight: 500; opacity: .82; }
+    .toc-btn {
+      font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--muted);
+      background: var(--surface); border: 1px solid var(--line2); border-radius: 999px; padding: 6px 14px;
+    }
+    .toc-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .toc-panel {
+      display: none; max-width: 880px; margin: 0 auto; padding: 4px 24px 16px;
+    }
+    .toc-panel.open { display: block; }
+    .toc-panel ol { list-style: none; columns: 2; column-gap: 28px; }
+    .toc-panel li { margin: 5px 0; font-size: 13.5px; break-inside: avoid; }
+    .toc-panel a { color: var(--body); text-decoration: none; }
+    .toc-panel a:hover { color: var(--blue); }
+    .toc-panel a b { color: var(--faint); font-weight: 600; margin-right: 8px; }
+
+    .page { max-width: 880px; margin: 0 auto; padding: 8px 24px 90px; }
+
+    /* cover */
+    .cover { border-bottom: 2px solid var(--blue); padding: 34px 0 26px; margin-bottom: 14px; }
+    .cover .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
+    .cover h1 { font-size: 38px; font-weight: 800; line-height: 1.12; margin-bottom: 10px; letter-spacing: -.01em; }
+    .cover .tagline { font-size: 17px; color: var(--muted); max-width: 640px; }
+
+    .read-paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 14px; margin: 30px 0 8px; }
+    .rp { border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; background: var(--surface); }
+    .rp .lvl { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+    .rp.s .lvl { color: var(--blue); } .rp.m .lvl { color: var(--purple-ink); } .rp.d .lvl { color: var(--teal-ink); }
+    .rp p { font-size: 13.5px; color: var(--muted); margin: 0; }
+    .rp b { color: var(--ink); }
+
+    /* section primitives */
+    section { padding-top: 24px; margin-top: 8px; }
+    .sec-chip { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--blue); background: var(--blue-bg); border-radius: 6px; padding: 4px 10px; margin-bottom: 12px; }
+    h2 { font-size: 25px; font-weight: 700; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--line); letter-spacing: -.01em; }
+    h3 { font-size: 16.5px; font-weight: 700; margin: 28px 0 10px; }
+    h4 { font-size: 14px; font-weight: 700; }
+    p { margin-bottom: 15px; font-size: 15px; color: var(--body); }
+    ul, ol { margin: 0 0 16px 22px; font-size: 15px; color: var(--body); }
+    li { margin-bottom: 8px; }
+    strong { font-weight: 700; }
+    code { font-family: 'Menlo','Consolas','Monaco',monospace; font-size: 13px; background: #E2E8F0; color: #1E293B; padding: 2px 6px; border-radius: 4px; }
+    em { font-style: italic; }
+
+    .lede { font-size: 16.5px; color: #1E293B; background: var(--blue-bg); border-left: 4px solid var(--blue); padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 0 0 24px; }
+
+    /* callouts */
+    .callout { border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 22px 0; font-size: 14.5px; }
+    .callout .tag { display: block; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 5px; }
+    .c-key { background: var(--blue-bg); border-left: 4px solid var(--blue); }
+    .c-key .tag { color: var(--blue); }
+    .c-warn { background: var(--amber-bg); border-left: 4px solid #D97706; color: #78350F; }
+    .c-warn .tag { color: var(--amber-ink); }
+    .c-ok { background: var(--green-bg); border-left: 4px solid var(--green-ink); color: #14532D; }
+    .c-ok .tag { color: var(--green-ink); }
+
+    /* the key line */
+    .keyline { text-align: center; font-size: 21px; font-weight: 700; line-height: 1.45; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--blue); border-radius: 10px; padding: 24px; margin: 8px 0 26px; }
+    .keyline .a { color: var(--amber-ink); } .keyline .b { color: var(--green-ink); }
+
+    /* audience notes */
+    .aud-note { border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 0 0 24px; font-size: 15px; }
+    .aud-note .tag { display: block; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 5px; }
+    .a-summary { background: var(--blue-bg); border-left: 4px solid var(--blue); }
+    .a-summary .tag { color: var(--blue); }
+    .a-methodology { background: var(--purple-bg); border-left: 4px solid var(--purple); }
+    .a-methodology .tag { color: var(--purple-ink); }
+    .a-details { background: var(--teal-bg); border-left: 4px solid var(--teal); }
+    .a-details .tag { color: var(--teal-ink); }
+    .aud-note { display: none; }
+    [data-aud="summary"] .a-summary,
+    [data-aud="methodology"] .a-methodology,
+    [data-aud="details"] .a-details { display: block; }
+    /* deeper inline content hidden at summary level */
+    [data-aud="summary"] .deep { display: none; }
+
+    /* compare */
+    .compare { display: flex; gap: 16px; flex-wrap: wrap; margin: 0 0 12px; }
+    .compare .col { flex: 1; min-width: 270px; border-radius: 10px; padding: 18px 20px; }
+    .compare .prompt { background: var(--amber-bg); border: 1px solid var(--amber-bd); }
+    .compare .codecol { background: var(--green-bg); border: 1px solid var(--green-bd); }
+    .compare h4 { font-size: 14.5px; margin-bottom: 4px; }
+    .compare .prompt h4 { color: var(--amber-ink); } .compare .codecol h4 { color: var(--green-ink); }
+    .compare .role { font-size: 12px; font-weight: 600; opacity: .85; margin-bottom: 12px; }
+    .compare .prompt .role { color: var(--amber-ink); } .compare .codecol .role { color: var(--green-ink); }
+    .compare ul { margin: 0 0 0 2px; list-style: none; }
+    .compare li { font-size: 13.5px; margin-bottom: 9px; padding-left: 22px; position: relative; color: var(--body); }
+    .compare .prompt li::before { content: "\26A0"; position: absolute; left: 0; color: var(--amber-ink); }
+    .compare .codecol li::before { content: "\2713"; position: absolute; left: 0; color: var(--green-ink); font-weight: 700; }
+    .verdict { font-size: 13px; font-weight: 700; margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,.12); }
+    .compare .prompt .verdict { color: var(--amber-ink); } .compare .codecol .verdict { color: var(--green-ink); }
+
+    /* terminal */
+    .terminal { background: #0F172A; border-radius: 10px; padding: 18px 20px; margin: 0 0 8px; font-family: 'Menlo','Consolas','Monaco',monospace; font-size: 12.5px; line-height: 1.6; color: #E2E8F0; overflow-x: auto; white-space: pre; }
+    .terminal .cmd { color: #93C5FD; } .terminal .deny { color: #FCA5A5; } .terminal .ok { color: #86EFAC; }
+    .terminal .dim { color: #94A3B8; } .terminal .hl { color: #FCD34D; }
+    .caption { font-size: 12.5px; color: var(--muted); margin: 0 0 24px; font-style: italic; }
+    .concrete-label { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--faint); margin: 26px 0 8px; }
+
+    /* expandable technical layer */
+    details.tech { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); margin: 16px 0 22px; overflow: hidden; }
+    details.tech > summary { cursor: pointer; list-style: none; padding: 14px 18px; font-size: 14px; font-weight: 700; color: var(--blue); display: flex; align-items: center; gap: 10px; user-select: none; }
+    details.tech > summary::-webkit-details-marker { display: none; }
+    details.tech > summary .chev { transition: transform .15s ease; font-size: 12px; }
+    details.tech[open] > summary .chev { transform: rotate(90deg); }
+    details.tech > summary .for { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--faint); text-transform: uppercase; letter-spacing: .04em; }
+    .tech-body { padding: 6px 20px 18px; border-top: 1px solid var(--line); }
+    .tech-body p, .tech-body li { font-size: 14px; }
+    .tech-body ol, .tech-body ul { margin: 12px 0 12px 20px; }
+
+    .failopen { background: var(--green-bg); border-left: 4px solid var(--green-ink); border-radius: 0 6px 6px 0; padding: 12px 16px; font-size: 13.5px; color: #14532D; margin: 14px 0; }
+    .failopen strong { display: block; margin-bottom: 3px; }
+
+    /* tables */
+    table.tbl { width: 100%; border-collapse: collapse; margin: 8px 0 22px; font-size: 13.5px; }
+    table.tbl th { text-align: left; background: #F1F5F9; color: var(--ink); font-weight: 700; padding: 9px 12px; border-bottom: 2px solid var(--line2); font-size: 12.5px; }
+    table.tbl td { padding: 9px 12px; border-bottom: 1px solid var(--line); color: var(--body); vertical-align: top; }
+    table.tbl tr:last-child td { border-bottom: none; }
+    table.tbl code { font-size: 12px; }
+    .center { text-align: center; }
+
+    /* pipeline diagram */
+    .pipeline { display: flex; align-items: stretch; flex-wrap: wrap; gap: 0; margin: 14px 0 8px; }
+    .phase { flex: 1; min-width: 120px; background: var(--surface); border: 1px solid var(--line2); border-radius: 10px; padding: 14px 12px; text-align: center; position: relative; }
+    .phase .pn { font-size: 11px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .04em; }
+    .phase .pt { font-size: 14px; font-weight: 700; color: var(--ink); margin: 4px 0; }
+    .phase .pc { font-size: 12px; color: var(--blue); font-family: 'Menlo','Consolas',monospace; }
+    .parrow { display: flex; align-items: center; justify-content: center; color: var(--line2); font-size: 20px; padding: 0 6px; font-weight: 700; }
+    .phase.future { border-style: dashed; opacity: .7; }
+    .phase.future .pn { color: var(--purple-ink); }
+
+    /* harness grid */
+    .hgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 12px; margin: 14px 0 8px; }
+    .hcard { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: var(--surface); }
+    .hcard .he { font-size: 22px; font-weight: 800; color: var(--blue); float: right; line-height: 1; }
+    .hcard .hn { font-size: 14px; font-weight: 700; color: var(--ink); }
+    .hcard .hr { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+    .hcard .hg { font-size: 11.5px; color: var(--teal-ink); margin-top: 8px; font-weight: 600; }
+
+    /* timeline */
+    .timeline { display: flex; flex-wrap: wrap; gap: 0; margin: 16px 0 8px; align-items: stretch; }
+    .tnode { flex: 1; min-width: 130px; text-align: center; position: relative; padding: 0 4px; }
+    .tnode .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--blue); margin: 0 auto 10px; border: 3px solid var(--blue-soft); }
+    .tnode.v5 .dot { background: var(--green-ink); border-color: var(--green-bd); }
+    .tnode .tv { font-size: 14px; font-weight: 800; color: var(--ink); }
+    .tnode .td { font-size: 11px; color: var(--faint); }
+    .tnode .th2 { font-size: 12.5px; font-weight: 700; color: var(--blue); margin-top: 6px; }
+    .tnode.v5 .th2 { color: var(--green-ink); }
+    .tnode .tx { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+    .tline { height: 2px; background: var(--line2); margin: -38px 0 30px; }
+
+    /* tier ladder */
+    .ladder { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+    .tier { border-radius: 10px; padding: 14px 18px; border: 1px solid; }
+    .tier .tname { font-size: 14.5px; font-weight: 700; }
+    .tier .tdesc { font-size: 13px; margin-top: 3px; }
+    .tier1 { background: #F8FAFC; border-color: var(--line2); }
+    .tier1 .tname { color: var(--muted); }
+    .tier2 { background: var(--blue-bg); border-color: var(--blue-soft); margin-left: 22px; }
+    .tier2 .tname { color: var(--blue-ink); }
+    .tier3 { background: var(--purple-bg); border-color: #DDD6FE; margin-left: 44px; }
+    .tier3 .tname { color: var(--purple-ink); }
+
+    /* ratchet loop */
+    .ratchet { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0; }
+    .rbox { flex: 1; min-width: 120px; background: var(--surface); border: 1px solid var(--line2); border-radius: 10px; padding: 12px; text-align: center; font-size: 12.5px; }
+    .rbox b { display: block; font-size: 13px; color: var(--ink); margin-bottom: 3px; }
+    .rbox.code { background: var(--green-bg); border-color: var(--green-bd); }
+    .rbox.code b { color: var(--green-ink); }
+
+    /* command groups */
+    .cmd-group { margin: 18px 0; }
+    .cmd-group h4 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--blue); margin-bottom: 8px; }
+    .cmd-row { display: grid; grid-template-columns: 180px 1fr; gap: 4px 16px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+    .cmd-row:last-child { border-bottom: none; }
+    .cmd-row .c { font-family: 'Menlo','Consolas',monospace; font-size: 12.5px; color: var(--blue-ink); font-weight: 600; }
+    .cmd-row .d { color: var(--muted); }
+
+    /* glossary */
+    .gloss { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 14px; }
+    .gterm { border: 1px solid var(--line); border-radius: 10px; padding: 13px 16px; background: var(--surface); }
+    .gterm dt { font-size: 14px; font-weight: 700; color: var(--blue-ink); margin-bottom: 4px; }
+    .gterm dd { font-size: 13px; color: var(--muted); margin: 0; }
+
+    .trace { font-size: 12px; color: var(--faint); border-top: 1px solid var(--line); padding-top: 12px; margin-top: 26px; }
+    .trace code { background: #F1F5F9; font-size: 11.5px; }
+
+    .totop { position: fixed; bottom: 22px; right: 22px; z-index: 90; width: 42px; height: 42px; border-radius: 50%; background: var(--blue); color: #fff; border: none; cursor: pointer; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.18); opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .totop.show { opacity: 1; pointer-events: auto; }
+
+    footer { margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line); font-size: 13px; color: var(--faint); }
+    footer b { color: var(--muted); }
+
+    /* ── v2 additions ─────────────────────────────────────────── */
+
+    /* harness SVG figure */
+    .harness-fig { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 18px 14px 8px; margin: 18px 0 8px; }
+    .harness-fig svg { width: 100%; height: auto; display: block; }
+    .harness-cap { font-size: 12.5px; color: var(--muted); font-style: italic; margin: 0 0 6px; text-align: center; }
+
+    /* memory layers (§03b) */
+    .mem-layers { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+    .mem { border: 1px solid var(--line); border-left: 4px solid var(--blue); border-radius: 0 10px 10px 0; padding: 14px 18px; background: var(--surface); }
+    .mem .ml { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--blue); margin-bottom: 4px; }
+    .mem .mt { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+    .mem .md { font-size: 13.5px; color: var(--muted); margin: 0; }
+    .mem .scope { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 2px 9px; margin-bottom: 8px; }
+    .mem.l1 { border-left-color: var(--purple); } .mem.l1 .ml { color: var(--purple-ink); } .mem.l1 .scope { background: var(--purple-bg); color: var(--purple-ink); }
+    .mem.l2 { border-left-color: var(--blue); } .mem.l2 .ml { color: var(--blue); } .mem.l2 .scope { background: var(--blue-bg); color: var(--blue-ink); }
+    .mem.l3 { border-left-color: var(--teal); } .mem.l3 .ml { color: var(--teal-ink); } .mem.l3 .scope { background: var(--teal-bg); color: var(--teal-ink); }
+    .mem.l4 { border-left-color: #D97706; background: var(--amber-bg); } .mem.l4 .ml { color: var(--amber-ink); } .mem.l4 .scope { background: #FEF3C7; color: var(--amber-ink); }
+
+    /* three pillars (§07b) */
+    .pillars3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin: 16px 0 8px; }
+    @media (max-width: 640px) { .pillars3 { grid-template-columns: 1fr; } }
+    .pcard { border: 1px solid var(--line); border-top: 3px solid var(--blue); border-radius: 12px; padding: 18px 18px; background: var(--surface); }
+    .pcard.p1 { border-top-color: var(--blue); } .pcard.p2 { border-top-color: #D97706; } .pcard.p3 { border-top-color: var(--green-ink); }
+    .pcard .picon { font-size: 26px; margin-bottom: 8px; }
+    .pcard .ptitle { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+    .pcard .pvideo { font-size: 12.5px; color: var(--muted); line-height: 1.55; margin-bottom: 10px; }
+    .pcard .pdiv { height: 1px; background: var(--line); margin: 10px 0; }
+    .pcard .plab { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); margin-bottom: 6px; }
+    .pcard.p2 .plab { color: var(--amber-ink); } .pcard.p3 .plab { color: var(--green-ink); }
+    .pcard .psdad { font-size: 12.5px; color: var(--body); line-height: 1.6; }
+    .pcard .psdad em { color: var(--muted); font-size: 11.5px; }
+
+    /* governance spectrum (§04) */
+    .spectrum-wrap { margin: 22px 0 8px; }
+    .spectrum-labels { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; }
+    .spectrum-labels .left { color: var(--red-ink); } .spectrum-labels .right { color: var(--green-ink); }
+    .spectrum-bar { height: 12px; border-radius: 999px; margin: 10px 0; background: linear-gradient(90deg, #DC2626 0%, #F59E0B 50%, #16A34A 100%); }
+    .spectrum-ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--faint); }
+
+    /* status cells (gaps table) */
+    .status-yes  { color: var(--green-ink); font-weight: 700; }
+    .status-gap  { color: var(--amber-ink); font-weight: 700; }
+    .status-more { color: var(--blue);      font-weight: 700; }
+
+    @media (max-width: 600px) {
+      .cover h1 { font-size: 30px; }
+      .toc-panel ol { columns: 1; }
+      .cmd-row { grid-template-columns: 1fr; }
+    }
+    @media print {
+      #progress, .topbar, .totop { display: none !important; }
+      body { background: #fff; }
+      .aud-note { display: block !important; }
+      .deep { display: block !important; }
+      details.tech { border-color: #ccc; }
+      details.tech .tech-body { display: block !important; }
+      section { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+<div id="progress"></div>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <span class="brand">SDAD v5 <span>&middot; Visual Manual</span></span>
+    <button class="pill" data-aud="summary" aria-pressed="false">Summary <span class="sub">the essentials</span></button>
+    <button class="pill" data-aud="methodology" aria-pressed="true">Methodology <span class="sub">how it flows</span></button>
+    <button class="pill" data-aud="details" aria-pressed="false">Details <span class="sub">the mechanics</span></button>
+    <button class="toc-btn" id="tocBtn" aria-expanded="false">Contents</button>
+  </div>
+  <nav class="toc-panel" id="tocPanel" aria-label="Table of contents">
+    <ol>
+      <li><a href="#s1"><b>01</b>Why this exists</a></li>
+      <li><a href="#s2"><b>02</b>SDAD in one picture</a></li>
+      <li><a href="#s3"><b>03</b>A project, start to finish</a></li>
+      <li><a href="#s3b"><b>03b</b>Memory &amp; persistence</a></li>
+      <li><a href="#s4"><b>04</b>The big idea</a></li>
+      <li><a href="#s5"><b>05</b>The harness model</a></li>
+      <li><a href="#s6"><b>06</b>The command surface</a></li>
+      <li><a href="#s7"><b>07</b>Quality, compliance &amp; safety</a></li>
+      <li><a href="#s7b"><b>07b</b>Three pillars: theory meets practice</a></li>
+      <li><a href="#s8"><b>08</b>The learning system</a></li>
+      <li><a href="#s9"><b>09</b>The Pyplan track</a></li>
+      <li><a href="#s10"><b>10</b>The v5 enforcement layer</a></li>
+      <li><a href="#s11"><b>11</b>Setup &amp; daily use</a></li>
+      <li><a href="#s12"><b>12</b>How SDAD grew</a></li>
+      <li><a href="#s13"><b>13</b>Where it's going</a></li>
+      <li><a href="#s14"><b>14</b>Glossary</a></li>
+    </ol>
+  </nav>
+</div>
+
+<div class="page" id="manual" data-aud="methodology">
+
+  <!-- ===================== COVER ===================== -->
+  <header class="cover">
+    <p class="eyebrow">G7 AI Development Methodology</p>
+    <h1>SDAD v5 &mdash; The Visual Manual</h1>
+    <p class="tagline">Spec-Driven AI Development, "Harness Edition." One document the whole G7 team can read &mdash; a director, a project lead, and a developer each open the same file and each come away understanding SDAD at their level.</p>
+
+    <div class="read-paths">
+      <div class="rp s">
+        <div class="lvl">Summary</div>
+        <p>Pick <b>Summary</b> above and read top to bottom in ~10 minutes. Plain language, no code &mdash; what SDAD is, why it matters, what risk it removes.</p>
+      </div>
+      <div class="rp m">
+        <div class="lvl">Methodology</div>
+        <p>Pick <b>Methodology</b> (the default) to see how a project actually flows through the phases, gates, and compliance tiers.</p>
+      </div>
+      <div class="rp d">
+        <div class="lvl">Details</div>
+        <p>Pick <b>Details</b> to auto-open every technical layer: the real commands, the hooks, the gates, the ratchet.</p>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--faint);margin:18px 0 0;">The control changes the depth of every section. You can also expand "How it works" in any single section, at any level. Use <b>Contents</b> to jump around. Prints cleanly to PDF (all layers expand).</p>
+  </header>
+
+  <!-- ===================== 1. WHY ===================== -->
+  <section id="s1">
+    <span class="sec-chip">01 &middot; The problem</span>
+    <h2>Why SDAD exists</h2>
+
+    <p class="lede">An AI coding agent is, structurally, an <strong>eager contractor with no memory between sessions, no inherent notion of project scope, and a strong disposition to be helpful right now</strong> &mdash; which means it starts coding before anyone has agreed on what "done" means.</p>
+
+    <p>The productivity is real: a task that took a day can take an hour, and a non-developer with domain knowledge can direct work they could not previously execute. But the failure modes are real too, and they are different from human-only development. Five of them recur across every team that adopts AI coding tools without a methodology:</p>
+
+    <table class="tbl">
+      <tr><th style="width:190px;">Failure mode</th><th>What it looks like</th></tr>
+      <tr><td><strong>Premature implementation</strong></td><td>The agent codes immediately. By the time the scope error is noticed, there are hundreds of lines of plausible code solving the wrong problem.</td></tr>
+      <tr><td><strong>Silent assumptions</strong></td><td>Reasonable-sounding guesses about data shapes and edge cases get baked into the build, with no record of what was assumed or why.</td></tr>
+      <tr><td><strong>Session amnesia</strong></td><td>When the context window expires, prior decisions are gone. The developer re-explains everything, or the agent drifts back to defaults.</td></tr>
+      <tr><td><strong>Governance drift</strong></td><td>Prompt rules ("always run tests", "never touch production") degrade over long sessions. A rule obeyed on turn 10 is quietly forgotten on turn 40.</td></tr>
+      <tr><td><strong>No auditability</strong></td><td>No record of what was built, why, what was rejected, or which AI model made which decision.</td></tr>
+    </table>
+
+    <div class="aud-note a-summary">
+      <span class="tag">In one breath</span>
+      AI writes code fast, but left to itself it builds before it understands, forgets what was decided, and treats your rules as polite requests. SDAD is the discipline that fixes this &mdash; so AI-assisted work becomes predictable, auditable, and safe for non-developers to direct.
+    </div>
+    <div class="aud-note a-methodology">
+      <span class="tag">Why a methodology, not just better prompts</span>
+      The instinctive fix is to write better prompts. It helps, but it has a ceiling: a prompt is a natural-language suggestion to a probabilistic system, not a constraint. SDAD's answer is structure &mdash; enforced phases, persistent state, and hard gates for the rules that must never be violated.
+    </div>
+    <div class="aud-note a-details">
+      <span class="tag">The engineering claim</span>
+      Governance-by-prompt provides <em>statistical</em> compliance; governance-by-code provides <em>guaranteed</em> compliance. SDAD's thesis is to use both layers in their correct domain &mdash; code for rules with serious consequences and a mechanically detectable trigger; prompt for guidance and judgment calls. Section 4 makes this concrete.
+    </div>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;2.1&ndash;2.2</code> (the problem), <code>&sect;3.3</code> (prompt vs. process engineering).</p>
+  </section>
+
+  <!-- ===================== 2. ONE PICTURE ===================== -->
+  <section id="s2">
+    <span class="sec-chip">02 &middot; The shape</span>
+    <h2>SDAD in one picture</h2>
+
+    <p class="lede">SDAD organizes every project into <strong>five phases, executed in sequence</strong>. They are not a checklist the developer keeps in their head &mdash; they are a structure the AI agent operates within, with gates that enforce the order.</p>
+
+    <div class="pipeline">
+      <div class="phase"><div class="pn">Phase 0</div><div class="pt">Context</div><div class="pc">reads the repo</div></div>
+      <div class="parrow">&rarr;</div>
+      <div class="phase"><div class="pn">Phase 1</div><div class="pt">Requirements</div><div class="pc">$spec</div></div>
+      <div class="parrow">&rarr;</div>
+      <div class="phase"><div class="pn">Phase 2</div><div class="pt">Specification</div><div class="pc">$specout</div></div>
+      <div class="parrow">&rarr;</div>
+      <div class="phase"><div class="pn">Phase 3</div><div class="pt">Build</div><div class="pc">$build</div></div>
+      <div class="parrow">&rarr;</div>
+      <div class="phase"><div class="pn">Phase 4</div><div class="pt">Quality</div><div class="pc">$qa</div></div>
+      <div class="parrow">&rarr;</div>
+      <div class="phase future"><div class="pn">Phase 5+</div><div class="pt">Deploy</div><div class="pc">(v6 roadmap)</div></div>
+    </div>
+
+    <div class="callout c-key">
+      <span class="tag">One-sentence definition</span>
+      SDAD is a methodology that imposes process discipline on Claude Code through a structured phase model, a command surface, automated session lifecycle management, a tiered compliance system, a cross-project Lesson Library, and &mdash; in v5 &mdash; <strong>hard enforcement of critical rules in executable code rather than natural-language instruction.</strong>
+    </div>
+
+    <p>The gates are the point. Phase 3 (Build) cannot begin until Phase 2 produces an <em>approved</em> specification. Phase 4 (QA) runs automatically after every Phase 3 increment. The sequence is not self-reported &mdash; it is enforced.</p>
+
+    <div class="aud-note a-summary">
+      <span class="tag">Read the picture left to right</span>
+      First SDAD reads your project. Then it asks what you want (one question at a time). Then it writes that down as a contract you approve. Only then does it build &mdash; in small, tested slices &mdash; and it checks quality after every slice.
+    </div>
+
+    <details class="tech">
+      <summary><span class="chev">&#9656;</span> How it works &mdash; what each phase does <span class="for">technical layer</span></summary>
+      <div class="tech-body">
+        <ul>
+          <li><strong>Phase 0 &mdash; Context Analysis.</strong> Before asking anything, SDAD reads files, git history, manifests, and any prior <code>SPEC.md</code>/<code>DECISIONS.md</code>. It determines new-vs-resume, the stack, whether a UI exists, the likely compliance tier, and whether a <code>$verify audit</code> is due (&gt;30 days since last build). It also surfaces 2&ndash;3 relevant lessons from the Lesson Library.</li>
+          <li><strong>Phase 1 &mdash; Requirements (<code>$spec</code>).</strong> A Socratic dialog: one question at a time, each with a proposed default. First question is always project language. The compliance-tier question is mandatory and cannot be skipped.</li>
+          <li><strong>Phase 2 &mdash; Specification (<code>$specout</code>).</strong> Generates the full 13-section <code>SPEC.md</code> and writes it to the repo root. This is the contract; <code>$build</code> stays locked until it is approved.</li>
+          <li><strong>Phase 3 &mdash; Build (<code>$build</code>).</strong> Implements one <em>vertical increment</em> per call &mdash; a complete, tested slice from user interaction down to data, not a horizontal layer.</li>
+          <li><strong>Phase 4 &mdash; QA (<code>$qa</code>).</strong> Runs automatically after every increment, in four priority-ordered layers (Security &rarr; Structure &rarr; Efficiency &rarr; Best Practices).</li>
+        </ul>
+      </div>
+    </details>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;4.1</code> (the phase model), <code>&sect;1</code> (abstract / definition).</p>
+  </section>
+
+  <!-- ===================== 3. A PROJECT ===================== -->
+  <section id="s3">
+    <span class="sec-chip">03 &middot; The walkthrough</span>
+    <h2>A project, start to finish</h2>
+
+    <p class="lede">The same five phases, but now with the real artifacts SDAD produces at each step &mdash; the spec contract, the increment announcement, the decision log, the QA pass.</p>
+
+    <h3>Phase 1 &mdash; the Socratic dialog</h3>
+    <p>The first question is <em>always</em> language: should interaction and documents be in English or Spanish? The answer becomes <code>PROJECT_LANGUAGE</code> and governs everything after (code identifiers and comments always stay in English). The standard sequence then covers scope, user roles, data model, integrations, business rules, performance, security &amp; compliance (with mandatory tier confirmation), and testing strategy.</p>
+
+    <h3>Phase 2 &mdash; the spec is a contract</h3>
+    <p><code>$specout</code> writes a complete 13-section <code>SPEC.md</code>. It is not documentation of what was built &mdash; it is a commitment to what <em>will</em> be built, agreed in advance by both the developer and the AI. Section §13, the <strong>AI Authorship Log</strong>, is a typed 8-column table (Increment, Feature, Model, Effort, Files, Tests, QA Findings, Date) that makes every increment auditable.</p>
+
+    <h3>Phase 3 &mdash; every increment announces itself</h3>
+    <p>Before writing a single line, <code>$build</code> announces the increment. If the active model does not match the recommendation, it flags the mismatch and waits:</p>
+    <div class="terminal"><span class="hl">&#128296; INCREMENT 3: customer checkout flow</span>
+<span class="dim">&#129504; MODEL: STANDARD &middot; effort low &mdash; mechanical implementation</span>
+<span class="dim">   (recommended: use /model and /effort if the active session differs)</span>
+Files: src/checkout.py, tests/test_checkout.py
+Tests: unit + integration &mdash; will be executed after writing
+Docs: README update + inline comments
+Dependencies: cart module (increment 2)
+<span class="dim">&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;</span></div>
+    <p class="caption">After writing code, <code>$build</code> runs tests (reporting real pass/fail counts, never simulated), runs <code>$qa</code>, writes the DECISIONS.md HUB BLOCK, and updates §13 &mdash; the tests, decision, and log committed atomically as one unit.</p>
+
+    <p class="concrete-label">The decision log &mdash; a real HUB BLOCK</p>
+    <div class="terminal"><span class="dim">&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;</span>
+<span class="hl">&#128203; HUB BLOCK &mdash; DECISIONS.md</span>
+<span class="dim">&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;</span>
+Date: 2026-06-15
+Increment: 3 &mdash; customer checkout flow
+Model: STANDARD
+Decision: use idempotency keys on the charge endpoint
+Rationale: retries must not double-charge the customer
+Alternatives considered: dedup table (heavier, rejected)
+Impact: src/checkout.py; adds stripe idempotency dependency</div>
+    <p class="caption">Every architectural decision becomes a searchable record, attributable to a model, date, and increment. This is the audit trail that makes AI-assisted development accountable.</p>
+
+    <div class="aud-note a-summary">
+      <span class="tag">What you'll actually see</span>
+      You answer a short interview, you read and approve a spec, and then the AI builds in small pieces &mdash; announcing each one before it starts, testing it, and writing down every decision. Nothing important happens silently.
+    </div>
+    <div class="aud-note a-methodology">
+      <span class="tag">Where you stay in control</span>
+      Three checkpoints are yours: you approve the spec before any build, you confirm the model tier when an increment announces a mismatch, and you approve any security or compliance fix. The vertical-increment rhythm means you review small, complete slices &mdash; never a 2,000-line drop.
+    </div>
+
+    <details class="tech">
+      <summary><span class="chev">&#9656;</span> How it works &mdash; the post-write sequence &amp; state files <span class="for">technical layer</span></summary>
+      <div class="tech-body">
+        <p>After writing code, <code>$build</code> runs, in order: (1) the project's test command, reporting real results; (2) <code>$qa</code> on the increment; (3) a DECISIONS.md HUB BLOCK; (4) the §13 update; (5) on Pyplan, the platform checklist; (6) after a structural increment, a proposed CLAUDE.md update. Steps 3&ndash;4 plus the tests commit atomically &mdash; a v5 discipline so a mid-write crash never leaves inconsistent state.</p>
+        <p>SDAD's permanent project memory lives in three git-backed files: <code>SPEC.md</code> (the contract), <code>DECISIONS.md</code> (the decision log; <code>[LOCK]</code> entries are non-reopenable), and <code>LESSON_LIBRARY.md</code> (cross-project knowledge). Sub-agents handle expensive, committed-file work (<code>$doc</code>, <code>$agent review/test/audit</code>) in isolated context that doesn't consume the main session budget.</p>
+        <p>Context budget is watched at two thresholds: <strong>50%</strong> soft warning (continue), <strong>65%</strong> hard warning (finish the current increment cleanly, then block new builds until <code>$pause compress</code> snapshots state for a fresh session).</p>
+      </div>
+    </details>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;4.1</code> (phases 1&ndash;4), <code>&sect;4.2</code> (state), <code>&sect;4.5</code> (context budget), <code>&sect;5.2</code> (HUB BLOCK).</p>
+  </section>
+
+  <!-- ===================== 3b. MEMORY & PERSISTENCE ===================== -->
+  <section id="s3b">
+    <span class="sec-chip">03b &middot; Memory</span>
+    <h2>Memory &amp; persistence between sessions</h2>
+
+    <p class="lede">An AI agent has no memory of its own &mdash; the context window empties when the session ends, and compaction can drop detail mid-session. SDAD treats memory as an engineered layer, not a hope. It persists what matters in <strong>four distinct tiers</strong>, each with a different lifetime and a different home.</p>
+
+    <div class="mem-layers">
+      <div class="mem l1">
+        <span class="scope">Lifetime: this session</span>
+        <div class="ml">Layer 1 &middot; Within-session context</div>
+        <div class="mt">The working context window</div>
+        <p class="md">Everything the agent currently "sees" &mdash; the conversation, files it has read, decisions made this turn. Fast but volatile: it degrades as it fills and is lost when the session ends. SDAD does not trust it as memory; it watches it with the context budget (50% soft / 65% hard) and parks work cleanly before it runs out. Sub-agents run in <em>isolated</em> context so heavy work never crowds this window.</p>
+      </div>
+      <div class="mem l2">
+        <span class="scope">Lifetime: across sessions, this project</span>
+        <div class="ml">Layer 2 &middot; Cross-session project files</div>
+        <div class="mt">SPEC.md + DECISIONS.md + the anchor</div>
+        <p class="md">The durable project memory, all git-backed in the repo. <code>SPEC.md</code> holds the contract; <code>DECISIONS.md</code> holds the decision log (with <code>[LOCK]</code> entries that are non-reopenable). The <strong>COMPACT ANCHOR</strong> &mdash; the set of <code>[LOCK]</code> decisions and live constraints &mdash; is written to disk by the PreCompact hook and <em>re-injected by SessionStart</em>, which is what makes it survive both compaction and a full restart. <code>$pause compress</code> produces a <strong>Session Snapshot</strong>: a compact state block you paste into the next session so SDAD restores phase, tier, approved sections, open QA findings, and the exact next step &mdash; with no re-explanation.</p>
+      </div>
+      <div class="mem l3">
+        <span class="scope">Lifetime: forever, every project</span>
+        <div class="ml">Layer 3 &middot; Cross-project knowledge</div>
+        <div class="mt">The Lesson Library</div>
+        <p class="md"><code>LESSON_LIBRARY.md</code> is the only memory that crosses project boundaries. A lesson learned on one project is surfaced automatically in <strong>Phase 0</strong> of every future project, matched by <code>#stack</code> and <code>#phase</code> tags (embeddings only past ~50 entries). This is how the methodology compounds: a mistake made once becomes a guardrail everywhere &mdash; and, when mechanically checkable, ratchets into code (Section 8).</p>
+      </div>
+      <div class="mem l4">
+        <span class="scope">Deliberately not persisted</span>
+        <div class="ml">Layer 4 &middot; What is NOT persisted</div>
+        <div class="mt">The forgetting is also a design choice</div>
+        <p class="md">Conversational chatter, intermediate reasoning, rejected drafts, and a sub-agent's full working context are intentionally <em>not</em> saved &mdash; only its HANDOFF result returns to the main session. Nothing already recorded by the code itself, git history, or <code>SPEC.md</code> is duplicated into memory. The rule is: persist decisions and contracts, discard the deliberation that produced them. Keeping everything would poison the context window it is meant to protect.</p>
+      </div>
+    </div>
+
+    <div class="aud-note a-summary">
+      <span class="tag">Why you never re-explain</span>
+      The AI forgets the conversation when a session ends &mdash; but SDAD doesn't. The plan, the decisions, and the lessons are written to files in your project, so the next session picks up exactly where you left off. And lessons from <em>other</em> projects show up automatically when they're relevant.
+    </div>
+    <div class="aud-note a-methodology">
+      <span class="tag">The four tiers in one line each</span>
+      Session context (volatile, watched by the budget) &rarr; project files (SPEC + DECISIONS + anchor, git-backed) &rarr; the Lesson Library (cross-project, surfaced in Phase 0) &rarr; and a deliberate discard layer that keeps the working window clean.
+    </div>
+
+    <details class="tech">
+      <summary><span class="chev">&#9656;</span> How it works &mdash; the survival path &amp; the snapshot <span class="for">technical layer</span></summary>
+      <div class="tech-body">
+        <p><strong>Anchor survival is a two-step mechanism, by design.</strong> A <code>[LOCK]</code> decision: PreCompact's <em>own</em> context injection does not survive compaction &mdash; so survival = <em>PreCompact writes the anchor to disk</em> + <em>SessionStart re-injects it</em> after compaction or restart. Either half alone fails.</p>
+        <p><strong>The Session Snapshot</strong> (<code>$pause compress</code>) carries: active phase / tier / platform, approved spec sections, the active increment, the <code>[LOCK]</code> decisions only (not the full decision log), open QA findings (H-XX), the Lesson Library delta, context budget %, and the exact next step. When SDAD detects a snapshot at conversation start, it restores all state without asking the developer to re-explain.</p>
+        <ul>
+          <li><strong>Volatile</strong> &mdash; the context window. Protected, never trusted.</li>
+          <li><strong>Durable, per-project</strong> &mdash; <code>SPEC.md</code>, <code>DECISIONS.md</code>, COMPACT ANCHOR, Session Snapshot.</li>
+          <li><strong>Durable, cross-project</strong> &mdash; <code>LESSON_LIBRARY.md</code>, surfaced in Phase 0.</li>
+          <li><strong>Discarded</strong> &mdash; deliberation, sub-agent working context, anything already in code or git.</li>
+        </ul>
+      </div>
+    </details>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;4.2</code> (state model), <code>&sect;4.5</code> (context budget), <code>&sect;6.4</code> (PreCompact / SessionStart anchor), <code>&sect;8</code> (Lesson Library).</p>
+  </section>
+
+  <!-- ===================== 4. THE BIG IDEA ===================== -->
+  <section id="s4">
+    <span class="sec-chip">04 &middot; The big idea</span>
+    <h2>Governance by code, not by prompt</h2>
+
+    <p class="lede">SDAD's whole reason for existing fits in one sentence: <strong>a rule written in a prompt is a suggestion; a rule written in code is a guarantee.</strong> Everything else in this manual is machinery built to honour that distinction.</p>
+
+    <div class="keyline">
+      A rule in a <span class="a">prompt</span> is a suggestion.<br>
+      A rule in <span class="b">code</span> is a guarantee.
+    </div>
+
+    <div class="spectrum-wrap">
+      <div class="spectrum-labels">
+        <span class="left">PROMPT RULE &mdash; statistical suggestion</span>
+        <span class="right">CODE GATE &mdash; structural guarantee</span>
+      </div>
+      <div class="spectrum-bar"></div>
+      <div class="spectrum-ends">
+        <span>Fails when the model stops attending to that part of context</span>
+        <span>Impossible to violate &mdash; the action is not available</span>
+      </div>
+    </div>
+    <p class="caption">SDAD places each rule on this spectrum deliberately. "Ask one question at a time" and "always propose a default" are judgment calls with no mechanical trigger &mdash; they stay on the left, as prompt guidance. The spec gate, the ASCII-PS1 check, and atomic state commits have a binary, detectable trigger &mdash; they ratchet to the right, into code. The governance axiom is choosing the correct end of the bar for each rule.</p>
+
+    <div class="aud-note a-summary">
+      <span class="tag">In one breath</span>
+      Think of an eager new contractor who is brilliant but forgetful. You can <em>ask</em> them to never touch production without sign-off &mdash; and they will, until the day they are busy and forget. Or you can take away the key. SDAD takes away the key: the most important rules are enforced by the tooling itself, so "we forgot" stops being a possible outcome.
+    </div>
+    <div class="aud-note a-methodology">
+      <span class="tag">How it flows in a project</span>
+      On your projects this means the AI literally cannot start building before there is an approved spec. Not "is told not to" &mdash; <em>cannot</em>. The spec you approve becomes a contract the tooling enforces, so scope is locked before a line of code exists, and every later decision is traceable back to it.
+    </div>
+    <div class="aud-note a-details">
+      <span class="tag">The mechanics</span>
+      The critical gates live in a <code>PreToolUse</code> hook and in <code>checks/</code> + a git <code>pre-commit</code> hook &mdash; not in <code>CLAUDE.md</code> prose. A <code>Write</code>/<code>Edit</code> call with no approved <code>SPEC.md</code> exits 2 before the file is ever touched. Expand the technical layer below for the exact gate logic.
+    </div>
+
+    <h3>What happens under stress</h3>
+    <p>Turn 60 of a long session. The model is distracted, the context is full. Now what?</p>
+
+    <div class="compare">
+      <div class="col prompt">
+        <h4>Rule lives in the prompt</h4>
+        <p class="role">"Never write code before an approved spec."</p>
+        <ul>
+          <li>Obeyed only while the model is attending to that instruction</li>
+          <li>Degrades over long sessions and after compaction</li>
+          <li>Compliance is statistical, not guaranteed</li>
+          <li>When it fails, it fails <em>silently</em> &mdash; code already written</li>
+        </ul>
+        <p class="verdict">Result: usually fine. Occasionally, 300 lines solving the wrong problem.</p>
+      </div>
+      <div class="col codecol">
+        <h4>Rule lives in code</h4>
+        <p class="role">A PreToolUse hook checks for an approved SPEC.md.</p>
+        <ul>
+          <li>The forbidden action is simply not available</li>
+          <li>Independent of the model's state or turn count</li>
+          <li>Compliance is structural &mdash; true by construction</li>
+          <li>When blocked, it blocks <em>loudly</em>, with a clear next step</li>
+        </ul>
+        <p class="verdict">Result: "code before approved spec" is impossible, not unlikely.</p>
+      </div>
+    </div>
+
+    <p class="concrete-label">See it happen &mdash; a real spec-gate denial</p>
+    <div class="terminal"><span class="dim"># No approved SPEC.md exists yet. The agent tries to write code:</span>
+<span class="cmd">&gt; Write src/payments.py</span>
+
+<span class="deny">&#10007; BLOCKED by spec gate (PreToolUse hook, exit 2)</span>
+<span class="dim">  SPEC.md is absent or not marked "SPEC STATUS: APPROVED".</span>
+<span class="dim">  No production code may be written before an approved spec.</span>
+<span class="dim">  &rarr; Run $spec to define requirements, or $docfinal for existing code.</span>
+
+<span class="dim"># After $spec / $specout and developer approval:</span>
+<span class="cmd">&gt; Write src/payments.py</span>
+<span class="ok">&#10003; allowed &mdash; SPEC STATUS: APPROVED found</span></div>
+    <p class="caption">The gate reads the file system, not the model's intentions. Markdown, docs, and <code>.sdad/</code> paths are always allowed &mdash; only production code is gated.</p>
+
+    <details class="tech">
+      <summary><span class="chev">&#9656;</span> How it works &mdash; the gate logic <span class="for">technical layer</span></summary>
+      <div class="tech-body">
+        <p>The spec gate is a <code>PreToolUse</code> hook registered in <code>.claude/settings.json</code>. It intercepts every <code>Write</code> and <code>Edit</code> call <em>before</em> execution and runs four steps:</p>
+        <ol>
+          <li>Extract the target file path from the tool call.</li>
+          <li>If the path is on the allowlist (<code>.md</code> files, <code>docs/</code>, <code>.sdad/</code>, <code>.claude/</code>, <code>hub/</code>, or any path when the <code>.sdad/DOCFINAL_ACTIVE</code> sentinel exists) &mdash; allow unconditionally.</li>
+          <li>If <code>SPEC.md</code> is absent or lacks the exact string <code>SPEC STATUS: APPROVED</code> &mdash; deny with exit 2 and a message pointing to <code>$spec</code> or <code>$docfinal</code>.</li>
+          <li>Otherwise &mdash; allow.</li>
+        </ol>
+        <div class="failopen">
+          <strong>Fail-open by design.</strong>
+          If the gate script itself errors, it <em>allows</em> the action and logs a warning to <code>.sdad/gate.log</code>. A broken guard must never freeze the developer &mdash; its job is to block unauthorized writes, not to gate-keep all writes.
+        </div>
+        <p>The hook ships as both <code>.ps1</code> (Windows/PowerShell, tested) and <code>.sh</code> (bash/macOS, pending the macOS test gate), dispatched by a cross-platform <code>run-hook.sh</code>.</p>
+      </div>
+    </details>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;3.2</code> (the harness axiom), <code>&sect;6.2</code> (the spec gate), <code>&sect;13.1</code> (the identity statement).</p>
+  </section>
+
+  <!-- ===================== 5. HARNESS MODEL ===================== -->
+  <section id="s5">
+    <span class="sec-chip">05 &middot; The theory</span>
+    <h2>The harness model &mdash; H = (E, T, C, S, L, V)</h2>
+
+    <p class="lede">A "harness" is the software layer that governs an AI agent's execution &mdash; the term is borrowed from a wiring harness that constrains and channels electrical connections. A well-designed harness decomposes into <strong>six governance functions</strong>. SDAD uses this map to decide which rules belong in code and which can stay as guidance.</p>
+
+    <p>The popular mental model puts the AI model in the centre with <strong>four things around it</strong> &mdash; Context, Tools, Memory, and Validation. That picture is correct but incomplete: SDAD's six-function decomposition (below the diagram) adds the two the four-part picture leaves implicit &mdash; the <strong>Execution loop (E)</strong> and the <strong>Lifecycle hooks (L)</strong>. The diagram maps the familiar four onto SDAD's letters and shows where the extra two live.</p>
+
+    <figure class="harness-fig">
+      <svg viewBox="0 0 720 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The harness model: AI model in the centre, surrounded by Context (C), Tools (T), Memory (S) and Validate (V), with a Spec Gate (L) above.">
+        <defs>
+          <marker id="ah" markerWidth="9" markerHeight="9" refX="5" refY="4" orient="auto"><path d="M0,1 L7,4 L0,7 Z" fill="#94A3B8"/></marker>
+          <marker id="ah-b" markerWidth="9" markerHeight="9" refX="5" refY="4" orient="auto"><path d="M0,1 L7,4 L0,7 Z" fill="#2563EB"/></marker>
+          <marker id="ah-a" markerWidth="9" markerHeight="9" refX="5" refY="4" orient="auto"><path d="M0,1 L7,4 L0,7 Z" fill="#B45309"/></marker>
+          <marker id="ah-p" markerWidth="9" markerHeight="9" refX="5" refY="4" orient="auto"><path d="M0,1 L7,4 L0,7 Z" fill="#7C3AED"/></marker>
+          <marker id="ah-g" markerWidth="9" markerHeight="9" refX="5" refY="4" orient="auto"><path d="M0,1 L7,4 L0,7 Z" fill="#15803D"/></marker>
+        </defs>
+
+        <text x="360" y="26" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="#94A3B8" letter-spacing="3">THE HARNESS &mdash; H = (E, T, C, S, L, V)</text>
+
+        <!-- connectors (behind nodes) -->
+        <line x1="215" y1="232" x2="278" y2="252" stroke="#2563EB" stroke-width="1.5" opacity=".5" marker-end="url(#ah-b)"/>
+        <line x1="505" y1="232" x2="442" y2="252" stroke="#B45309" stroke-width="1.5" opacity=".5" marker-end="url(#ah-a)"/>
+        <line x1="232" y1="392" x2="300" y2="318" stroke="#7C3AED" stroke-width="1.5" opacity=".5" marker-end="url(#ah-p)"/>
+        <line x1="420" y1="318" x2="488" y2="392" stroke="#15803D" stroke-width="1.5" opacity=".5" marker-end="url(#ah-g)"/>
+        <line x1="360" y1="138" x2="360" y2="196" stroke="#B45309" stroke-width="1.5" opacity=".45" marker-end="url(#ah-a)"/>
+        <line x1="360" y1="58" x2="360" y2="86" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4,4" opacity=".5" marker-end="url(#ah)"/>
+        <line x1="436" y1="258" x2="640" y2="150" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4,4" opacity=".4" marker-end="url(#ah)"/>
+
+        <!-- input / output -->
+        <text x="360" y="50" text-anchor="middle" font-family="system-ui" font-size="11" fill="#94A3B8" letter-spacing="1">DEVELOPER PROMPT / $cmd</text>
+        <text x="648" y="146" text-anchor="start" font-family="system-ui" font-size="11" fill="#94A3B8">output</text>
+
+        <!-- central model -->
+        <ellipse cx="360" cy="262" rx="82" ry="60" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+        <ellipse cx="360" cy="262" rx="60" ry="42" fill="#DBEAFE" stroke="#2563EB" stroke-width="1" opacity=".6"/>
+        <text x="360" y="256" text-anchor="middle" font-family="system-ui" font-size="15" font-weight="800" fill="#1E3A8A">AI MODEL</text>
+        <text x="360" y="274" text-anchor="middle" font-family="system-ui" font-size="11" fill="#475569">Claude Code + SDAD</text>
+        <text x="360" y="290" text-anchor="middle" font-family="system-ui" font-size="10" fill="#94A3B8">E &mdash; execution loop</text>
+
+        <!-- CONTEXT (C) -->
+        <g>
+          <rect x="30" y="196" width="180" height="74" rx="12" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.5"/>
+          <circle cx="52" cy="216" r="11" fill="#2563EB"/><text x="52" y="220" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="800" fill="#fff">C</text>
+          <text x="72" y="220" font-family="system-ui" font-size="14" font-weight="700" fill="#1E3A8A">CONTEXT</text>
+          <text x="48" y="240" font-family="system-ui" font-size="10.5" fill="#475569">Budget 50% &#9888; / 65% &#128308;</text>
+          <text x="48" y="256" font-family="system-ui" font-size="10.5" fill="#475569">$pause compress &middot; sub-agents</text>
+        </g>
+
+        <!-- TOOLS (T) -->
+        <g>
+          <rect x="510" y="196" width="184" height="74" rx="12" fill="#FFFBEB" stroke="#B45309" stroke-width="1.5"/>
+          <circle cx="532" cy="216" r="11" fill="#B45309"/><text x="532" y="220" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="800" fill="#fff">T</text>
+          <text x="552" y="220" font-family="system-ui" font-size="14" font-weight="700" fill="#B45309">TOOLS</text>
+          <text x="528" y="240" font-family="system-ui" font-size="10.5" fill="#475569">Skills on-demand &middot; spec gate</text>
+          <text x="528" y="256" font-family="system-ui" font-size="10.5" fill="#475569">&sect;D MCP &middot; CLI-vs-MCP rule</text>
+        </g>
+
+        <!-- MEMORY (S) -->
+        <g>
+          <rect x="40" y="386" width="190" height="74" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+          <circle cx="62" cy="406" r="11" fill="#7C3AED"/><text x="62" y="410" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="800" fill="#fff">S</text>
+          <text x="82" y="410" font-family="system-ui" font-size="14" font-weight="700" fill="#6D28D9">MEMORY</text>
+          <text x="58" y="430" font-family="system-ui" font-size="10.5" fill="#475569">SPEC &middot; DECISIONS &middot; LESSONS</text>
+          <text x="58" y="446" font-family="system-ui" font-size="10.5" fill="#475569">COMPACT ANCHOR &middot; &sect;13 log</text>
+        </g>
+
+        <!-- VALIDATE (V) -->
+        <g>
+          <rect x="490" y="386" width="190" height="74" rx="12" fill="#F0FDF4" stroke="#15803D" stroke-width="1.5"/>
+          <circle cx="512" cy="406" r="11" fill="#15803D"/><text x="512" y="410" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="800" fill="#fff">V</text>
+          <text x="532" y="410" font-family="system-ui" font-size="14" font-weight="700" fill="#15803D">VALIDATE</text>
+          <text x="508" y="430" font-family="system-ui" font-size="10.5" fill="#475569">$qa 4 layers &middot; real tests</text>
+          <text x="508" y="446" font-family="system-ui" font-size="10.5" fill="#475569">$eval golden dataset</text>
+        </g>
+
+        <!-- SPEC GATE (L) top -->
+        <g>
+          <rect x="268" y="96" width="184" height="44" rx="10" fill="#FFFBEB" stroke="#B45309" stroke-width="1.5"/>
+          <circle cx="290" cy="118" r="11" fill="#B45309"/><text x="290" y="122" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="800" fill="#fff">L</text>
+          <text x="368" y="114" text-anchor="middle" font-family="system-ui" font-size="12.5" font-weight="700" fill="#B45309">&#128274; SPEC GATE</text>
+          <text x="368" y="131" text-anchor="middle" font-family="system-ui" font-size="10" fill="#475569">PreToolUse + lifecycle hooks</text>
+        </g>
+
+        <text x="20" y="488" font-family="system-ui" font-size="10.5" fill="#94A3B8">Four familiar components (C, T, S, V) ring the model; the Spec Gate (L) sits above it; the execution loop (E) is the model's own cycle.</text>
+      </svg>
+      <figcaption class="harness-cap">The video's four-part picture, mapped onto SDAD's six-function harness. E and L are the parts the popular diagram leaves implicit.</figcaption>
+    </figure>
+
+    <div class="hgrid">
+      <div class="hcard"><span class="he">E</span><div class="hn">Execution Loop</div><div class="hr">The observe-think-act cycle; error recovery and loop termination.</div><div class="hg">SDAD: E-termination protocol</div></div>
+      <div class="hcard"><span class="he">T</span><div class="hn">Tool Registry</div><div class="hr">Typed, validated boundary between model and environment.</div><div class="hg">SDAD: PreToolUse spec gate</div></div>
+      <div class="hcard"><span class="he">C</span><div class="hn">Context Manager</div><div class="hr">Compaction, retrieval, prioritization within the token budget.</div><div class="hg">SDAD: 50%/65% budget, $pause</div></div>
+      <div class="hcard"><span class="he">S</span><div class="hn">State Store</div><div class="hr">Memory that survives turns and sessions, committed safely.</div><div class="hg">SDAD: SPEC + DECISIONS + LESSON</div></div>
+      <div class="hcard"><span class="he">L</span><div class="hn">Lifecycle Hooks</div><div class="hr">Interception, approvals, audit trails, heartbeat detection.</div><div class="hg">SDAD: four session hooks</div></div>
+      <div class="hcard"><span class="he">V</span><div class="hn">Evaluation Interface</div><div class="hr">Instrumentation that captures what the agent did and whether it worked.</div><div class="hg">SDAD: $eval golden dataset</div></div>
+    </div>
+
+    <div class="callout c-key">
+      <span class="tag">The governance axiom</span>
+      Structural constraints are non-negotiable; natural-language pleading is merely a suggestion. A rule in a prompt is obeyed only while the model is compliant, attending, on that turn. A rule in code is obeyed by construction &mdash; because the action it forbids is not available.
+    </div>
+
+    <div class="aud-note a-summary">
+      <span class="tag">Why six letters matter to you</span>
+      You don't need to memorize them. The point is that SDAD didn't invent rules ad hoc &mdash; it used an engineering framework to decide, deliberately, which safeguards are strong enough to be guarantees and which remain good advice.
+    </div>
+
+    <details class="tech">
+      <summary><span class="chev">&#9656;</span> How it works &mdash; where SDAD governs each function <span class="for">technical layer</span></summary>
+      <div class="tech-body">
+        <table class="tbl">
+          <tr><th>Function</th><th>Where SDAD governs it</th><th>Layer</th></tr>
+          <tr><td><strong>E</strong> Execution</td><td>E-termination (HOLD_AUTOCOMMIT + clean stop on error)</td><td>Code</td></tr>
+          <tr><td><strong>T</strong> Tools</td><td>PreToolUse spec-gate (Write/Edit blocked without approved SPEC)</td><td>Code (exit 2)</td></tr>
+          <tr><td><strong>C</strong> Context</td><td>Budget thresholds, <code>$pause compress</code>, sub-agent isolation</td><td>Prompt + Code</td></tr>
+          <tr><td><strong>S</strong> State</td><td>SPEC + DECISIONS + LESSON; atomic commits per increment</td><td>Code</td></tr>
+          <tr><td><strong>L</strong> Lifecycle</td><td>SessionStart, PreCompact, SessionEnd, PreToolUse; <code>$agent</code> liveness timeout</td><td>Code</td></tr>
+          <tr><td><strong>V</strong> Evaluation</td><td><code>$eval</code> golden dataset + runner; typed §13; last-run stamp</td><td>Code</td></tr>
+        </table>
+        <p>SDAD started strong in <strong>C</strong> and <strong>S</strong> (functions a methodology can own through documentation and disciplined workflow), correctly delegated generic <strong>E</strong> and <strong>T</strong> plumbing to Claude Code, activated <strong>L</strong> in v4.2, and in v5 closed the two real gaps: it added <strong>V</strong> (entirely absent before) and moved the critical parts of <strong>T</strong>, <strong>L</strong>, and <strong>E</strong> from prose into code.</p>
+      </div>
+    </details>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;3.2</code> (harness engineering), Appendix C (the H mapping).</p>
+  </section>
+
+  <!-- ===================== 6. COMMANDS ===================== -->
+  <section id="s6">
+    <span class="sec-chip">06 &middot; The toolbox</span>
+    <h2>The command surface</h2>
+
+    <p class="lede">SDAD is driven by a small set of <code>$</code>-commands, grouped by phase. You rarely need all of them &mdash; <code>$spec</code>, <code>$specout</code>, <code>$build</code>, and <code>$qa</code> carry a project end to end. Here is the at-a-glance reference.</p>
+
+    <div class="cmd-group">
+      <h4>Orientation</h4>
+      <div class="cmd-row"><span class="c">$sdad</span><span class="d">Methodology overview: all phases, commands, version. The first place to go in a new session.</span></div>
+      <div class="cmd-row"><span class="c">$skills</span><span class="d">Lists active and available specialist skills, their triggers, and loading status.</span></div>
+    </div>
+    <div class="cmd-group">
+      <h4>Phases 1&ndash;2 &middot; requirements &amp; spec</h4>
+      <div class="cmd-row"><span class="c">$spec</span><span class="d">Guided requirements &mdash; one question at a time, each with a default. First question is always language.</span></div>
+      <div class="cmd-row"><span class="c">$spec [section]</span><span class="d">Resume from a specific requirements section.</span></div>
+      <div class="cmd-row"><span class="c">$specout</span><span class="d">Generate the full 13-section SPEC.md; request approval before unlocking $build.</span></div>
+    </div>
+    <div class="cmd-group">
+      <h4>Phase 3 &middot; build</h4>
+      <div class="cmd-row"><span class="c">$build</span><span class="d">Implement the next vertical increment with tests + QA. Requires an approved SPEC.md.</span></div>
+      <div class="cmd-row"><span class="c">$build [feature]</span><span class="d">Implement a specific named feature.</span></div>
+    </div>
+    <div class="cmd-group">
+      <h4>Phase 4 &middot; quality</h4>
+      <div class="cmd-row"><span class="c">$qa</span><span class="d">Auto mode: incremental QA on the last $build increment.</span></div>
+      <div class="cmd-row"><span class="c">$qa review</span><span class="d">Manual QA &mdash; per-finding approval.</span></div>
+      <div class="cmd-row"><span class="c">$qa full / $QA</span><span class="d">Full project audit / standalone audit (any project, any state).</span></div>
+    </div>
+    <div class="cmd-group">
+      <h4>Support &amp; lifecycle</h4>
+      <div class="cmd-row"><span class="c">$verify [audit]</span><span class="d">Dependency currency check &mdash; reactive, or proactive full-manifest audit.</span></div>
+      <div class="cmd-row"><span class="c">$eval [release]</span><span class="d">Methodology self-evaluation: deterministic core, or core + LLM smoke before a release.</span></div>
+      <div class="cmd-row"><span class="c">$pause [compress]</span><span class="d">Show session state, or generate a Session Snapshot for the next session.</span></div>
+      <div class="cmd-row"><span class="c">$agent review/test/audit</span><span class="d">Delegate to a sub-agent in isolated context (review, test generation, security audit).</span></div>
+      <div class="cmd-row"><span class="c">$doc [readme/api/arch]</span><span class="d">Documentation generation; <code>$doc compliance</code> for Tier 2/3.</span></div>
+      <div class="cmd-row"><span class="c">$lesson [search/new]</span><span class="d">Browse, search, or create Lesson Library entries.</span></div>
+      <div class="cmd-row"><span class="c">$flow [name] run</span><span class="d">Define and run saved, repeatable sequences of SDAD operations.</span></div>
+      <div class="cmd-row"><span class="c">$docfinal</span><span class="d">Retroactive documentation for projects built without SDAD &mdash; infers everything from the codebase.</span></div>
+    </div>
+
+    <div class="aud-note a-summary">
+      <span class="tag">The four you'll hear about</span>
+      <code>$spec</code> (interview), <code>$specout</code> (write the contract), <code>$build</code> (build a slice), <code>$qa</code> (check it). The rest are power tools the developers reach for when needed.
+    </div>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;5.1</code> (core commands), Appendix A (complete reference).</p>
+  </section>
+
+  <!-- ===================== 7. QA & COMPLIANCE ===================== -->
+  <section id="s7">
+    <span class="sec-chip">07 &middot; Safety</span>
+    <h2>Quality, compliance &amp; safety</h2>
+
+    <p class="lede">QA in SDAD is not a post-hoc check &mdash; it is Phase 4, an integral step of every increment, run in <strong>four priority-ordered layers</strong>. Security goes first, because a critical finding there can make the other layers irrelevant.</p>
+
+    <table class="tbl">
+      <tr><th style="width:40px;">#</th><th style="width:120px;">Layer</th><th>Focus</th><th>Example findings</th></tr>
+      <tr><td><strong>1</strong></td><td><strong>Security</strong></td><td>API-key exposure, injection, PII, auth</td><td>Hardcoded keys, credentials in logs, unprotected endpoints</td></tr>
+      <tr><td><strong>2</strong></td><td>Structure</td><td>Architecture consistency, coupling, error handling</td><td>Missing error recovery, tight coupling</td></tr>
+      <tr><td><strong>3</strong></td><td>Efficiency</td><td>Token usage, redundant calls, latency</td><td>Unbounded loops, repeated LLM calls</td></tr>
+      <tr><td><strong>4</strong></td><td>Best Practices</td><td>Readability, naming, documentation</td><td>Undocumented interfaces, duplication</td></tr>
+    </table>
+    <p>Findings are classified <strong>Must fix</strong> (blocks the increment), <strong>Should improve</strong> (your decision), or <strong>Style suggestion</strong> (noted). A fifth Platform layer runs on Pyplan projects.</p>
+
+    <div class="callout c-warn">
+      <span class="tag">Security never auto-changes</span>
+      Layer 1 (Security) and compliance findings always require explicit developer approval before SDAD applies any fix. <code>$qa</code> auto mode never silently edits security or compliance code. Critical issues are marked &#128680; and compliance violations &#128274; &mdash; regardless of the current phase, and never suppressed.
+    </div>
+
+    <h3>The three compliance tiers</h3>
+    <p>SDAD recommends a tier in Phase 0 from repo signals, you confirm it in Phase 1, and it then applies tier-appropriate rigor throughout. Each step up adds rigor:</p>
+
+    <div class="ladder">
+      <div class="tier tier1"><div class="tname">Tier 1 &mdash; Standard</div><div class="tdesc">Internal tools, proofs of concept, scripts. No extra Definition-of-Done requirements beyond the standard QA layers.</div></div>
+      <div class="tier tier2"><div class="tname">Tier 2 &mdash; Business</div><div class="tdesc">Customer-facing products, SaaS, any project handling user data. Auto-activates the Compliance Reviewer. Adds audit logging, PII handling, auth review, sanitized errors.</div></div>
+      <div class="tier tier3"><div class="tname">Tier 3 &mdash; Enterprise / Regulated</div><div class="tdesc">Cloud, healthcare, financial, government (ISO 27001, SOC 2, GDPR, HIPAA). Adds threat model, data-flow diagram, control matrix. <strong>$build is blocked until §9 is complete and approved.</strong></div></div>
+    </div>
+
+    <div class="aud-note a-summary">
+      <span class="tag">The risk story</span>
+      Quality is checked after every slice, not at the end. Higher-stakes projects (customer data, regulated industries) automatically get more rigor &mdash; and for the strictest tier, the AI cannot build at all until the security section is signed off.
+    </div>
+    <div class="aud-note a-details">
+      <span class="tag">The MCP-vs-CLI lock</span>
+      Layer 1 also enforces a <code>[LOCK]</code> rule: if a CLI wrapper was chosen over a vetted MCP (§7), the wrapper must not introduce shell injection, credentials-in-argv, or fragile parsing risk &mdash; and this check cannot be waived on token-cost grounds. Tier-3's §9 gate is structural, like the spec gate: no code until the compliance section is approved, regardless of what the model is otherwise willing to do.
+    </div>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;4.1</code> (Phase 4), <code>&sect;7.1&ndash;7.3</code> (QA layers, tiers, markers).</p>
+  </section>
+
+  <!-- ===================== 7b. THREE PILLARS ===================== -->
+  <section id="s7b">
+    <span class="sec-chip">07b &middot; Theory meets practice</span>
+    <h2>Three pillars &mdash; harness theory meets SDAD practice</h2>
+
+    <p class="lede">The harness idea is often summarized as <strong>three operational pillars</strong>: the repo is the system, work is orchestrated across agents, and results must be verified rather than declared. SDAD implements all three &mdash; with more formality at each. Here is the theory beside the practice.</p>
+
+    <div class="pillars3">
+      <div class="pcard p1">
+        <div class="picon">&#128193;</div>
+        <div class="ptitle">1 &middot; The repo is the system</div>
+        <div class="pvideo"><strong>The theory:</strong> the whole harness lives in repo files &mdash; an agents file, a feature list, a progress folder. The model reads files to know what to do; its context is built from the repo, not from chat.</div>
+        <div class="pdiv"></div>
+        <div class="plab">SDAD in practice</div>
+        <div class="psdad">
+          <strong>SPEC.md</strong> &mdash; a 13-section contract, not just a task list.<br>
+          <strong>DECISIONS.md</strong> &mdash; a HUB BLOCK per increment, with <code>[LOCK]</code>.<br>
+          <strong>LESSON_LIBRARY.md</strong> &mdash; cross-project knowledge.<br>
+          <strong>&sect;13 Authorship Log</strong> &mdash; attributable by model and date.<br>
+          <br>
+          <em>More structured and more auditable than a feature list. The spec is a contract, not a to-do.</em>
+        </div>
+      </div>
+
+      <div class="pcard p2">
+        <div class="picon">&#129302;</div>
+        <div class="ptitle">2 &middot; Multi-agent orchestration</div>
+        <div class="pvideo"><strong>The theory:</strong> a lead agent dispatches specialist sub-agents in isolated context, which write results to a shared folder &mdash; avoiding the "telephone game" of passing one bloated context around.</div>
+        <div class="pdiv"></div>
+        <div class="plab">SDAD in practice</div>
+        <div class="psdad">
+          <strong>Isolated sub-agents</strong> for <code>$doc</code>, <code>$agent review/test/audit</code>.<br>
+          <strong>.sdad/lib/agent-run</strong> &mdash; 600s timeout + empty-output guard.<br>
+          <strong>HANDOFF BLOCK</strong> &mdash; a structured return per sub-agent.<br>
+          <strong>Model/effort routing</strong> &mdash; FRONTIER / STANDARD / ECONOMY per phase.<br>
+          <br>
+          <em>SDAD adds zombie-agent detection and explicit model routing &mdash; the theory names neither.</em>
+        </div>
+      </div>
+
+      <div class="pcard p3">
+        <div class="picon">&#9989;</div>
+        <div class="ptitle">3 &middot; Verification</div>
+        <div class="pvideo"><strong>The theory:</strong> the agent must <em>demonstrate</em> that something works (tests, browser checks), never merely claim it. The reviewer may even rewrite its own instructions to self-improve.</div>
+        <div class="pdiv"></div>
+        <div class="plab">SDAD in practice</div>
+        <div class="psdad">
+          <strong>$qa runs automatically</strong> after every <code>$build</code> &mdash; 4 layers.<br>
+          <strong>Real tests</strong> &mdash; never simulated; real pass/fail counts reported.<br>
+          <strong>$eval golden dataset</strong> &mdash; validates the methodology itself.<br>
+          <strong>Governed self-improvement</strong> &mdash; the agent <em>proposes</em> a CLAUDE.md update (step 5.5); the developer approves.<br>
+          <br>
+          <em>A philosophy difference: the theory allows autonomous self-modification; SDAD keeps the developer in the loop.</em>
+        </div>
+      </div>
+    </div>
+
+    <div class="aud-note a-summary">
+      <span class="tag">The honest comparison</span>
+      The popular three-pillar picture is a good map &mdash; and SDAD follows it. The difference is rigor: a contract instead of a task list, guarded sub-agents instead of loose ones, and a methodology that tests itself. The one place SDAD deliberately diverges is letting the AI rewrite its own rules: SDAD makes it propose, and a human approves.
+    </div>
+    <div class="aud-note a-details">
+      <span class="tag">Where SDAD goes beyond all three pillars</span>
+      None of the three pillars covers compliance tiers, the §13 audit trail, cross-project lesson capture, model/effort routing, or methodology self-evaluation (<code>$eval</code>). These are SDAD-specific additions, not implementations of the harness theory &mdash; they make AI-assisted work accountable, not just controllable.
+    </div>
+
+    <div style="background:var(--surface); border-left:3px solid var(--blue); border-radius:0 10px 10px 0; padding:18px 22px; margin-top:8px;">
+      <p style="font-size:16px; color:var(--ink); font-style:italic; margin:0; line-height:1.65;">
+        "SDAD imposes a contract before code begins, records every decision while it is built, and verifies every result when it ends &mdash; all inside the repository, all attributable to a model and a moment."
+      </p>
+    </div>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;3.2</code> (harness pillars), <code>&sect;4</code> (phases &amp; sub-agents), <code>&sect;6</code> (verification &amp; <code>$eval</code>); cross-referenced against the harness-engineering comparison analysis.</p>
+  </section>
+
+  <!-- ===================== 8. LEARNING SYSTEM ===================== -->
+  <section id="s8">
+    <span class="sec-chip">08 &middot; Memory across projects</span>
+    <h2>The learning system &amp; the ratchet</h2>
+
+    <p class="lede">Most development knowledge is siloed in individuals: one developer learns an expensive lesson, then the next person learns it the same expensive way. SDAD's <strong>Lesson Library</strong> breaks the silo &mdash; a lesson captured on any project becomes available on every future project, surfaced automatically in Phase 0 by stack and phase.</p>
+
+    <h3>The two-layer ratchet</h3>
+    <p>A lesson starts as prose. When its pattern becomes <em>mechanically checkable</em>, it migrates into code &mdash; and once in code, it cannot be forgotten, misremembered, or skipped on a particular turn.</p>
+
+    <div class="ratchet">
+      <div class="rbox"><b>QA finds a pattern</b>likely to recur</div>
+      <div class="parrow">&rarr;</div>
+      <div class="rbox"><b>Lesson L-XX</b>written to the library (prose)</div>
+      <div class="parrow">&rarr;</div>
+      <div class="rbox"><b>Checkable?</b>binary, mechanical test</div>
+      <div class="parrow">&rarr;</div>
+      <div class="rbox code"><b>Check in checks/</b>wired to session-end + git pre-commit</div>
+      <div class="parrow">&rarr;</div>
+      <div class="rbox code"><b>Cannot recur</b>blocked by construction</div>
+    </div>
+
+    <div class="callout c-key">
+      <span class="tag">The story that proves it &mdash; L-01</span>
+      "PowerShell hooks must be pure-ASCII." This lesson was captured, written to the library &mdash; and then <em>recurred anyway</em>. That recurrence is the proof prose ratchets fail. It triggered the migration: L-01 is now enforced by <code>checks/ascii-ps1</code> and a git <code>pre-commit</code> hook, not only a prose rule. The pattern that produced this mechanism is the same pattern the mechanism now prevents.
+    </div>
+
+    <div class="aud-note a-summary">
+      <span class="tag">Why this compounds</span>
+      The methodology gets safer every time it is used. A mistake made once on one project becomes a guardrail on all projects &mdash; and the most important guardrails get turned into code that simply can't be bypassed.
+    </div>
+
+    <details class="tech">
+      <summary><span class="chev">&#9656;</span> How it works &mdash; lesson structure &amp; the v5 entries <span class="for">technical layer</span></summary>
+      <div class="tech-body">
+        <p>Each <code>L-XX</code> entry carries: Category (LLM Design, Architecture, Data &amp; Debugging, Environment, Workflow, Pyplan), Tags (<code>#stack:&lt;tech&gt;</code> + <code>#phase:&lt;phase&gt;</code> for filtered retrieval), a Signal (how another developer recognizes it applies), a Principle (one transferable sentence), and an Origin. Capture is silent when nothing is worth capturing &mdash; SDAD never forces trivial entries.</p>
+        <ul>
+          <li><strong>L-01</strong> &mdash; PowerShell hooks must be pure-ASCII and handle UTF-8 explicitly (ratcheted into code).</li>
+          <li><strong>L-02</strong> &mdash; Validate single-source rules against real workflows: the premise can be wrong even when the rule is right.</li>
+          <li><strong>L-03</strong> &mdash; PS 5.1: native-command stderr under <code>ErrorActionPreference Stop</code> becomes a terminating error.</li>
+          <li><strong>L-04</strong> &mdash; Reference <code>CLAUDE.md</code> by its exact case on case-sensitive surfaces (ratcheted into <code>checks/claude-md-case</code>).</li>
+        </ul>
+        <p>Migration from Layer 1 (prompt) to Layer 2 (code) is triggered by <em>recurrence</em>: if a lesson is violated despite the prose rule, that is evidence the prose ratchet failed and the pattern needs code enforcement.</p>
+      </div>
+    </details>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;8</code> (Lesson Library &amp; ratchet), <code>&sect;6.3</code> (checks/ directory), Appendix D.</p>
+  </section>
+
+  <!-- ===================== 9. PYPLAN ===================== -->
+  <section id="s9">
+    <span class="sec-chip">09 &middot; Platform track</span>
+    <h2>The Pyplan track <span style="font-size:13px;font-weight:500;color:var(--faint);">(relevant only to some readers)</span></h2>
+
+    <details class="tech" open>
+      <summary><span class="chev">&#9656;</span> Expand the Pyplan extensions <span class="for">platform-specific</span></summary>
+      <div class="tech-body">
+        <p>Pyplan is a Python BI and financial-modeling platform that organizes computation as an influence diagram (a DAG of node functions). Its projects have unique characteristics &mdash; data from client sources the team doesn't control, computation in a visual node graph, and platform-specific interface constraints &mdash; so SDAD adds extensions that activate automatically when <code>PROJECT_PLATFORM: pyplan</code> is declared in §0.</p>
+
+        <h4 style="margin-top:14px;">§A &mdash; the Data Architecture gate</h4>
+        <p>In conventional projects the team defines the schema. In Pyplan, data comes from the client (spreadsheets, ERP, accounting files) and the architecture must fit what actually exists. §A requires a client diagnosis, an architecture decision, and a data contract per source. <strong>§A is a gate: <code>$build</code> is blocked until it is approved</strong> &mdash; because discovering a data mismatch after building model nodes is expensive, while discovering it first is nearly free.</p>
+
+        <div class="callout c-warn" style="margin:12px 0;">
+          <span class="tag">Small delta vs. structural delta</span>
+          A <strong>small delta</strong> (wrong field name, unexpected nulls) is resolved in the node and logged in §B; the build continues. A <strong>structural delta</strong> (data doesn't exist, wrong granularity) pauses <code>$build</code> immediately and produces a data-gap report for the client &mdash; because an improvised structural fix produces a model that looks like it works but is built on a wrong foundation.
+        </div>
+
+        <h4>§D &mdash; the MCP Tools Catalog gate</h4>
+        <p>When a project exposes model nodes as MCP tools (the <code>@mcp_tool</code> decorator), §D documents each tool (identifier, description, <code>Annotated</code> parameter schema, return serialization). <strong>§D is a gate too</strong>, and the increment checklist adds six MCP-specific items (docstrings, typed params, serializable returns, <code>result = _fn</code> not <code>_fn()</code>, no session-state dependence, §D updated).</p>
+
+        <h4>HTML interfaces &amp; Build-via-AI</h4>
+        <p>Each HTML interface is its own increment closed with a dedicated checklist (all traffic through <code>window.pyplan.callback</code>, no cookies/localStorage, model writes via <code>set_input</code>/<code>set_form_values</code>). Build-via-AI &mdash; Pyplan's natural-language edit capability &mdash; is permitted <em>with</em> full SDAD discipline (spec gate + increment + approval + QA) rather than blocked, so it stays auditable instead of pushing developers outside oversight.</p>
+      </div>
+    </details>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;9.1&ndash;9.7</code> (Pyplan extensions), Appendix B (§ structure).</p>
+  </section>
+
+  <!-- ===================== 10. ENFORCEMENT LAYER ===================== -->
+  <section id="s10">
+    <span class="sec-chip">10 &middot; What makes v5 different</span>
+    <h2>The v5 enforcement layer</h2>
+
+    <p class="lede">From v4.0 to v4.3, SDAD governed almost everything through <code>CLAUDE.md</code> instruction. v5 is a <strong>major</strong> version because it changes SDAD's identity: from a methodology governed by instruction to one governed by instruction <em>plus enforced code</em>. Four hooks, a self-evaluator, and a defined error state do the work.</p>
+
+    <h3>Four session hooks</h3>
+    <table class="tbl">
+      <tr><th style="width:140px;">Hook</th><th>What it does</th></tr>
+      <tr><td><strong>SessionStart</strong></td><td>Re-injects the COMPACT ANCHOR (<code>[LOCK]</code> decisions); runs <code>git pull --ff-only</code> if the tree is clean; reminds you if <code>CLAUDE.md</code> changed since the last <code>$eval</code> pass. Never blocks startup.</td></tr>
+      <tr><td><strong>PreCompact</strong></td><td>Writes the COMPACT ANCHOR to disk before compaction &mdash; because PreCompact's own context injection does not survive compaction. Survival = write-to-disk + re-inject at SessionStart.</td></tr>
+      <tr><td><strong>SessionEnd</strong></td><td>Autocommits a whitelist (DECISIONS.md, LESSON_LIBRARY.md &mdash; never code). Respects the <code>HOLD_AUTOCOMMIT</code> sentinel; runs the ascii ratchet check; never commits to main directly or commits empty.</td></tr>
+      <tr><td><strong>PreToolUse</strong></td><td>The spec gate (Section 4): blocks Write/Edit without an approved SPEC.md.</td></tr>
+    </table>
+
+    <h3>$eval &mdash; the methodology evaluates itself</h3>
+    <p>Before v5, SDAD edited itself every release but had no way to detect whether an edit introduced a regression &mdash; regressions surfaced only when a real project later failed. <code>$eval</code> is the <strong>V component</strong>: a deterministic golden dataset of 13 scenarios (gate denies/allows, fail-open, ascii check, pre-commit block, regression detection, timeout, typed §13, and more) plus a release-only LLM smoke test.</p>
+
+    <div class="aud-note a-summary">
+      <span class="tag">The plain version</span>
+      v5 is the version where the most important rules stopped being polite requests and became code that can't be ignored. SDAD also gained the ability to test <em>itself</em> before any change reaches a real project &mdash; the kind of check most teams never apply even to their production software.
+    </div>
+    <div class="aud-note a-methodology">
+      <span class="tag">What this buys the team</span>
+      Decisions survive session restarts and context compaction (COMPACT ANCHOR + <code>[LOCK]</code>). Errors stop cleanly instead of looping (E-termination). And a change to the methodology itself is caught by <code>$eval</code> before it can break a client project.
+    </div>
+
+    <details class="tech">
+      <summary><span class="chev">&#9656;</span> How it works &mdash; E-termination, atomic commits &amp; the [LOCK] registry <span class="for">technical layer</span></summary>
+      <div class="tech-body">
+        <p><strong>E-termination protocol.</strong> On a tool/test error mid-increment, SDAD reports clearly, stops cleanly, creates <code>.sdad/HOLD_AUTOCOMMIT</code> (suppressing SessionEnd autocommit), and does not retry or loop. This converts an open-ended ReAct-style runaway into a clean, visible stop. Recovery clears the sentinel and resumes.</p>
+        <p><strong>Atomic state commits.</strong> Tests, the DECISIONS.md entry, and the §13 update commit as one unit, so a mid-write crash never leaves inconsistent state.</p>
+        <p><strong>The five <code>[LOCK]</code> decisions</strong> (non-reopenable, carried in every anchor): (1) MCP-vs-CLI security is a hard gate, never a cost choice; (2) CLAUDE.md stays lean; (3) net line budget ≤ +60 per release; (4) anchor survival = PreCompact-writes-to-disk + SessionStart-re-injects; (5) no API dependency in the methodology.</p>
+      </div>
+    </details>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;6.1&ndash;6.7</code> (the harness layer), Appendix E (the <code>[LOCK]</code> registry).</p>
+  </section>
+
+  <!-- ===================== 11. SETUP ===================== -->
+  <section id="s11">
+    <span class="sec-chip">11 &middot; Getting started</span>
+    <h2>Setup &amp; daily use</h2>
+
+    <p class="lede">SDAD installs once into your Claude Code configuration, then each project repo is initialized separately. Day to day, the rhythm is: open Claude Code, <code>$spec</code>, approve, <code>$build</code>, repeat.</p>
+
+    <h3>The daily loop</h3>
+    <div class="terminal"><span class="cmd">claude</span>            <span class="dim"># open Claude Code in the project directory</span>
+<span class="cmd">$spec</span>             <span class="dim"># guided requirements (Phase 1)</span>
+<span class="dim">[answer questions]</span>
+<span class="cmd">$specout</span>          <span class="dim"># generate SPEC.md (Phase 2)</span>
+<span class="dim">[review and approve SPEC.md]</span>
+<span class="cmd">$build</span>            <span class="dim"># first increment (Phase 3) -> tests -> $qa</span>
+<span class="dim">[review HUB BLOCK, confirm any lesson capture]</span>
+<span class="cmd">$build</span>            <span class="dim"># next increment...</span></div>
+
+    <div class="aud-note a-summary">
+      <span class="tag">The short version</span>
+      Install once, then for each project you run a short interview, approve a plan, and let the AI build in checked steps. A status bar shows how much "memory" the session has left so work is parked cleanly before it runs out.
+    </div>
+
+    <details class="tech">
+      <summary><span class="chev">&#9656;</span> How it works &mdash; install, init, resume, verify <span class="for">technical layer</span></summary>
+      <div class="tech-body">
+        <p><strong>Prerequisites:</strong> Claude Code, Node.js 18+, Git. Windows: PowerShell 5.1+ and Git for Windows. macOS/Linux: bash. Strongly recommended: <code>ccstatusline</code> (<code>npx ccstatusline@latest</code>) &mdash; the real-time status bar showing model, effort, context %, cost, and branch. It is the primary context-budget indicator, showing the 50%/65% thresholds live.</p>
+        <p><strong>Install</strong> runs a one-line installer (PowerShell on Windows, <code>curl | bash</code> on macOS/Linux) that checks/installs Node and Claude Code, copies <code>CLAUDE.md</code>, installs skills/agents, registers all four hooks, scaffolds <code>checks/</code> and <code>.sdad/eval/</code>, and installs the git <code>pre-commit</code> hook. <strong>project-init</strong> then creates <code>SPEC.md</code>, <code>LESSON_LIBRARY.md</code>, <code>DECISIONS.md</code>, and <code>.sdad/</code> in the repo.</p>
+        <p><strong>Resuming</strong> a session: SessionStart re-injects the anchor and runs a clean fast-forward pull; if a <code>$pause compress</code> snapshot exists, paste it and SDAD restores state with no re-explanation. <strong>Verify</strong> with <code>$sdad</code> (version 5.0), <code>$skills</code>, <code>$spec</code> (first question = language), <code>$pause</code> (context %), and <code>$eval</code> (13 scenarios all green).</p>
+      </div>
+    </details>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;10.1&ndash;10.7</code> (installation, setup, day-to-day use).</p>
+  </section>
+
+  <!-- ===================== 12. EVOLUTION ===================== -->
+  <section id="s12">
+    <span class="sec-chip">12 &middot; The arc</span>
+    <h2>How SDAD grew</h2>
+
+    <p class="lede">Each release was driven by a concrete deficiency discovered in the prior one &mdash; and each moved SDAD along a single trajectory: <strong>from a documented practice, to an automated practice, to an enforced practice.</strong></p>
+
+    <div class="timeline">
+      <div class="tnode"><div class="dot"></div><div class="tv">v4.0</div><div class="td">2026</div><div class="th2">Foundation</div><div class="tx">Native Claude Code rebuild</div></div>
+      <div class="tnode"><div class="dot"></div><div class="tv">v4.1</div><div class="td">06-04</div><div class="th2">Platform</div><div class="tx">Pyplan MCP + §D gate</div></div>
+      <div class="tnode"><div class="dot"></div><div class="tv">v4.2</div><div class="td">06-08</div><div class="th2">Continuity</div><div class="tx">Hooks + security gate</div></div>
+      <div class="tnode"><div class="dot"></div><div class="tv">v4.3</div><div class="td">06-10</div><div class="th2">Routing</div><div class="tx">Model routing + installer</div></div>
+      <div class="tnode v5"><div class="dot"></div><div class="tv">v5.0</div><div class="td">06-13</div><div class="th2">Enforcement</div><div class="tx">Governance moves to code</div></div>
+    </div>
+    <div class="tline"></div>
+
+    <table class="tbl">
+      <tr><th>Maturity phase</th><th>Versions</th><th>What governance looked like</th></tr>
+      <tr><td><strong>Documented</strong></td><td>v4.0&ndash;v4.1</td><td>Rules exist as prose in CLAUDE.md; developer and model are trusted to follow them.</td></tr>
+      <tr><td><strong>Automated</strong></td><td>v4.2&ndash;v4.3</td><td>Lifecycle events handled by hooks; state persists without manual effort &mdash; but the critical rules are still prose.</td></tr>
+      <tr><td><strong>Enforced</strong></td><td>v5.0</td><td>The rules that matter most are executable code: the spec gate is a hook, the ratchet is a check, the methodology evaluates itself.</td></tr>
+    </table>
+
+    <div class="aud-note a-summary">
+      <span class="tag">The one-line history</span>
+      SDAD went from "we wrote the rules down," to "the tooling handles the routine automatically," to "the most important rules are enforced by code." v5 is that last step &mdash; where governance became binding.
+    </div>
+    <div class="aud-note a-details">
+      <span class="tag">The meta-pattern</span>
+      Three of five versions were driven by a flaw found <em>while using SDAD on itself</em>: v4.2's L-01 (found building the hooks), v4.3's installer drift (found auditing v4.2), and v5.0's central thesis (proven by L-01 recurring <em>despite</em> being in the library). v5's ratchet &mdash; a recurring lesson is forced into code &mdash; is the formalization of exactly the pattern that produced v5 itself.
+    </div>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;11.0&ndash;11.7</code> (evolutionary history, timeline, capability matrix, driver&rarr;response).</p>
+  </section>
+
+  <!-- ===================== 13. FUTURE ===================== -->
+  <section id="s13">
+    <span class="sec-chip">13 &middot; The road ahead</span>
+    <h2>Where it's going &mdash; v6 "Team &amp; Portfolio Edition"</h2>
+
+    <p class="lede">SDAD v5 solved the <strong>single-developer</strong> governance problem with unusual rigor. The next frontier is the deployment G7 is actually heading into: <strong>many clients, many projects, many developers on mixed operating systems.</strong> The good news is that the mechanisms v5 invented are exactly the right ones &mdash; the work ahead is <em>relocation, not reinvention.</em></p>
+
+    <div class="callout c-key">
+      <span class="tag">The one-line thesis for v6</span>
+      A gate that lives on the developer's machine is a suggestion; a gate that lives in the shared pipeline is a guarantee &mdash; and a methodology used across many clients must be governed from one place, or it is not governed at all.
+    </div>
+
+    <p>v5's gates live in local hooks, which means the headline guarantee holds on one correctly-configured machine and weakens once a second developer, a second OS, or a CI server enters the picture. v6's job is to move the same mechanisms into the shared pipeline and a central, multi-project home.</p>
+
+    <h3>Two honest gaps vs the harness theory</h3>
+    <p>A comparison against the harness-engineering literature surfaced two places where the theory points at something SDAD handles less crisply than it could. Neither is an architecture flaw &mdash; both are documentation or calibration opportunities, and both are tracked openly here.</p>
+
+    <table class="tbl">
+      <tr><th style="width:150px;">Gap</th><th>What the theory argues</th><th>Where SDAD stands</th><th style="width:110px;">Status</th></tr>
+      <tr>
+        <td><strong>Tool Minimalism</strong></td>
+        <td>Stripping specialist tools from an agent measurably improves it &mdash; one reported case removed ~80% of bespoke tools and got faster, cheaper runs. The principle: a more complex harness performs <em>worse</em>.</td>
+        <td>SDAD already practices this &mdash; skills load <strong>on-demand</strong> so the base prompt stays lean &mdash; but never articulates minimalism as a stated performance principle. The 10+ specialist skills can read as the opposite intent.</td>
+        <td class="status-gap">Gap (minor) &mdash; articulate the principle: "activate only the skills the increment needs."</td>
+      </tr>
+      <tr>
+        <td><strong>Context Threshold</strong></td>
+        <td>Context quality is reported to degrade early &mdash; noticeable around 20%, with cleanup advised by ~40% of the window.</td>
+        <td>SDAD's soft warning fires at <strong>50%</strong>, hard at <strong>65%</strong>. If early degradation is real, the first warning arrives after some quality has already been lost &mdash; most visible in long <code>$build</code> sessions.</td>
+        <td class="status-gap">Gap (calibration) &mdash; consider a 30&ndash;40% early heads-up, or document the empirical basis for 50%.</td>
+      </tr>
+    </table>
+
+    <div class="callout c-ok">
+      <span class="tag">For balance &mdash; where SDAD already exceeds the theory</span>
+      The same comparison found SDAD goes <em>beyond</em> the harness theory on the spec gate (no code without an approved contract), compliance tiers, the §13 audit trail, cross-project lesson capture, model/effort routing, and methodology self-evaluation (<code>$eval</code>). The two gaps above are the honest exceptions, not the rule.
+    </div>
+
+    <h3>The prioritized roadmap</h3>
+    <table class="tbl">
+      <tr><th style="width:60px;">Priority</th><th>Move</th></tr>
+      <tr><td><strong style="color:var(--red-ink);">P0</strong></td><td>Server-side (CI) enforcement of the gates &mdash; run the spec gate and ratchet on every pull request, OS-independently. The local hook stays as fast feedback; CI becomes the guarantee.</td></tr>
+      <tr><td><strong style="color:var(--red-ink);">P0</strong></td><td>Cross-platform parity &mdash; finish and test the <code>.sh</code> gate on macOS/Linux; run <code>$eval</code> on a CI matrix across all three OSes.</td></tr>
+      <tr><td><strong style="color:var(--red-ink);">P0</strong></td><td>Central methodology distribution &amp; versioning &mdash; install, version, and update SDAD across many client repos from one source of truth.</td></tr>
+      <tr><td><strong style="color:#C2410C;">P1</strong></td><td>Merge-friendly collaborative state; a portfolio governance layer (central Lesson Library + per-client tiers + §13 telemetry); an architecture gate for all cloud / Tier 2&ndash;3 projects; a Deploy/Operate phase.</td></tr>
+      <tr><td><strong style="color:#A16207;">P2&ndash;P3</strong></td><td>Product-level eval harness; multi-developer coordination primitives; team cost governance; state compaction &amp; embedding retrieval.</td></tr>
+    </table>
+
+    <div class="aud-note a-summary">
+      <span class="tag">What this means for the team</span>
+      The strong guarantees you get on one machine today will become strong guarantees across every client and every developer. v6 isn't a rewrite &mdash; it takes the safeguards that already work and installs them in the shared pipeline and a central home.
+    </div>
+
+    <p class="trace">Source &mdash; thesis <code>&sect;15</code> (critical assessment &amp; roadmap to team &amp; portfolio governance). Pitched here for a team audience; the chapter itself is deliberately adversarial.</p>
+  </section>
+
+  <!-- ===================== 14. GLOSSARY ===================== -->
+  <section id="s14">
+    <span class="sec-chip">14 &middot; Reference</span>
+    <h2>Glossary</h2>
+    <p class="lede">The terms that most often block non-technical readers &mdash; defined plainly, in the order you meet them.</p>
+
+    <dl class="gloss">
+      <div class="gterm"><dt>Spec (SPEC.md)</dt><dd>The specification document SDAD writes and you approve. A contract for what will be built, agreed before any code exists.</dd></div>
+      <div class="gterm"><dt>Increment</dt><dd>One small, complete, tested feature &mdash; a vertical slice from user interaction down to data, not a horizontal layer.</dd></div>
+      <div class="gterm"><dt>Hook</dt><dd>A small script the tooling runs automatically at a key moment (session start/end, before a file write, before compaction).</dd></div>
+      <div class="gterm"><dt>Gate</dt><dd>A hard checkpoint that blocks progress until a condition is met &mdash; e.g. no build before an approved spec.</dd></div>
+      <div class="gterm"><dt>Harness</dt><dd>The software layer that governs an AI agent's execution. SDAD models it as H = (E, T, C, S, L, V).</dd></div>
+      <div class="gterm"><dt>Ratchet</dt><dd>The one-way migration of a lesson from prose into enforced code, so a fixed failure mode cannot recur.</dd></div>
+      <div class="gterm"><dt>CI</dt><dd>Continuous Integration &mdash; an automated server that runs checks on every code change. Where v6 will move the gates.</dd></div>
+      <div class="gterm"><dt>MCP</dt><dd>Model Context Protocol &mdash; a typed, validated way to expose tools (e.g. Pyplan model nodes) to an AI client.</dd></div>
+      <div class="gterm"><dt>Compliance tier</dt><dd>The rigor level of a project: Tier 1 (standard), Tier 2 (business / user data), Tier 3 (regulated).</dd></div>
+      <div class="gterm"><dt>Context budget</dt><dd>How much of the session's working memory is used. SDAD warns at 50% and blocks new builds at 65%.</dd></div>
+      <div class="gterm"><dt>HUB BLOCK</dt><dd>The structured decision record written to DECISIONS.md after every increment &mdash; date, model, rationale, alternatives, impact.</dd></div>
+      <div class="gterm"><dt>COMPACT ANCHOR / [LOCK]</dt><dd>The set of non-reopenable architectural decisions that survive session restarts and context compaction &mdash; written to disk by PreCompact and re-injected by SessionStart.</dd></div>
+      <div class="gterm"><dt>Session Snapshot</dt><dd>The compact state block produced by <code>$pause compress</code> &mdash; phase, tier, approved spec sections, open QA findings, lessons, and the exact next step &mdash; pasted into the next session so SDAD restores state with no re-explanation.</dd></div>
+      <div class="gterm"><dt>Tool Minimalism</dt><dd>The principle that fewer, simpler tools make an agent faster and more reliable than many specialist ones. SDAD practices it by loading skills on-demand to keep the base prompt lean.</dd></div>
+      <div class="gterm"><dt>§13 / AI Authorship Log</dt><dd>A typed 8-column table in the spec recording which model made which decision, at what effort, with what QA result.</dd></div>
+      <div class="gterm"><dt>Fail-open</dt><dd>A safety choice: if a guard script itself breaks, it allows the action (and logs a warning) rather than freezing the developer.</dd></div>
+      <div class="gterm"><dt>Sub-agent</dt><dd>A delegated AI run in isolated context for expensive work (docs, review, audit) that doesn't consume the main session.</dd></div>
+      <div class="gterm"><dt>Pyplan</dt><dd>A Python BI / financial-modeling platform; SDAD has a dedicated extension track for it.</dd></div>
+    </dl>
+
+    <p class="trace">Source &mdash; terms drawn from thesis <code>&sect;3</code>, <code>&sect;4</code>, <code>&sect;6</code>, <code>&sect;8</code>, <code>&sect;9</code>, and the appendices.</p>
+  </section>
+
+  <footer>
+    <b>SDAD v5.0 "Harness Edition"</b> &middot; The Visual Manual &middot; G7 AI Development Methodology<br>
+    Spec-Driven AI Development for Claude Code. Every factual claim in this manual traces to <code>SDAD_v5_thesis.md</code>; the pedagogy is in the presentation, not in new claims. &middot; 2026
+  </footer>
+
+</div>
+
+<button class="totop" id="toTop" aria-label="Back to top">&#8593;</button>
+
+<script>
+  (function () {
+    var manual = document.getElementById('manual');
+    var pills = document.querySelectorAll('.topbar .pill');
+    function setAud(aud) {
+      manual.setAttribute('data-aud', aud);
+      pills.forEach(function (p) { p.setAttribute('aria-pressed', String(p.dataset.aud === aud)); });
+      document.querySelectorAll('details.tech').forEach(function (d) {
+        if (d.closest('#s9')) return; /* Pyplan stays open by default */
+        d.open = (aud === 'details');
+      });
+    }
+    pills.forEach(function (p) { p.addEventListener('click', function () { setAud(p.dataset.aud); }); });
+
+    var tocBtn = document.getElementById('tocBtn');
+    var tocPanel = document.getElementById('tocPanel');
+    tocBtn.addEventListener('click', function () {
+      var open = tocPanel.classList.toggle('open');
+      tocBtn.setAttribute('aria-expanded', String(open));
+    });
+    tocPanel.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () { tocPanel.classList.remove('open'); tocBtn.setAttribute('aria-expanded', 'false'); });
+    });
+
+    var progress = document.getElementById('progress');
+    var toTop = document.getElementById('toTop');
+    function onScroll() {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      var pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+      progress.style.width = pct + '%';
+      toTop.classList.toggle('show', h.scrollTop > 600);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    toTop.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  })();
+</script>
+</body>
+</html>

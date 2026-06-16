@@ -1,7 +1,7 @@
-# SDAD v4.3 — CLAUDE.md
+# SDAD v5.0 — CLAUDE.md
 # Spec-Driven AI Development for Claude Code
 # G7 AI Development Methodology
-# Version 4.3 | 2026
+# Version 5.0 | 2026
 #
 # INSTALLATION: Place this file at the root of your project repository.
 # The .claude/ folder (skills, agents, hooks) is installed by the SDAD installer.
@@ -117,6 +117,7 @@ ANNOUNCEMENT RULE (generalizes the $build 🧠 MODEL line):
 - **Decision Architecture** — trigger: data architecture, DW, staging, data sources, §A
 - **Data Discovery** — trigger: data delta, field mismatch, source discrepancy, data gap
 - **Dev Setup** — trigger: onboarding, dev setup, which Claude Code features complement SDAD (links to live docs)
+- **Harness** — trigger: control layer, harness model, governance axiom, E/T/C/S/L/V, enforcement in code vs prompt, $eval
 
 Use $skills to view details or activate additional skills manually.
 
@@ -197,7 +198,7 @@ EXECUTION:
 
 ## Commands
 
-**$sdad** — Show SDAD v4.3 methodology overview: phases, descriptions, command list.
+**$sdad** — Show SDAD v5.0 methodology overview: phases, descriptions, command list (incl. $eval).
 
 **$spec** (or $spec [section]) — Phase 1: Guided Requirements.
 ONE question at a time with proposed default.
@@ -424,6 +425,12 @@ dependency. Flag in §7: "Pyplan MCP server — v1 (first release, API may chang
 Pyplan updates)." Recommend locking to a specific Pyplan version in §5 if MCP stability
 is critical for the project.
 
+**$eval** — Methodology self-evaluation (V component). Replays the `.sdad/eval/` golden
+dataset (deterministic core: spec-gate hook, ASCII ratchet, $agent liveness, CLAUDE.md asserts;
+`$eval release` adds non-deterministic LLM smoke before tagging) to catch regressions before
+release. Run on any CLAUDE.md/skill change and as the release gate; SessionStart reminds when
+CLAUDE.md drifts from the last green run. See the Harness skill.
+
 **$pause** — Show current session state.
   Current Phase | Spec Status | Compliance Tier | Platform | Context Budget %
   Last increment + test result | Open QA findings (H-XX) | Active Skills
@@ -596,6 +603,11 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - Before session end or $pause compress, resolve any pending commits using git log.
 - All .ps1 scripts must be pure ASCII — Windows PowerShell 5.1 misreads UTF-8 without BOM
   and non-ASCII characters (em-dashes, accents) break the parser (L-01, confirmed twice).
+- Governance Axiom: hard gates live in code (PreToolUse spec-gate, checks/ ratchet, git pre-commit); prompt rules are the fallback, not the guarantee. See the Harness skill.
+- $eval runs on any CLAUDE.md/skill change and as the release gate; a captured lesson with a mechanically verifiable pattern gets a check in checks/, not only a prose rule.
+- $agent delegation goes through .sdad/lib/agent-run (600s timeout) — fails loud on timeout or empty output, never proceeds silently.
+- On a tool/test error mid-increment: stop the increment cleanly, set .sdad/HOLD_AUTOCOMMIT, never enter an undefined retry loop — recovery clears when the developer resumes.
+- Commit DECISIONS.md + §13 + SPEC.md for one increment as a single atomic commit; record the exact model string per release (§5 / $verify) when reproducibility matters.
 
 ---
 
@@ -628,5 +640,5 @@ Use as primary context budget indicator — shows the 50% / 65% thresholds.
 
 ---
 
-G7 AI Development Methodology | SDAD v4.3 | CLAUDE.md
+G7 AI Development Methodology | SDAD v5.0 | CLAUDE.md
 Spec-Driven AI Development for Claude Code

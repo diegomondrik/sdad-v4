@@ -1,0 +1,68 @@
+name: SDAD gates
+
+# Server-side, authoritative re-run of the SDAD v5 gates on every pull request
+# (SPEC v5.1 I1). The local hooks stay as fast pre-PR feedback; this workflow is
+# the blocker on merge -- no developer, OS, or commit path can route around it.
+# Least-privilege token and pull_request (not pull_request_target) per SPEC v5.1 §9.
+
+on:
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+jobs:
+  spec-gate:
+    name: Spec gate (no code without an approved SPEC)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # H-01 (L-05): run the gate logic from the TRUSTED base ref, not the PR's
+      # checkout, so a PR cannot edit the policy to pass itself. The changed-file
+      # list and the SPEC.md approval state still come from the PR. Falls back to
+      # the in-repo gate when the base predates the gate (the PR that adds it).
+      - name: Run the spec gate from the trusted base ref
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -e
+          git fetch --no-tags --quiet origin "$BASE_REF"
+          tmp=$(mktemp -d)
+          if git show "origin/$BASE_REF:checks/spec-gate-ci.sh" > "$tmp/spec-gate-ci.sh" 2>/dev/null \
+             && git show "origin/$BASE_REF:checks/spec-gate-policy.sh" > "$tmp/spec-gate-policy.sh" 2>/dev/null; then
+            echo "Gate from trusted base ref origin/$BASE_REF"
+            SPEC_GATE_POLICY="$tmp/spec-gate-policy.sh" sh "$tmp/spec-gate-ci.sh" "$BASE_REF"
+          else
+            echo "Base ref lacks the gate scripts (bootstrap PR); using the in-repo gate."
+            sh checks/spec-gate-ci.sh "$BASE_REF"
+          fi
+
+  ascii-ps1:
+    name: ASCII ratchet (L-01)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan tracked .ps1 for non-ASCII bytes
+        run: sh checks/ascii-ps1.sh
+
+  claude-md-case:
+    name: CLAUDE.md case ratchet (L-04)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan code/config for wrong-case methodology-file references
+        run: sh checks/claude-md-case.sh
+
+  eval-core:
+    name: SDAD eval (deterministic core)
+    # INC-1 runs the eval on Windows (the scenarios invoke the Windows powershell
+    # host). INC-2 ports the runner + scenarios to pwsh and expands to the
+    # Windows / macOS / Linux matrix. See DECISIONS (v5.1 INC-1).
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run the golden-dataset core
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .sdad/eval/run-eval.ps1

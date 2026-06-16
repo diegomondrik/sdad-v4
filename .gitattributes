@@ -1,0 +1,8 @@
+# SDAD v5 -- line-ending policy (repo has core.autocrlf=true on Windows).
+# Shell scripts MUST stay LF: a CRLF shebang/line breaks sh on checkout
+# ("bad interpreter"), the same failure class as the L-01 ratchet and the
+# install.ps1 pre-commit CRLF->LF fix. Applies to hooks, checks, installers.
+*.sh text eol=lf
+
+# PowerShell tolerates CRLF; leave .ps1 to the default so the ASCII ratchet
+# (bytes > 127) is unaffected -- CR/LF are both ASCII.

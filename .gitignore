@@ -2,7 +2,14 @@
 mcp.json
 
 # SDAD runtime state (hook artifacts: compact anchor snapshot, autocommit hold sentinel)
-.sdad/
+# .sdad/eval/ is the exception: the methodology golden dataset is versioned (v5 I3)
+.sdad/*
+!.sdad/eval/
+!.sdad/lib/
+# ...but the last green-run stamp is machine state, not part of the dataset
+.sdad/eval/last-run
+# agent delegation output is runtime state, never versioned
+.sdad/agent_output.tmp
 
 # Windows
 Thumbs.db
