@@ -1,6 +1,6 @@
 # SDAD v5 — User Guide
 
-**G7 AI Development Methodology · SDAD v5.1 "Harness Edition"**
+**G7 AI Development Methodology · SDAD v5.2 "Board Edition"**
 *For everyday use. No programming required — you answer questions and approve steps.*
 
 ---
@@ -40,7 +40,7 @@ recommends. After writing, it runs your real tests and reports the actual result
 reviews its own work.
 
 **Review — `$qa`.** Runs automatically after each increment, checking security, structure,
-efficiency, and best practices (plus a platform layer on Pyplan projects). Security and
+efficiency, and best practices (plus a platform layer on Pyplan and Board projects). Security and
 compliance issues are never fixed silently — SDAD flags them and waits for your go-ahead.
 
 **Pause or stop — `$pause`.** Shows the current state: phase, spec status, compliance tier,
@@ -135,4 +135,4 @@ it is enforcing the one discipline that matters most.
 
 ---
 
-G7 AI Development Methodology | SDAD v5.1 User Guide | 2026
+G7 AI Development Methodology | SDAD v5.2 User Guide | 2026

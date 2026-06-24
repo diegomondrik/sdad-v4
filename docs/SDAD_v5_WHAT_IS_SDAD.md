@@ -1,6 +1,6 @@
 # What is SDAD — and why use it
 
-**G7 AI Development Methodology · SDAD v5 "Harness Edition"**
+**G7 AI Development Methodology · SDAD v5.2 "Board Edition"**
 *An extended explainer for developers, analysts, and decision-makers.*
 
 ---
@@ -53,14 +53,14 @@ The core loop is **Context -> Requirements -> Spec -> Build -> QA**.
   a time — and runs the project's real tests after each one. It announces what it will do
   before doing it, including which model and reasoning effort it recommends.
 - `$qa` reviews each increment across security, structure, efficiency, and best-practice
-  layers (plus a platform layer for Pyplan projects), and never silently changes
+  layers (plus a platform layer for Pyplan and Board projects), and never silently changes
   security or compliance code without your explicit approval.
 
 Around that loop sit supporting capabilities: compliance tiers that escalate rigor for
 customer-facing or regulated work; a Lesson Library that captures recurring patterns so
 the same mistake is not made twice; sub-agents that do expensive reviews in isolated
 context; and session continuity that lets you stop and resume without re-explaining
-anything. Specialist "skills" (architecture, security, QA, frontend, Pyplan, and more)
+anything. Specialist "skills" (architecture, security, QA, frontend, Pyplan, Board, and more)
 load automatically when the work calls for them.
 
 ---
@@ -189,4 +189,4 @@ important promises *binding*.
 
 ---
 
-G7 AI Development Methodology | SDAD v5 "Harness Edition" | 2026
+G7 AI Development Methodology | SDAD v5.2 "Board Edition" | 2026

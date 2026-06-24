@@ -1,6 +1,6 @@
 # SDAD v5 — Installation Guide
 
-**G7 AI Development Methodology · SDAD v5.1 "Harness Edition"**
+**G7 AI Development Methodology · SDAD v5.2 "Board Edition"**
 
 ---
 
@@ -136,7 +136,7 @@ Start `claude` in a project and check:
 
 | Command | Expected |
 |---|---|
-| `$sdad` | All phases + active skills listed; version 5.1 |
+| `$sdad` | All phases + active skills listed; version 5.2 |
 | `$skills` | AI Architect and AI Engineer active; on-demand skills available |
 | `$spec` | First question asks project language (English/Spanish) |
 | `$pause` | Session state including context budget % |
@@ -162,4 +162,4 @@ point of v5.
 
 ---
 
-G7 AI Development Methodology | SDAD v5.1 Install Guide | 2026
+G7 AI Development Methodology | SDAD v5.2 Install Guide | 2026
