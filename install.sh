@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# SDAD v5.1 — Installer for Mac / Linux
+# SDAD v5.2 — Installer for Mac / Linux
 # Spec-Driven AI Development — G7 AI Development Methodology
-# Version: 5.1 | 2026
+# Version: 5.2 | 2026
 #
 # Run from inside the project repo where you want SDAD installed:
 #
@@ -18,7 +18,7 @@ NC='\033[0m'
 
 echo ""
 echo "============================================"
-echo "  SDAD v5.1 — Installer"
+echo "  SDAD v5.2 — Installer"
 echo "============================================"
 echo ""
 
@@ -84,6 +84,11 @@ mkdir -p \
     .claude/skills/dev-setup \
     .claude/skills/brand-design \
     .claude/skills/security-reviewer \
+    .claude/skills/board \
+    .claude/skills/board/spec-context \
+    .claude/skills/board/data-model \
+    .claude/skills/board/capsule \
+    .claude/skills/board/qa-platform \
     .claude/agents \
     .claude/hooks \
     checks \
@@ -125,6 +130,11 @@ download_skill ".claude/skills/data-discovery/SKILL.md"
 download_skill ".claude/skills/dev-setup/SKILL.md"
 download_skill ".claude/skills/brand-design/SKILL.md"
 download_skill ".claude/skills/security-reviewer/SKILL.md"
+download_skill ".claude/skills/board/SKILL.md"
+download_skill ".claude/skills/board/spec-context/SKILL.md"
+download_skill ".claude/skills/board/data-model/SKILL.md"
+download_skill ".claude/skills/board/capsule/SKILL.md"
+download_skill ".claude/skills/board/qa-platform/SKILL.md"
 download_skill ".claude/agents/code-reviewer.md"
 download_skill ".claude/agents/security-auditor.md"
 download_skill ".claude/agents/test-generator.md"
@@ -209,7 +219,7 @@ if [ -f "CLAUDE.md" ]; then
         echo -e "${YELLOW}  WARNING  Existing CLAUDE.md found. Appending SDAD block.${NC}"
         echo "" >> CLAUDE.md
         curl -fsSL "$REPO/CLAUDE.md" >> CLAUDE.md
-        echo -e "${GREEN}  OK     SDAD v5.1 block appended to CLAUDE.md${NC}"
+        echo -e "${GREEN}  OK     SDAD v5.2 block appended to CLAUDE.md${NC}"
     fi
 else
     curl -fsSL "$REPO/CLAUDE.md" -o CLAUDE.md
@@ -248,13 +258,13 @@ fi
 # .gitignore
 if [ -f ".gitignore" ]; then
     if ! grep -q "SDAD v" .gitignore 2>/dev/null; then
-        printf "\n# SDAD v5.1\n.claude/.session_tmp\n.sdad/agent_output.tmp\n.sdad/gate.log\n*.tmp\n" >> .gitignore
+        printf "\n# SDAD v5.2\n.claude/.session_tmp\n.sdad/agent_output.tmp\n.sdad/gate.log\n*.tmp\n" >> .gitignore
         echo -e "${GREEN}  OK     .gitignore updated${NC}"
     else
         echo -e "${CYAN}  SKIP   .gitignore already has SDAD entries${NC}"
     fi
 else
-    printf "# SDAD v5.1\n.claude/.session_tmp\n.sdad/agent_output.tmp\n.sdad/gate.log\n*.tmp\n" > .gitignore
+    printf "# SDAD v5.2\n.claude/.session_tmp\n.sdad/agent_output.tmp\n.sdad/gate.log\n*.tmp\n" > .gitignore
     echo -e "${GREEN}  OK     .gitignore created${NC}"
 fi
 
@@ -281,11 +291,11 @@ echo ""
 echo -e "${YELLOW}[ 7/7 ] Installation complete${NC}"
 echo ""
 echo -e "${GREEN}============================================${NC}"
-echo -e "${GREEN}  SDAD v5.1 installed successfully${NC}"
+echo -e "${GREEN}  SDAD v5.2 installed successfully${NC}"
 echo -e "${GREEN}============================================${NC}"
 echo ""
 echo "Files installed:"
-echo "  CLAUDE.md                                — core instructions (v5.1)"
+echo "  CLAUDE.md                                — core instructions (v5.2)"
 echo "  .claude/skills/                          — AI Architect, AI Engineer, harness + on-demand skills"
 echo "  .claude/agents/                          — code-reviewer, security-auditor, test-generator + HANDOFF"
 echo "  .claude/hooks/                           — session hooks + PreToolUse spec-gate (.sh + .ps1)"

@@ -7,6 +7,72 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [5.2] — 2026-06-24
+
+### Overview
+
+SDAD v5.2 adds `PROJECT_PLATFORM: board` as a first-class platform, mirroring the Pyplan
+integration pattern introduced in v4.0. No changes to existing commands, SPEC.md format,
+or harness. Fully backward-compatible with all v5.x and v4.x projects.
+
+Core theme: Board BI & Planning projects now follow the same spec-first workflow as Pyplan,
+with platform-specific $spec questions, gate sections (§E, §F), increment checklist,
+QA Layer 5, and four on-demand skills. The harness fix (`assert-claude-md.ps1` dynamic
+baseline) enables the +60 lines/release rule to accumulate correctly across releases.
+
+**Upgrade note:** fresh installs use v5.2 automatically. Existing v5.x checkouts: pull
+`main` to get the Board skill stack and harness fix. No migration script needed — additive.
+
+---
+
+### Added
+
+**Board platform support (INC-1 to INC-7)**
+- `PROJECT_PLATFORM: board` in CLAUDE.md and SPEC_blank.md activates four skills
+- `.claude/skills/board/SKILL.md` — always-on mental model (Data Model / Capsule layers,
+  BR-03/BR-04/BR-05 business rules, artefact types, sub-skill routing)
+- `.claude/skills/board/spec-context/SKILL.md` — `$spec` flows (new vs existing),
+  §E/§F generation, Layout XML/CFG/CSV/screenshot ingestion, Board API OAuth2
+- `.claude/skills/board/data-model/SKILL.md` — Entities/Relationships/Cubes/Data Readers/
+  Algorithms with CSV+SQL artefact templates and BR-05 creation order enforcement
+- `.claude/skills/board/capsule/SKILL.md` — Screens/Procedures/Layouts/Masks/Selectors/
+  Data Entry with Procedure placement rules and Layout XML artefact template
+- `.claude/skills/board/qa-platform/SKILL.md` — 10 named Layer 5 checks:
+  DM-01..06 (Data Model) and CP-01..05 (Capsule), SEC-01 (P0 credential check)
+
+**SPEC_blank.md additions**
+- §E (Board Data Model) — gate section with Entities/Relationships/Cubes tables + Status field
+- §F (Board Capsule Structure) — informational section with Capsules/Screens/Procedures tables
+
+**CLAUDE.md additions (+60 lines, at budget limit)**
+- `PROJECT_PLATFORM: board` option in project declaration block
+- §E gate rule in Core Rules
+- 4 Board skill entries in Active Skills (on-demand, triggered by context)
+- BOARD PROJECTS block in `$spec` — 7 lines
+- §E and §F in `$specout` additional sections
+- `$build` Board gate + BOARD INCREMENT CHECKLIST (Data Model, Capsule, Artefact, Discovery)
+- Layer 5 extended to Board projects (10 named checks)
+- `$docfinal` detects Board alongside Pyplan
+- 5 Board behavior rules
+- Header/footer version bump v5.0 → v5.2
+
+**install.ps1 / install.sh**
+- 5 Board skill folders and files added to the download manifest
+
+### Fixed
+
+**Harness: `assert-claude-md.ps1` dynamic baseline (INC-8)**
+- Changed hardcoded `v4.3` baseline tag to `git describe --tags --abbrev=0`
+- The `+60 lines per release` [LOCK] now accumulates from the most recent tag,
+  not a fixed v4.3 ceiling — enabling correct enforcement across future releases
+- Error message includes the resolved baseline tag for traceability
+
+### QA
+
+`$eval` 14/14 PASS after INC-8 fix.
+
+---
+
 ## [5.1] — 2026-06-16
 
 ### Overview

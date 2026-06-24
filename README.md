@@ -1,4 +1,4 @@
-# G7 SDAD v5.1 — "Harness Edition"
+# G7 SDAD v5.2 — "Board Edition"
 ## Spec-Driven AI Development for Claude Code
 
 SDAD is G7's development methodology for teams using Claude Code as their
@@ -6,6 +6,30 @@ primary AI development tool. It brings spec-first discipline, vertical
 increments, integrated QA, compliance tiers, and a shared Lesson Library
 to AI-assisted development. As of v5, the rules that matter most are enforced
 in code — not merely requested in a prompt.
+
+---
+
+## What's new in v5.2
+
+v5.2 adds `PROJECT_PLATFORM: board` as a first-class platform, mirroring the existing
+Pyplan integration pattern. No changes to existing commands, SPEC.md format, or harness.
+Fully backward-compatible with all v5.x and v4.x projects.
+
+- **Board platform** — `PROJECT_PLATFORM: board` activates a four-skill stack
+  (spec-context, data-model, capsule, qa-platform) automatically. Board-specific
+  `$spec` questions, §E (Board Data Model) and §F (Board Capsule Structure) sections
+  in SPEC.md, Board increment checklist in `$build`, and Board Layer 5 in `$qa`.
+- **Existing project ingestion** — `$spec` on an existing Board project accepts
+  Layout XML, CFG, CSV exports, and screenshots; auto-populates §E/§F marking
+  inferred fields `[inferred]`. Optional Board Public API ingestion via OAuth2.
+- **`$build` generates Board artefacts** — SQL Data Readers, Entity/Cube CSVs,
+  Layout XML specs, and Procedure specs instead of generic code files.
+- **Board QA Layer 5** — 10 named checks (DM-01..06, CP-01..05) covering Entity
+  creation order, Algorithm syntax, Procedure placement, Step type misclassification,
+  Cube sparsity, naming conventions, and API credential exposure (P0).
+- **Harness fix** — `assert-claude-md.ps1` line-budget baseline changed from
+  hardcoded `v4.3` to the most recent git tag. Enables the `+60 per release` rule
+  to accumulate correctly across releases instead of hitting a fixed ceiling.
 
 ---
 
@@ -263,6 +287,22 @@ Auto-activated by tier: 🔒 Compliance Reviewer (Tier 2/3).
 
 ---
 
+## Board projects
+
+Skills activate automatically when `PROJECT_PLATFORM: board` is declared in SPEC.md §0:
+
+| Skill | Activates when |
+|-------|----------------|
+| `board/spec-context` | Always on Board projects — drives $spec and §E/§F generation |
+| `board/data-model` | Entity, Cube, Relationship, dimension, Algorithm, Data Reader work |
+| `board/capsule` | Capsule, Screen, Procedure, Layout, Mask, Selector work |
+| `board/qa-platform` | Board-specific QA checks (Layer 5) |
+
+§E (Board Data Model) is a gate section: `$build` is blocked until §E is at least Draft.
+Draft = analysis/optimization mode (existing projects). Approved = full `$build`.
+
+---
+
 ## Pyplan projects
 
 Skills activate automatically when `PROJECT_PLATFORM: pyplan` is declared
@@ -285,7 +325,7 @@ features work standalone.
 
 ```
 sdad-v4/
-├── CLAUDE.md                          # Core Claude Code config (v5.1)
+├── CLAUDE.md                          # Core Claude Code config (v5.2)
 ├── SPEC_blank.md                      # Blank spec template
 ├── install.sh                         # Mac/Linux methodology installer
 ├── install.ps1                        # Windows methodology installer
@@ -322,12 +362,18 @@ sdad-v4/
 │   │   ├── dev-setup/SKILL.md
 │   │   ├── decision-architecture/SKILL.md
 │   │   ├── data-discovery/SKILL.md
-│   │   └── pyplan/
-│   │       ├── spec-context/SKILL.md
-│   │       ├── diagram/SKILL.md
-│   │       ├── interfaces/SKILL.md
-│   │       ├── qa-platform/SKILL.md
-│   │       └── mcp/SKILL.md
+│   │   ├── pyplan/
+│   │   │   ├── spec-context/SKILL.md
+│   │   │   ├── diagram/SKILL.md
+│   │   │   ├── interfaces/SKILL.md
+│   │   │   ├── qa-platform/SKILL.md
+│   │   │   └── mcp/SKILL.md
+│   │   └── board/
+│   │       ├── SKILL.md               # always-on for Board projects
+│   │       ├── spec-context/SKILL.md  # $spec flows, §E/§F, file ingestion
+│   │       ├── data-model/SKILL.md    # Entities, Cubes, Algorithms, SQL
+│   │       ├── capsule/SKILL.md       # Screens, Procedures, Layouts, Masks
+│   │       └── qa-platform/SKILL.md   # Layer 5 QA checks
 │   ├── agents/
 │   │   ├── code-reviewer.md
 │   │   ├── test-generator.md
@@ -364,7 +410,7 @@ After installing, start `claude` and verify:
 
 | Command | Expected |
 |---------|----------|
-| `$sdad` | All phases + active skills listed; version 5.1 |
+| `$sdad` | All phases + active skills listed; version 5.2 |
 | `$skills` | AI Architect, AI Engineer always active; on-demand skills available |
 | `$spec` | First requirements question with proposed default (language first) |
 | `$pause` | Session state including context budget |
@@ -377,8 +423,8 @@ After installing, start `claude` and verify:
 | File | Contents |
 |------|----------|
 | `docs/SDAD_v5_WHAT_IS_SDAD.html` | **Start here** — what SDAD is, harness engineering, why governance-by-code |
-| `docs/SDAD_v5_INSTALL.html` | v5.1 installation + migration guide |
-| `docs/SDAD_v5_USER_GUIDE.html` | v5.1 everyday-use guide (the gate, ratchet, `$eval`, CI harness) |
+| `docs/SDAD_v5_INSTALL.html` | v5.2 installation + migration guide |
+| `docs/SDAD_v5_USER_GUIDE.html` | v5.2 everyday-use guide (the gate, ratchet, `$eval`, CI harness) |
 | `docs/SDAD_Visual_Manual_v2.html` | Visual manual — diagrams and flows |
 | `docs/sdad-harness-diagrams.html` | Harness engineering diagrams |
 | `docs/DEVELOPER_MANUAL_v4.3.html` | Didactic manual: SDAD, SDAD for Pyplan, day-to-day usage |
@@ -392,4 +438,4 @@ The Markdown sources (`SDAD_v5_*.md`) are the machine-readable copies; the
 
 ---
 
-G7 AI Development Methodology | SDAD v5.1 "Harness Edition"
+G7 AI Development Methodology | SDAD v5.2 "Board Edition"

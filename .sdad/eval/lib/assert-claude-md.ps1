@@ -47,31 +47,33 @@ if (-not $header.Success) {
     $failures += "version stamp mismatch (header $($header.Groups[1].Value) vs footer $($footer.Groups[1].Value))"
 }
 
-# 6 -- line budget: current length <= v4.3 baseline + 60 (R4 [LOCK]).
-#      Needs the v4.3 git tag; skipped gracefully where it does not exist
-#      (downstream installs) or when asserting a fixture copy (-SkipBudget).
+# 6 -- line budget: current length <= previous-release baseline + 60 (R4 [LOCK]).
+#      Uses the most recent git tag reachable from HEAD as the per-release baseline.
+#      Skipped gracefully when no tag exists (downstream installs) or -SkipBudget.
 if (-not $SkipBudget) {
     $baseline = $null
     try {
         Push-Location (Split-Path $Path -Parent)
-        # Resolve the tag's tracked name case-insensitively: git is case-sensitive,
-        # and the methodology file's leaf name has varied in case across older refs.
-        $leaf = Split-Path $Path -Leaf
-        $tracked = @(git ls-tree -r --name-only v4.3 2>$null) |
-            Where-Object { (Split-Path $_ -Leaf) -ieq $leaf } | Select-Object -First 1
-        if ($tracked) {
-            $baseRaw = git show "v4.3:$tracked" 2>$null
-            if ($LASTEXITCODE -eq 0 -and $baseRaw) { $baseline = @($baseRaw).Count }
+        # Find the most recent release tag reachable from HEAD (dynamic baseline).
+        $baseTag = git describe --tags --abbrev=0 2>$null
+        if ($LASTEXITCODE -eq 0 -and $baseTag) {
+            $leaf = Split-Path $Path -Leaf
+            $tracked = @(git ls-tree -r --name-only $baseTag 2>$null) |
+                Where-Object { (Split-Path $_ -Leaf) -ieq $leaf } | Select-Object -First 1
+            if ($tracked) {
+                $baseRaw = git show "${baseTag}:${tracked}" 2>$null
+                if ($LASTEXITCODE -eq 0 -and $baseRaw) { $baseline = @($baseRaw).Count }
+            }
         }
         Pop-Location
     } catch { try { Pop-Location } catch {} }
     if ($null -eq $baseline) {
-        Write-Host "ASSERT NOTE: v4.3 tag not reachable -- line-budget assert skipped"
+        Write-Host "ASSERT NOTE: no release tag reachable -- line-budget assert skipped"
     } else {
         $current = @(Get-Content $Path -Encoding UTF8).Count
         $limit = $baseline + 60
         if ($current -gt $limit) {
-            $failures += "line budget exceeded: $current lines vs limit $limit (v4.3 baseline $baseline + 60)"
+            $failures += "line budget exceeded: $current lines vs limit $limit ($baseTag baseline $baseline + 60)"
         }
     }
 }

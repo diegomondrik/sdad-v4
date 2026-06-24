@@ -8,10 +8,11 @@
 
 ## §0 — Platform & Context
 
-**PROJECT_PLATFORM:** [general | pyplan | other]
+**PROJECT_PLATFORM:** [general | pyplan | board]
 
 > Declare the deployment platform here. This activates the correct skill set.
 > `pyplan` → activates Pyplan skills (diagram, interfaces, qa-platform, spec-context)
+> `board`  → activates Board skills (spec-context, data-model, capsule, qa-platform); adds §E/§F
 > `general` → activates standard AI Architect + AI Engineer only
 
 **Runtime environment:**
@@ -53,6 +54,64 @@
 **Brand Token Sheet status:** [Not started / Draft / Approved]
 **Client approval date:** [date or "pending"]
 **Notes:** [any brand constraints or client preferences]
+
+---
+
+## §E — Board Data Model
+**Applies to:** `PROJECT_PLATFORM: board` projects. Omit for all other platforms.
+**Gate:** §E must be Draft or Approved before `$build` is allowed.
+  Draft = analysis/optimization mode (existing projects).
+  Approved = full $build enabled (new projects or after developer confirmation).
+
+**Board version:** [15 / 14 / other]
+**Environment:** [Cloud / On-premises]
+**Data Model name(s):** [name1, name2]
+**Time Range:** [start year – end year, granularity: Monthly / Weekly / Daily]
+
+### Entities
+| Entity name | Description | Members (approx.) | Source |
+|-------------|-------------|-------------------|--------|
+| [Month] | Time dimension | 12/year | Board time entity |
+| [Entity1] | [description] | [N] | [SQL table / CSV] |
+
+### Relationships (Hierarchies)
+| Hierarchy name | Base Entity → Parent → ... → Top |
+|----------------|-----------------------------------|
+| [HierarchyName] | [Entity] → [Parent] → [Top] |
+
+### Cubes
+| Cube name | Description | Dimensions | Data type | Source |
+|-----------|-------------|------------|-----------|--------|
+| [CubeName] | [description] | [Entity1, Entity2, Month] | Numeric | [SQL Data Reader / CSV] |
+
+**§E Status:** Draft / Approved
+
+---
+
+## §F — Board Capsule Structure
+**Applies to:** `PROJECT_PLATFORM: board` projects. Omit for all other platforms.
+
+### Capsules
+| Capsule name | Purpose | Primary Data Model | Screens (approx.) |
+|--------------|---------|-------------------|-------------------|
+| [CapsuleName] | [description] | [DataModelName] | [N] |
+
+### Screens (per Capsule)
+| Screen name | Type | Objects | Data Model |
+|-------------|------|---------|------------|
+| [ScreenName] | [Dashboard / Input / Report] | [DataView, Chart, Selector...] | [DataModelName] |
+
+### Procedures
+| Procedure name | Location | Type | Steps summary | Scheduleable |
+|----------------|----------|------|---------------|--------------|
+| [ProcName] | [Data Model / Capsule] | [Server-side / Client-side] | [summary] | [Yes / No] |
+
+### Masks
+| Mask name | Applied to Screens | Contents |
+|-----------|-------------------|----------|
+| [MaskName] | [All / specific screens] | [Menu Object, Logo...] |
+
+**§F Status:** Draft / Approved
 
 ---
 

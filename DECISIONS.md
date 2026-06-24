@@ -663,3 +663,28 @@ Cost note: if the repo is private, the macOS leg burns Actions minutes (~10x);
   + the .ps1 hook policy call, fix $env:TEMP / backslash paths, add the 3-OS matrix -- those
   surface when the macOS/Linux legs are added.
 ================================================================
+
+---
+
+## v5.2 — Inc 1+2: Board platform declaration (CLAUDE.md + SPEC_blank.md)
+
+════════════════════════════════════════════════════════
+📋 HUB BLOCK — DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-24
+Increment: v5.2 Inc 1+2 — Board platform declaration
+Model: claude-sonnet-4-6
+Decision: PROJECT_PLATFORM: board added as first-class platform following the Pyplan
+          pattern — declaration block, §E/§F gates, 4 on-demand skills, Board increment
+          checklist in CLAUDE.md, Board Layer 5 in $qa.
+Rationale: Reusing proven Pyplan infrastructure minimizes risk; consistent activation
+           model reduces cognitive overhead for SDAD users switching between platforms.
+Alternatives considered: single monolithic Board skill (rejected — spec-context,
+           data-model, capsule, qa-platform have distinct triggers that warrant
+           separate files); putting checklist entirely in skill (rejected for Inc 1 —
+           kept in CLAUDE.md for parity with Pyplan; will move to board/SKILL.md once
+           created in Inc 3).
+Impact: CLAUDE.md +60 lines net (at budget limit); SPEC_blank.md +56 lines (§E+§F
+        templates); assert-claude-md.ps1 baseline changed from hardcoded v4.3 to
+        dynamic latest-tag (collateral fix: enables +60 per release, not +60 from v4.3 forever).
+════════════════════════════════════════════════════════

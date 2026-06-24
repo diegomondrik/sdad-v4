@@ -1,4 +1,4 @@
-# SDAD v5.0 — CLAUDE.md
+# SDAD v5.2 — CLAUDE.md
 # Spec-Driven AI Development for Claude Code
 # G7 AI Development Methodology
 # Version 5.0 | 2026
@@ -13,6 +13,7 @@
 
 # ── REQUIRED: set PROJECT_PLATFORM if applicable ──────────────────────────
 # PROJECT_PLATFORM: pyplan       ← uncomment for Pyplan projects
+# PROJECT_PLATFORM: board        ← uncomment for Board projects
 # PROJECT_PLATFORM: generic      ← default (no platform-specific skills)
 #
 # PROJECT_LANGUAGE: en | es      ← set by the first $spec question (v4.3).
@@ -29,6 +30,15 @@
 #   · Skills   → pyplan-diagram, pyplan-interfaces, pyplan-qa-platform,
 #                pyplan-spec-context, pyplan-mcp load on-demand by trigger
 #                decision-architecture and data-discovery load on-demand by trigger
+#
+# When PROJECT_PLATFORM: board is set, the following activate automatically:
+#   · $spec    → adds §E (Board Data Model — gate) and §F (Board Capsule Structure)
+#                asks "new vs existing project" before standard sections
+#   · $build   → adds Board increment checklist at increment close
+#                generates Board artefacts (SQL, CSV, Layout XML, Procedure specs)
+#   · $qa      → adds Platform layer (Layer 5 — Board) to QA run
+#   · Skills   → board-spec-context, board-data-model, board-capsule,
+#                board-qa-platform load on-demand by trigger
 
 ---
 
@@ -44,6 +54,8 @@
   Same gate logic as §9 Security on Tier 3 projects.
 - §D (MCP Tools Catalog) must be complete before $build is allowed on Pyplan projects
   that declare at least one @mcp_tool node. Same gate logic as §A.
+- §E (Board Data Model) must be complete before $build is allowed on Board projects.
+  Existing projects: Draft §E enables analysis mode; Approved enables full $build.
 
 ---
 
@@ -118,6 +130,10 @@ ANNOUNCEMENT RULE (generalizes the $build 🧠 MODEL line):
 - **Data Discovery** — trigger: data delta, field mismatch, source discrepancy, data gap
 - **Dev Setup** — trigger: onboarding, dev setup, which Claude Code features complement SDAD (links to live docs)
 - **Harness** — trigger: control layer, harness model, governance axiom, E/T/C/S/L/V, enforcement in code vs prompt, $eval
+- **Board Spec Context** — trigger: auto on $spec/$specout on Board projects
+- **Board Data Model**   — trigger: entity, cube, relationship, dimension, §E (Board projects)
+- **Board Capsule**      — trigger: capsule, screen, procedure, layout, mask, §F (Board projects)
+- **Board QA Platform**  — trigger: auto by $qa on Board projects (Layer 5)
 
 Use $skills to view details or activate additional skills manually.
 
@@ -229,6 +245,14 @@ PYPLAN PROJECTS (when PROJECT_PLATFORM: pyplan):
     §D gate: flag explicitly when §D is incomplete — $build is blocked until approved.
     If no: skip §D entirely — do not create the section.
 
+BOARD PROJECTS (when PROJECT_PLATFORM: board):
+  Ask "New project or existing?" before standard sections.
+  New: run Board questions in order (version, cloud/on-prem, entities, relationships,
+    cubes, capsule structure, procedures, data sources, Board API available?).
+  Existing: file ingestion flow (Layout XML, CFG, CSV, screenshots) → auto-populate §E/§F.
+    Mark all inferred fields as [inferred] — developer confirms before §E approved.
+  §E gate: flag when empty — $build blocked. Draft = analysis mode for existing projects.
+
 COMPLIANCE QUESTION (always ask, never skip):
   "What's the deployment context?
    (1) Internal tool / POC — Tier 1 Standard
@@ -264,6 +288,10 @@ Additional sections for Pyplan projects (prepended before §1):
       parameter names + types + Annotated descriptions, return type, serialization notes.
       §D is a gate section: must be approved before $build when present.)
 
+Additional sections for Board projects (prepended before §1):
+  §E  Board Data Model (gate: approved before $build; Draft allows analysis mode for existing projects)
+  §F  Board Capsule Structure
+
 §7 — MCP vs CLI rule (consumer context only):
   When §7 documents a third-party integration SDAD will consume during $build,
   evaluate wrapping a CLI over invoking the MCP directly when ALL hold:
@@ -280,6 +308,7 @@ After generating, write the Spec to SPEC.md in the repo root automatically.
 For Tier 2/3: §9 is mandatory and must be complete before approval.
 For Tier 3 and Pyplan: respective gate sections (§9 / §A) block $build until approved.
 For Pyplan projects with MCP tools: §D blocks $build until approved.
+For Board projects: §E blocks $build until Draft or Approved (empty §E = full block).
 Ask for developer approval before allowing $build.
 
 **$build** (or $build [feature]) — Phase 3: Guided Development.
@@ -289,6 +318,7 @@ WHEN no test command found: flag before writing code.
 Blocked if Context Budget hard warning (65%) was triggered.
 ON PYPLAN PROJECTS: blocked if §A is not marked as approved in SPEC.md.
 ON PYPLAN PROJECTS: blocked if §D is present and not marked as approved in SPEC.md.
+ON BOARD PROJECTS: blocked if §E is empty (not present, not Draft, not Approved) in SPEC.md.
 
 Before each increment announce:
 
@@ -311,6 +341,7 @@ After writing code for an increment:
   3. Write DECISIONS.md entry for this increment (see HUB BLOCK below).
   4. Update SPEC.md §13 AI Authorship Log.
   5. ON PYPLAN PROJECTS: run Pyplan increment checklist (see below).
+     ON BOARD PROJECTS: run Board increment checklist (see below).
   5.5. Project CLAUDE.md sync — if this increment changed structure, propose an update to the
        project's own CLAUDE.md (see PROJECT CLAUDE.md PROTOCOL below).
 
@@ -345,6 +376,23 @@ PYPLAN INCREMENT CHECKLIST (runs after step 4 on Pyplan projects):
     □ result = _fn assigned — not result = _fn() (function assigned, not called)
     □ Tool does not depend on interactive agent behavior or session state
     □ §D entry created or updated for this tool (identifier, name, description, parameter schema)
+
+BOARD INCREMENT CHECKLIST (runs after step 4 on Board projects):
+  Data Model surface:
+    □ Entity creation order respected: Entities → Relationships → Cubes
+    □ All Cubes reference only valid Entities as dimensions
+    □ Algorithm formulas use block letters (a, b, c...) and Board functions only: dt(), rt(), gt(), @DATE, @MONTH, @YEAR
+    □ No circular dependencies in Relationships
+  Capsule surface:
+    □ Scheduleable Procedures placed at Data Model level — not Capsule level
+    □ Client-side Steps (navigation, selection) not placed in server-side Procedures
+    □ All Screen Data Blocks bound to a valid Data Model
+  Artefact validation:
+    □ SQL Data Readers validated against declared source type in §E
+    □ CSV imports match Entity structure defined in §E
+    □ Layout XML follows Board element and attribute naming conventions
+  Discovery:
+    □ Any schema or source deltas found during this increment recorded in §B and DECISIONS.md
 
 DATA DELTA HANDLING (Pyplan projects):
   Small delta (format error, nulls, unexpected volume, wrong field name):
@@ -395,7 +443,8 @@ QA LAYERS (run in priority order):
   Layer 3 — ⚡ Efficiency: token usage, redundant calls, conversation history management,
             unbounded loops, latency bottlenecks
   Layer 4 — ✅ Best Practices: readability, maintainability, duplication, naming, docs gaps
-  Layer 5 — 🟠 Platform (Pyplan projects only): nodes missing result=, unsynchronized indexes,
+  Layer 5 — 🟠 Platform (Pyplan and Board projects):
+    Pyplan checks: nodes missing result=, unsynchronized indexes,
             inputs without validations, circular dependencies, Analyst Agent context gaps
             MCP tools (when §D present):
               □ All nodes registered in §D are decorated with @mcp_tool and have result = _fn
@@ -407,6 +456,11 @@ QA LAYERS (run in priority order):
               □ Page↔model traffic only via window.pyplan.callback — no direct requests
               □ Mutator callbacks report stale widgets via get_nodes_to_refresh
               □ No cookie/localStorage dependence — state persisted through model callbacks
+    Board checks (Board projects only): Entity creation order, Cube dimension validity,
+            Algorithm syntax (block letters, Board functions: dt(), rt(), gt(), @DATE, @MONTH, @YEAR),
+            Procedure level (scheduleable → Data Model level only, not Capsule level),
+            Step type misplacement (client-side Steps in server-side Procedures),
+            naming convention consistency, Board API credentials not logged in Procedures (P0)
 
 $qa auto never touches security, compliance, or Spec deviations without human approval.
 Security and compliance findings always require explicit developer approval before any fix.
@@ -467,7 +521,7 @@ STEP 2 — AI AUTHORSHIP LOG: Generate §13 table — one row per detected modul
   Append to SPEC_RETROACTIVE.md.
 
 STEP 3 — QA STANDALONE AUDIT: Full $QA Standalone mode. All layers including Platform
-  if Pyplan is detected. Mark P0 findings with 🚨. Number H-01, H-02...
+  if Pyplan or Board is detected. Mark P0 findings with 🚨. Number H-01, H-02...
   Do NOT apply any fixes — report only.
   Close with: "Which fixes would you like me to apply? (H-XX, 'all', or 'none')"
 
@@ -507,8 +561,9 @@ All $doc outputs written directly to /docs in the repo.
 **$skills** — Show active and available AI specialist skills.
   Always active: AI Architect, AI Engineer.
   On-demand: Security Reviewer, QA Engineer, Compliance Reviewer, Frontend,
-             Brand Design, Pyplan x5 (diagram, interfaces, qa-platform,
-             spec-context, mcp), Decision Architecture, Data Discovery.
+             Brand Design, Pyplan x5 (diagram, interfaces, qa-platform, spec-context, mcp),
+             Board x4 (spec-context, data-model, capsule, qa-platform),
+             Decision Architecture, Data Discovery.
 
 ---
 
@@ -590,6 +645,11 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - Write DECISIONS.md entry and HUB BLOCK after each completed increment.
 - Mark non-reopenable decisions [LOCK] in DECISIONS.md; $pause compress carries only [LOCK] decisions into the COMPACT ANCHOR.
 - ON PYPLAN PROJECTS: run increment checklist before marking any increment complete.
+- ON BOARD PROJECTS: run Board increment checklist before marking any increment complete.
+- ON BOARD PROJECTS: Entity creation order enforced — Entities → Relationships → Cubes (BR-05).
+- ON BOARD PROJECTS: Algorithm syntax validated before increment closes — block letters and valid Board functions only (BR-03).
+- ON BOARD PROJECTS: Procedure placement enforced — scheduleable Procedures at Data Model level only, not Capsule level (BR-04).
+- ON BOARD PROJECTS: existing project ingestion marks all inferred §E/§F fields as [inferred] — developer confirms before §E approved (BR-07).
 - ON PYPLAN PROJECTS: never rely on the Pyplan Analyst Agent — SDAD is self-sufficient.
 - ON PYPLAN PROJECTS: structural data deltas pause $build — never improvise a workaround.
 - ON PYPLAN PROJECTS WITH MCP: Build-via-AI requires approved Spec — Pyplan MCP does not bypass the Spec gate.
@@ -640,5 +700,5 @@ Use as primary context budget indicator — shows the 50% / 65% thresholds.
 
 ---
 
-G7 AI Development Methodology | SDAD v5.0 | CLAUDE.md
+G7 AI Development Methodology | SDAD v5.2 | CLAUDE.md
 Spec-Driven AI Development for Claude Code
