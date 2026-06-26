@@ -376,6 +376,9 @@ PYPLAN INCREMENT CHECKLIST (runs after step 4 on Pyplan projects):
     □ result = _fn assigned — not result = _fn() (function assigned, not called)
     □ Tool does not depend on interactive agent behavior or session state
     □ §D entry created or updated for this tool (identifier, name, description, parameter schema)
+  Versioning (only when the increment modified the Pyplan model):
+    □ Model exported to .sdad/pyplan-snapshots/ named YYYYMMDD-incN-slug.ppl
+    □ Snapshot included in this increment's atomic commit
 
 BOARD INCREMENT CHECKLIST (runs after step 4 on Board projects):
   Data Model surface:
@@ -419,6 +422,9 @@ BUILD-VIA-AI GUARDRAILS (Pyplan MCP — when using Pyplan MCP's build/modify cap
     3. Wait for developer approval before executing the modification.
     4. After execution: write DECISIONS.md entry and update §13 AI Authorship Log.
     5. Run $qa on the modified increment — no increment is complete without QA.
+    5.5. PYPLAN MODEL SNAPSHOT: after $qa passes, export the model to
+         .sdad/pyplan-snapshots/YYYYMMDD-incN-slug.ppl (MCP export endpoint if available,
+         else Pyplan UI); include it in this increment's atomic commit.
     6. Run MCP surface checklist for any node modified or created via AI.
   Note: Pyplan MCP is a v1 server (first release). Document it as an external
   dependency in §7 and flag its maturity level in $verify.
@@ -452,6 +458,7 @@ QA LAYERS (run in priority order):
               □ Docstrings are precise enough for an external LLM to invoke correctly
               □ Return values verified serializable — no DataFrames, no xarray without conversion
               □ No tool depends on interactive agent behavior or mutable session state
+              □ Build-via-AI: model snapshot present in .sdad/pyplan-snapshots/ for this increment (YYYYMMDD-incN, committed)
             HTML interfaces (when the project has any):
               □ Page↔model traffic only via window.pyplan.callback — no direct requests
               □ Mutator callbacks report stale widgets via get_nodes_to_refresh
@@ -658,11 +665,14 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - ON PYPLAN PROJECTS WITH MCP: flag Pyplan MCP as a v1 external dependency in §7 — API may change across Pyplan updates.
 - ON PYPLAN PROJECTS: AI-built interfaces default to HTML interfaces; each one is announced,
   approved, and QA'd as an increment, closing with the HTML interface surface checklist.
+- ON PYPLAN PROJECTS WITH MCP: after each Build-via-AI increment's $qa passes, export the model
+  snapshot to .sdad/pyplan-snapshots/ before committing — increment is not complete without it.
 - Convert binary source documents (PDF/docx/xlsx/pptx) to Markdown with markitdown before
   reading them — see DOCUMENT INGESTION under $spec. Local trusted files only.
 - Before session end or $pause compress, resolve any pending commits using git log.
-- All .ps1 scripts must be pure ASCII — Windows PowerShell 5.1 misreads UTF-8 without BOM
-  and non-ASCII characters (em-dashes, accents) break the parser (L-01, confirmed twice).
+- All .ps1 AND .sh scripts must be pure ASCII — Windows PowerShell 5.1 misreads UTF-8 without
+  BOM and fresh-machine installers break on non-ASCII bytes; ratcheted for both in
+  checks/ascii-ps1 (L-01, .sh added in the v5.2 versioning patch).
 - Governance Axiom: hard gates live in code (PreToolUse spec-gate, checks/ ratchet, git pre-commit); prompt rules are the fallback, not the guarantee. See the Harness skill.
 - $eval runs on any CLAUDE.md/skill change and as the release gate; a captured lesson with a mechanically verifiable pattern gets a check in checks/, not only a prose rule.
 - $agent delegation goes through .sdad/lib/agent-run (600s timeout) — fails loud on timeout or empty output, never proceeds silently.
