@@ -1,292 +1,249 @@
-# SPEC — SDAD v5.1 "CI Foundation"
+# SPEC — SDAD v5.2 Pyplan Model Versioning Patch
 
-> SPEC STATUS: APPROVED (2026-06-15, developer: Diego Mondrik)
-> Project: SDAD methodology repo (self-referential — SDAD builds SDAD v5.1)
+> SPEC STATUS: APPROVED (2026-06-25, developer: Diego Mondrik)
+> Project: SDAD methodology repo (self-referential — SDAD builds SDAD)
 > Tier: 2 Business · Platform: generic · PROJECT_LANGUAGE: es (interaction) / en (documents)
-> Date: 2026-06-15 · Developer: Diego Mondrik
-> Input: SDAD_v6_BUILD_BRIEF.md (sections 0, 2, I1-I3, 5) + decisions confirmed in $spec 2026-06-15
-> Predecessor: v5.0 "Harness Edition" (preserved at git tag v5.0)
+> Date: 2026-06-25 · Developer: Diego Mondrik
+> Input: SDAD_pyplan_versioning_brief.md (sections 0-6) + $spec anchor validation 2026-06-25
+> Predecessor: v5.1 "CI Foundation" (preserved in git history; v5.0 at tag v5.0)
+> Version impact: NONE — behavior patch to v5.2, no version bump.
 
 ---
 
 ## §1 Vision & Objective
 
-SDAD v5.0 moved the spec gate and the lesson ratchet from prompt into code — but only
-on **one correctly-configured machine**. The confirmed deployment context (4-5 developers
-per project, many client projects, mixed Windows/macOS/Linux, cloud delivery) breaks that
-guarantee the moment a second developer, a second OS, or a non-installer commit path
-appears. `.git/hooks` is unversioned; a developer who never runs the installer, or who
-commits via web/CI/another tool, bypasses every v5 gate silently.
+When working with Pyplan MCP, SDAD manages two separate state layers. **Methodology
+state** (SPEC.md, DECISIONS.md, LESSON_LIBRARY.md) is versioned in git by the SessionEnd
+hook — well covered. **Pyplan application state** (nodes, interfaces, model logic) lives
+in Pyplan's cloud workspace, is modified directly by the MCP, and is NOT in git.
 
-v5.1 is the **CI Foundation**: the prerequisite the v6 brief identified (section 0.5 / 5.1)
-when it confirmed that **no shared CI exists today across client projects**. Rather than
-fold the pipeline into v6, this release stands it up as its own shippable, independently
-adoptable artifact, so the whole v6 portfolio layer (I4-I11) can ride on a proven base.
+The gap: after a Build-via-AI increment, git holds the *record* of the change
+(DECISIONS.md, §13) but not the *artifact* (the model itself). If the Pyplan workspace is
+corrupted or lost, there is no recovery path from the repo.
 
-Three moves, all relocation (not reinvention) of v5 mechanisms from machine to pipeline:
+The fix is a single convention: export the Pyplan model after each Build-via-AI increment
+and commit the `.ppl` export alongside DECISIONS.md. The committed `.ppl` files become the
+local backup and the model's version history. No GitHub required — local git commits are
+sufficient for recovery; a remote (if configured) is a second copy.
 
-1. **Gates as a server-side guarantee (I1).** A GitHub Actions workflow re-runs the v5
-   gates on every pull request — spec gate, ascii-ps1 ratchet, claude-md-case ratchet,
-   `$eval` deterministic core — reusing the existing `checks/` scripts and
-   `run-eval.ps1` (via `pwsh`) as the single source of truth. Local hooks stay as fast
-   pre-PR feedback; CI is the authoritative blocker on merge.
-2. **Symmetric cross-OS enforcement (I2).** The `.sh` spec-gate (shipped untested in v5)
-   is finished and tested on macOS and Linux; `$eval` runs on a Windows/macOS/Linux
-   matrix; the deferred live PreCompact verification on POSIX is closed.
-3. **Versioned distribution (I3-versioning).** A `.sdad/VERSION` stamp, an installer
-   pinned to a release tag instead of `main`, drift detection (does a client repo lag the
-   central source?), and an idempotent update path that never clobbers project state.
+This is a behavior patch to SDAD v5.2 — it does not bump the version number.
 
-**Versioning: 5.1** — minor, backward-compatible with v5.0 (no SPEC.md or command-surface
-breaks). The identity change to portfolio governance is reserved for v6.0; v5.1 is the
-load-bearing step that makes v6 possible.
-Upgrade note: `git tag v5.0` already exists; tag `v5.1` on release.
+---
 
 ## §2 Users & Roles
 
-| Role | Who | Interaction |
-|---|---|---|
-| Methodology owner | Diego (Windows 11, PowerShell 5.1) | Approves Spec, runs `$build`, reviews PRs, tags releases |
-| Contributing devs | Mixed Windows / macOS / Linux, 4-5 per project | Open PRs; CI gate is authoritative on their merges |
-| Downstream developers | Consumers of `install.*` / `project-init.*` in client repos | Receive the CI workflow + versioned installer; adopt per repo |
-| CI runner (GitHub Actions) | Automated, non-human | Re-runs the gates server-side on every PR; blocks merge on failure |
+| Role | Description | Access |
+|------|-------------|--------|
+| SDAD developer (Pyplan project) | Runs Build-via-AI increments against a Pyplan instance; exports and commits the model snapshot per increment | Full repo + Pyplan workspace |
+| SDAD maintainer (this repo) | Applies this patch to the methodology artefacts | Full repo |
+
+The patch changes methodology behavior only — no end-user-facing software surface.
+
+---
 
 ## §3 Functional Flows
 
-### F1 — Server-side spec gate on pull request (I1)
-1. A PR is opened or updated against a protected branch.
-2. `sdad-gates.yml` runs. A gate job computes the PR's changed files (`git diff`).
-3. For each changed path, it applies the **shared spec-gate policy** (the same
-   allowlist / code-file denylist / `$docfinal` sentinel / SPEC-approval logic the local
-   hook uses — see §5 single-source-of-truth design).
-4. If any changed path is a code file AND `SPEC.md` is absent OR not marked
-   `SPEC STATUS: APPROVED` → the job fails the PR with a message naming `$spec` / `$docfinal`.
-5. Otherwise the gate passes. The ratchet jobs (F2) and `$eval` (F3-eval) also run; any
-   failure fails the PR. All green → merge is allowed.
+### Flow 1 — Build-via-AI increment with model snapshot (Pyplan projects)
 
-### F2 — Ratchets and eval on the CI matrix (I1 + I2)
-1. The workflow runs a matrix: `ubuntu-latest`, `windows-latest`, `macos-latest`.
-2. Each OS installs `pwsh` if not present, then runs, reusing existing scripts (no
-   reimplementation): `checks/ascii-ps1`, `checks/claude-md-case`, and
-   `pwsh .sdad/eval/run-eval.ps1` (deterministic core).
-3. Any non-ASCII `.ps1`, any wrong-case `CLAUDE.md` reference, or any failing eval
-   scenario fails the PR on that OS leg.
-4. Platform deltas (if any leg behaves differently) are recorded in DECISIONS.md.
+After each Build-via-AI increment closes:
 
-### F3 — Versioned install / drift / update (I3-versioning)
-1. **Install:** `install.*` / `project-init.*` fetch files from a **pinned release tag**
-   (e.g. `.../sdad-v4/v5.1/...`) rather than `main`, and write `.sdad/VERSION` (`5.1`).
-   The CI workflow ships as one of the fetched files.
-2. **Drift check:** `$verify` (drift mode) reads local `.sdad/VERSION`, fetches the
-   central version marker from the source, and reports if the repo lags
-   (e.g. "this repo is on SDAD 5.0; central is 5.1 — run the updater").
-3. **Update:** re-running the installer pinned to a newer tag is idempotent — it refreshes
-   methodology files and `.sdad/VERSION` while preserving `SPEC.md`, `DECISIONS.md`,
-   `LESSON_LIBRARY.md`, and `.sdad/project.md` untouched.
+1. MCP modifies the model (increment announced and approved per existing protocol).
+2. `$qa` on the increment — must pass before export.
+3. **Export the Pyplan model** — via MCP export endpoint if available (D-1), otherwise
+   manually from the Pyplan UI → save as
+   `.sdad/pyplan-snapshots/YYYYMMDD-incN-slug.ppl`.
+4. **Atomic commit:** DECISIONS.md + §13 update + the `.ppl` snapshot — one commit per
+   increment.
+5. *(Optional — only with a remote configured)* `git push`.
 
-### F4 — Local-CI parity (the v6 thesis, enforced)
-The local PreToolUse hook and the CI gate consume the **same** decision module, so a path
-that is allowed/denied locally is allowed/denied identically in CI. Divergence between
-local and server enforcement is the failure mode v5.1 exists to prevent; the shared module
-makes it structurally impossible to drift.
+Recovery: load the corresponding `.ppl` in Pyplan; git history gives the restore timeline.
 
-## §4 Data Model (artifacts produced / consumed)
+### Flow 2 — Project initialization scaffolds the snapshots folder (Pyplan projects)
 
-| Artifact | Status | Role |
-|---|---|---|
-| `.github/workflows/sdad-gates.yml` | new | CI workflow: PR gate + ratchets + eval matrix |
-| `checks/spec-gate-policy.{sh,ps1}` | new | Shared spec-gate decision module (consumed by local hook + CI) |
-| `.claude/hooks/pre-tool-use-spec-gate.{ps1,sh}` | refactor | Local hook delegates the decision to the shared policy module |
-| `checks/ascii-ps1.{ps1,sh}` | reuse | L-01 ratchet — run by CI unchanged |
-| `checks/claude-md-case.{ps1,sh}` | reuse | L-04 ratchet — run by CI unchanged |
-| `.sdad/eval/run-eval.ps1` + scenarios | reuse | Deterministic core — run by CI via `pwsh` |
-| `.sdad/VERSION` | new | Version stamp (`5.1`); read by drift check, written by installer |
-| `install.{ps1,sh}`, `project-init.{ps1,sh}` | modify | Pin to release tag, write VERSION, ship workflow, idempotent update |
-| `apply-v5.1.{ps1,sh}` | new | One-shot, idempotent, self-deleting; applies `.claude/` hook refactor |
-| CLAUDE.md, CHANGELOG.md, README.md, docs/ | modify | Version bump, behavior rules, what's-new (release close) |
+`project-init` detects a Pyplan project (CLAUDE.md contains uncommented
+`PROJECT_PLATFORM: pyplan`, OR `--pyplan` flag passed) and creates
+`.sdad/pyplan-snapshots/.gitkeep` so the folder exists and is tracked from day one.
+Non-Pyplan projects: skip silently.
 
-No end-user data, no database, no persistent runtime state. The "data" of this project is
-methodology source files and CI configuration.
+---
+
+## §4 Data Model
+
+| Artefact | Location | Format | Tracked in git |
+|----------|----------|--------|----------------|
+| Model snapshot | `.sdad/pyplan-snapshots/YYYYMMDD-incN-slug.ppl` | Pyplan binary `.ppl` | Yes (new exception in .gitignore) |
+| Folder keeper | `.sdad/pyplan-snapshots/.gitkeep` | empty | Yes |
+
+**Naming convention (deterministic, sortable):** `YYYYMMDD-incN-slug.ppl`
+e.g. `20260625-inc03-revenue-nodes.ppl` — date `YYYYMMDD` · `inc` + zero-padded number ·
+short feature slug.
+
+---
 
 ## §5 Technical Architecture
 
-**Stack / surface.** GitHub Actions (chosen platform [LOCK] D1 — remote is on GitHub,
-`pwsh` runs on all three GitHub-hosted runners, so existing `.ps1` checks and the eval
-runner are reused rather than reimplemented). PowerShell 5.1 (Windows) + PowerShell Core
-`pwsh` (POSIX runners) + POSIX `sh` for the `.sh` variants. No new runtime dependency, no
-external registry, no API dependency (honors the [LOCK] "no API dependency in the
-methodology").
+**Stack:** PowerShell 5.1 (`.ps1`) + Bash (`.sh`) for init scripts; Markdown for
+methodology artefacts (CLAUDE.md, skills, guides, briefs); git for versioning.
 
-**Single-source-of-truth gate design.** The spec-gate decision (allow/deny a given path
-under the current SPEC state) is factored into `checks/spec-gate-policy.{sh,ps1}`. Two
-entry points consume it:
-- **Local** (`pre-tool-use-spec-gate.*`): reads one path from the PreToolUse stdin JSON,
-  asks the policy, denies the single tool call. Per-tool-call, fast feedback.
-- **CI** (`sdad-gates.yml`): iterates the PR's `git diff` changed paths, asks the policy
-  per path, fails the PR. Per-PR, authoritative.
-Refactoring the local hook to delegate to the shared module must be behavior-preserving:
-eval scenarios 01-05 must still pass after the refactor.
+**Components touched by this patch:**
 
-**Apply-script scope.** Only changes under the write-protected `.claude/` ship via
-`apply-v5.1.*` (the hook refactor). `.github/workflows/`, `checks/`, and `.sdad/VERSION`
-are NOT under `.claude/` and are written directly by the installer / repo.
+| Component | Role | Change |
+|-----------|------|--------|
+| `.gitignore` | Ignore rules | Add `!.sdad/pyplan-snapshots/` exception |
+| `project-init.ps1` / `.sh` | Project bootstrap | Add Pyplan detection (hybrid) + snapshots scaffold; `.sh` sanitized to pure ASCII |
+| `install.sh` | Installer | Sanitize to pure ASCII (I2b) — runs on fresh machines |
+| `checks/ascii-ps1.ps1` / `.sh` | ASCII ratchet | Extend scan glob from `*.ps1` to `*.ps1` + `*.sh` (I2b) |
+| `CLAUDE.md` | Methodology control | Build-via-AI step 5.5, Pyplan checklist, QA Layer 5, Behavior rule |
+| `.claude/skills/pyplan/mcp/SKILL.md` | MCP skill | Snapshot convention, QA integration, $verify note |
+| `docs/SDAD_v5_USER_GUIDE.md` | User guide | New §7 Pyplan versioning (renumber old §7→§8) |
+| `SDAD_v6_BUILD_BRIEF.md` | v6 plan | New increment Ix + I4/I9 dependency notes |
+| `DECISIONS.md` | Decisions log | HUB BLOCK entry for this patch |
 
-**Build plan (increments).**
+**Model string (reproducibility):** this patch built with `claude-opus-4-8` (FRONTIER) for
+I3; `claude-sonnet-4-6` (STANDARD) acceptable for I1/I2/I4-I7 per §6.
 
-- **INC-1 — Shared policy module + CI gate workflow (I1).** FRONTIER · high.
-  Extract `spec-gate-policy.*`; refactor local hook to consume it (eval 01-05 unchanged).
-  New `sdad-gates.yml` running PR spec gate + ascii-ps1 + claude-md-case + `$eval` core on
-  `ubuntu-latest`. Fixtures prove deny/allow. Enable the workflow on this repo (self-hosting).
-- **INC-2 — Cross-OS parity + matrix (I2).** STANDARD · medium (FRONTIER if edge cases bite).
-  Test `pre-tool-use-spec-gate.sh` against scenarios 01-05 on macOS + Linux; resolve the
-  two known P2 edge cases (BSD `sed` path extraction; word-splitting on paths with spaces,
-  in the gate and `ascii-ps1.sh`). Expand `sdad-gates.yml` to the Windows/macOS/Linux
-  matrix (`pwsh` on all). Close the deferred live `/compact` PreCompact verification on POSIX.
-- **INC-3 — Versioned distribution + drift + update (I3-versioning).** FRONTIER · high.
-  `.sdad/VERSION` stamp; pin installer/project-init to a release tag; idempotent update
-  preserving project state; `$verify` drift mode; `apply-v5.1.*` for the `.claude/` refactor.
-- **INC-4 — Release close.** STANDARD · low.
-  CLAUDE.md → 5.1 (version + footer + behavior rules for the CI gate and drift check),
-  within the +60-line budget (push CI detail into the existing `harness` skill, not inline);
-  CHANGELOG `[5.1]`; README what's-new + repo-structure; installer ships the new files;
-  `$eval` + `$qa full` green on the matrix; tag `v5.1`.
+---
 
 ## §6 Business Rules
 
-1. **CI is additive, never a replacement.** Local hooks stay (fast feedback); CI is the
-   authoritative blocker on merge. Do not remove or weaken any v5 local enforcement.
-2. **Single source of truth.** CI reuses the existing `checks/` scripts and `run-eval.ps1`;
-   it does not reimplement gate logic. The local hook and CI share one policy module.
-3. **The v5 eval golden dataset must pass after every increment** (no methodology regression).
-4. **Cross-OS parity is first-class.** Every gate/check must be tested on Windows AND at
-   least one POSIX OS before its increment closes — the v5 "ship `.sh` untested" pattern is
-   not acceptable here (the team is mixed today).
-5. **No SPEC.md or command-surface breaks.** v5.0 projects keep working; new surface is
-   additive (a `$verify` mode, not a renamed command).
-6. **Apply-script discipline.** `.claude/` changes ship via `apply-v5.1.*`: idempotent,
-   self-deleting, pure ASCII.
-7. **CLAUDE.md +60-line budget per release** ([LOCK]); voluminous CI detail → `harness` skill.
+- **BR-1** The export/snapshot step is conditional on `PROJECT_PLATFORM: pyplan`. It must
+  NOT be added to the general (non-Pyplan) `$build` flow.
+- **BR-2** Snapshot filename must follow `YYYYMMDD-incN-slug.ppl` exactly — deterministic
+  and sortable.
+- **BR-3** The snapshot is committed in the SAME atomic commit as DECISIONS.md and the §13
+  update. One commit = one increment = one known model state.
+- **BR-4** CLAUDE.md net inline delta for this patch: target ≤ +10 lines; overflow prose
+  goes to the skill file. (Hard ceiling remains the release budget ≤ +60.)
+- **BR-5** `project-init` detection is hybrid: automatic via CLAUDE.md
+  `PROJECT_PLATFORM: pyplan` (uncommented) as default; `--pyplan` flag as explicit
+  override. Non-Pyplan: scaffold skipped silently.
+- **BR-6** L-01 ASCII rule (EXTENDED): ALL `.ps1` AND `.sh` scripts MUST be pure ASCII.
+  Rationale: `install.sh` and `project-init.sh` run on fresh cross-platform machines and
+  non-ASCII bytes break them — the same failure class L-01 documented for `.ps1` (confirmed
+  by developer from field experience). I2b sanitizes the two non-ASCII `.sh` files
+  (`install.sh`, `project-init.sh`) and extends `checks/ascii-ps1` (both the `.ps1` and the
+  `.sh` mirror) to scan `*.sh` as well, so the rule is ratcheted in code — not just a
+  convention. The check is NOT renamed (kept `ascii-ps1` to preserve hook/eval/install
+  references); only the scan glob and header comment change.
+
+---
 
 ## §7 Integrations & APIs
 
-| Integration | Role | Maturity / notes |
-|---|---|---|
-| GitHub Actions | CI host; runs the gate/ratchet/eval workflow on PRs | Standard; GitHub-hosted runners (Windows/macOS/Ubuntu) ship `pwsh` or install it cheaply. Assumes repo is public (installer uses unauthenticated `raw.githubusercontent` URLs) → free runner minutes. |
-| `raw.githubusercontent.com/<repo>/<ref>/...` | Distribution channel for `install.*` / `project-init.*` | Existing mechanism; v5.1 changes the `<ref>` from `main` to a pinned release tag. Supply-chain integrity addressed in §9. |
-| `pwsh` (PowerShell Core) | Runs `.ps1` checks + eval on POSIX runners | Cross-platform; the reuse path that avoids reimplementing checks per OS. |
+| Integration | Endpoint | Usage |
+|-------------|----------|-------|
+| Pyplan MCP server | `/ai/mcp` (model export endpoint: UNKNOWN — D-1) | Model export during snapshot step IF the endpoint exists; v1 (first release, API may change). Lock Pyplan version in §5 of consuming project if MCP stability is critical. |
+| git | local + optional remote | Atomic commit of snapshot + DECISIONS.md + §13; optional push |
 
-No third-party MCP is consumed by this release (the §7 MCP-vs-CLI rule does not apply).
+No MCP-vs-CLI tradeoff applies: the export is producer-side state capture, not a consumer
+integration SDAD wraps during build.
+
+---
 
 ## §8 Testing Strategy
 
-| Test | Type | Trigger |
-|---|---|---|
-| Fixture PR: code file + no approved SPEC → CI fails | integration (CI) | INC-1, every PR |
-| Fixture PR: code file + approved SPEC → CI passes | integration (CI) | INC-1 |
-| Fixture: non-ASCII `.ps1` → CI fails (ascii-ps1) | integration (CI) | INC-1 |
-| Fixture: wrong-case `CLAUDE.md` ref → CI fails (claude-md-case) | integration (CI) | INC-1 |
-| `pre-tool-use-spec-gate.sh` scenarios 01-05 on macOS + Linux | parity | INC-2 |
-| Two P2 edge cases (BSD `sed`, space paths) confirmed/fixed | parity | INC-2 |
-| `$eval` deterministic core green on Windows/macOS/Linux matrix | regression | INC-2, release gate |
-| Live `/compact` PreCompact write + SessionStart re-inject on POSIX | manual | INC-2 |
-| Install version N → bump central to N+1 → update brings repo to N+1, state intact | integration | INC-3 |
-| `$verify` drift mode flags a lagging repo | integration | INC-3 |
-| `apply-v5.1.*` idempotent + self-deleting + ASCII | manual + ascii check | INC-3 |
-| `$qa full` + `$eval` green on final v5.1 state, all three OSes | release gate | INC-4 |
+| Inc | Test | Type | Notes |
+|-----|------|------|-------|
+| I1 | Create `.sdad/pyplan-snapshots/test.ppl`, confirm `git status` shows it untracked (not ignored); delete it | manual | As specified in brief |
+| I2 | Scaffold logic must be testable WITHOUT triggering interactive prompts or web downloads — see F-1 note below; `project-init.sh` passes the (extended) `checks/ascii-ps1` | manual/scripted | Brief's naive test is NOT runnable as written |
+| I2b | After sanitizing, `checks/ascii-ps1` (extended to `.sh`) returns clean for all tracked `.ps1` + `.sh`; `$eval` scenario 06-ascii-check still passes | automated | High-risk: touches harness + eval |
+| I3 | `$eval` — all golden scenarios pass; inspect CLAUDE.md diff for the 4 changes, no unintended lines | automated + review | `$eval` MANDATORY after I3 |
+| I4 | Read updated SKILL.md; confirm 3 sections consistent with I3 | review | No automated test for skill files |
+| I5 | Read updated guide; section numbering correct, Pyplan-specific, matches I3/I4 | review | |
+| I6 | Read updated v6 brief; Ix positioned after I3 before I4; I4/I9 notes additive | review | |
+| I7 | DECISIONS.md HUB BLOCK entry present | review | |
 
-## §9 Security & Compliance (Tier 2 — Business)
+**I2 test redesign (F-1):** the existing `project-init` scripts are fully interactive
+(`Read-Host` / `read -p`) and download from the repo. The brief's test
+(`run project-init.ps1 --pyplan in a scratch folder`) would trigger all prompts and web
+fetches — not runnable non-interactively. The scaffold logic must be added as a guarded
+branch that can be exercised in isolation (e.g. an early flag/detection check that creates
+the folder before the interactive section, or an extractable function), and tested by
+asserting `.sdad/pyplan-snapshots/.gitkeep` is created with the flag and NOT created
+without it.
 
-This release introduces a real security surface even though it ships no end-user product:
-it governs CI execution and a distribution channel that reaches many client repos.
+---
 
-**Data classification.** No end-user PII is collected or processed. Sensitive data in scope:
-- **CI secrets / tokens** — `GITHUB_TOKEN` and any repo/org secrets available to the workflow.
-- **Contributor identity** — PR author, commit author (already public in git history); the
-  typed §13 log records model/effort/author per increment (not personal data beyond git).
+## §9 Security & Compliance (Tier 2 Business)
 
-**Controls (must hold before release):**
-- **Token scope (least privilege).** The workflow declares minimal `permissions:`
-  (`contents: read`, `pull-requests: read` — no write unless a specific job needs it).
-  No secret is required for the gate/ratchet/eval jobs; do not grant secrets the gate
-  does not need.
-- **Workflow-injection hardening.** Trigger on `pull_request` (not `pull_request_target`)
-  so untrusted PR code cannot run with elevated token/secret access. Never interpolate
-  untrusted PR text (titles, branch names, file contents) into shell `run:` steps; pass
-  via environment variables and quote. No checkout of untrusted code into a privileged job.
-- **Secrets never in logs.** Gate/ratchet/eval output must not echo tokens or secrets;
-  `gate.log` and CI logs carry decisions and paths, not credentials (mirrors the v5
-  fail-open log discipline).
-- **Supply-chain integrity of the installer.** Pinning the install `<ref>` to a release
-  **tag** (not `main`) removes the "latest main is whatever was just pushed" exposure; the
-  pinned tag is an auditable, immutable point. Document that consumers should install from a
-  tag. (Stronger integrity — checksums / signed releases — is recorded as an open item, §12.)
-- **Error sanitization.** CI failure messages are generic + actionable (name `$spec` /
-  `$docfinal`, the offending file) and never include secret values or full environment dumps.
+**Assets to protect:** Pyplan model `.ppl` files (may embed business logic / data
+structure), git history integrity.
 
-**Audit trail.** The PR + CI run history is the append-only audit log for "was the gate
-enforced on this change" (actor = PR author, action = merge attempt, resource = changed
-files, timestamp = run time) — GitHub retains it and application users cannot delete it.
-The typed §13 log is the per-increment authorship record.
+**Controls:**
+- `.ppl` snapshots are committed deliberately; developer is responsible for ensuring no
+  secrets/credentials are embedded in an exported model before commit (manual review —
+  surface in $qa Layer 1 when this convention is used on a real project).
+- No new network surface, no new credentials handled by this patch.
+- ASCII ratchet (L-01) protects the `.ps1` init script from Windows PowerShell 5.1 parse
+  failures — enforced in `checks/ascii-ps1` (CI + pre-commit), fails CLOSED.
 
-**Tier 2 DoD additions (mapped to this project):**
-- [ ] No secret/token exposable in CI logs or `gate.log`.
-- [ ] Workflow uses least-privilege `permissions:` and `pull_request` (not `_target`).
-- [ ] No untrusted PR input interpolated into shell steps.
-- [ ] Installer documented to pin to a release tag (supply-chain).
-- [ ] CI failure messages sanitized (no stack/secret leakage).
+**Tier 2 note:** this patch adds no PII handling, no auth surface, no audit-logging
+surface of its own. The §9 obligations of the base methodology are unchanged.
 
-## §10 Definition of Done (release gate for v5.1)
+---
 
-- A PR adding code without an approved SPEC is blocked **in CI**, OS-independently
-  (proven on Windows + at least one POSIX OS).
-- `$eval` and the gate scenarios pass on Windows, macOS, and Linux (matrix green).
-- The `.sh` spec-gate passes scenarios 01-05 on macOS + Linux; the two P2 edge cases are
-  resolved or recorded as resolved.
-- Live `/compact` PreCompact verification confirmed on a POSIX OS (v5 deferred item closed).
-- A SDAD version installs from a pinned tag, writes `.sdad/VERSION`, and updates idempotently
-  to a newer tag without clobbering SPEC/DECISIONS/LESSON; `$verify` reports drift.
-- Local hook + CI share one policy module; eval 01-05 still pass after the refactor.
-- §9 Tier 2 controls all satisfied.
-- All `.ps1`/`.sh` pure ASCII; `apply-v5.1.*` idempotent + self-deleting.
-- CLAUDE.md within the +60-line budget; version + footer = 5.1.
-- v5.0 compatibility verified: an existing v5.0 SPEC.md still loads and `$pause` reports
-  correctly.
-- CHANGELOG `[5.1]`, README what's-new, and docs updated and consistent. Tag `v5.1`.
+## §10 Definition of Done
 
-## §11 Out of Scope (this release)
+- [ ] **I1** `.gitignore` has `!.sdad/pyplan-snapshots/`; a `.ppl` test file shows as
+      untracked.
+- [ ] **I2** `project-init` (both scripts) scaffolds `.sdad/pyplan-snapshots/.gitkeep` on
+      Pyplan projects (CLAUDE.md detection OR `--pyplan`); skips on non-Pyplan. Scaffold
+      logic is testable in isolation (F-1). `project-init.sh` is pure ASCII after the edit.
+- [ ] **I2b** `install.sh` and `project-init.sh` are pure ASCII; `checks/ascii-ps1` (`.ps1`
+      + `.sh` mirror) scans `*.sh` as well and returns clean for the whole repo; `$eval`
+      passes (scenario 06-ascii-check green with the extended scope).
+- [ ] **I3** CLAUDE.md has the four changes; net inline delta ≤ +10 lines (BR-4); `$eval`
+      passes clean.
+- [ ] **I4** `pyplan/mcp SKILL.md` has the three new sections, consistent with CLAUDE.md.
+- [ ] **I5** `SDAD_v5_USER_GUIDE.md` has §7 Pyplan versioning; numbering correct.
+- [ ] **I6** `SDAD_v6_BUILD_BRIEF.md` has Ix after I3, plus additive I4 + I9 notes.
+- [ ] **I7** `DECISIONS.md` has the HUB BLOCK entry for this patch.
+- [ ] **F-2 (RESOLVED — developer override):** ALL `.ps1` and `.sh` are pure ASCII and the
+      ratchet now enforces it for both (I2b). My earlier proposal to exempt `.sh` was wrong
+      — the installer breaks on fresh machines with non-ASCII bytes (developer field
+      experience). The brief's original intent stands and is now ratcheted in code.
+- [ ] **CORRECTED (F-3):** if the four I3 changes exceed +10 inline lines (estimated ~12),
+      tighten wording or move prose to the skill file to land ≤ +10, per BR-4.
 
-- **The entire v6 portfolio layer:** central Lesson Library flow-down/up (I5), per-client
-  compliance isolation, `$portfolio` telemetry aggregation, merge-friendly per-increment
-  DECISIONS/§13 restructure (I4), architecture gate generalization (I6), Deploy/Operate
-  Phase 5 (I7), product-level eval harness (I8), multi-dev coordination/locks (I9), team
-  cost governance (I10), state compaction/embeddings (I11). All deferred to v6.0.
-- **Rolling CI out to the ~30 client repos** (organizational adoption — this repo cannot
-  write to them; v5.1 ships the capability + reference implementation + adoption path).
-- **Choosing a different distribution mechanism** (submodule / package): see §12 OD-1.
-- **GitLab CI / Azure DevOps** workflow variants (GitHub Actions only, [LOCK] D1).
-- **Automated repo bootstrap** (detect new-vs-existing project, `gh repo create`, push,
-  auto-enable branch protection via `gh`): deferred to v6. v5.1 keeps repo creation +
-  branch-protection activation as a documented manual adoption step (OD-5).
+---
+
+## §11 Out of Scope
+
+- `.gitattributes` `*.ppl merge=ours` binary merge strategy — deferred to v6 (Ix / I9).
+  Single-developer merges are unaffected.
+- Snapshot automation via a SessionEnd hook — deferred to v6 once the export endpoint is
+  confirmed (D-1).
+- CI gate that fails a PR closing a Build-via-AI increment without a `.ppl` snapshot —
+  this is v6 Ix, documented here as a forward reference only.
+- Any version bump of SDAD.
+- Fixing pre-existing drift unrelated to this patch (e.g. mcp SKILL.md header says "v4.2";
+  `.gitignore` duplicate `.sdad/agent_output.tmp`) — noted, not in scope.
+
+---
 
 ## §12 Open Decisions
 
-| # | Decision | Status |
-|---|---|---|
-| OD-1 | Distribution mechanism stays the **versioned installer** (raw-download pinned to a tag), same shape as v5 — confirmed for v5.1, but **revisit in v6** whether submodule / versioned package is better at portfolio scale. | Decided (provisional) |
-| OD-2 | Drift detection surface: extend **`$verify`** (drift mode). | Decided 2026-06-15 |
-| OD-3 | CI detail home in CLAUDE.md: fold into the existing **`harness`** skill (conserves +60 budget). | Decided 2026-06-15 |
-| OD-4 | Stronger installer supply-chain integrity (checksums / signed releases) beyond tag-pinning. | Deferred to v6 |
-| OD-5 | Branch protection: **enforce** it. On this reference repo, enable "require status checks to pass" so the CI gate actually blocks merges (not advisory). For downstream client repos this is a mandatory documented setup step (this repo cannot set their GitHub config remotely). Verified constraint: branch protection / rulesets are NOT enforced on **private** repos under a free plan — they require GitHub Pro/Team+ (see OD-6). On free private repos the CI gate runs and reports but cannot block merges. | Decided 2026-06-15 — implement at INC-1 |
-| OD-6 | **Adoption prerequisite (organizational):** the team is on personal GitHub accounts today, with no corporate Organization. For OD-5 enforcement on private client repos, a corporate GitHub **Organization** + **Team plan** (US$4/user/mo, 3000 Actions min/mo; verified 2026-06) is required. Documented as a rollout prerequisite in the adoption guide (INC-4). CI-minute efficiency: full Windows/macOS/Linux matrix on release/schedule, Linux-only per PR (macOS/Windows runner-minute multipliers — verify exact factors in billing). | Recorded 2026-06-15 — adoption guidance, not a v5.1 code item |
+| # | Decision | Status | Resolution path |
+|---|----------|--------|-----------------|
+| D-1 | Does the installed Pyplan version expose a model export MCP endpoint? | **OPEN** (per developer instruction) | Verify against a real running Pyplan instance when this patch is used on an actual Pyplan project. This repo is `generic` — no Pyplan instance available here. If yes: document the endpoint in §7 of the consuming project's SPEC and use it in the snapshot step. If no: the export is manual (UI). CLAUDE.md language covers both cases. |
+| D-2 | I2 detection approach | **RESOLVED** | Hybrid: CLAUDE.md auto-detection (default) + `--pyplan` override (BR-5). |
+
+---
 
 ## §13 AI Authorship Log
 
 | Increment | Feature | Model | Effort | Files | Tests | QA findings | Date |
-|---|---|---|---|---|---|---|---|
-| SPEC v5.1 | CI Foundation spec (I1+I2+I3-versioning) | claude-opus-4-8[1m] | high | SPEC.md | n/a | n/a | 2026-06-15 |
-| INC-1 | Shared spec-gate policy module + CI gate workflow (I1) | claude-opus-4-8[1m] | high | checks/spec-gate-policy.{sh,ps1}, checks/spec-gate-ci.sh, .github/workflows/sdad-gates.yml, .sdad/eval/scenarios/14-ci-spec-gate-policy, .claude/hooks/pre-tool-use-spec-gate.{ps1,sh} | eval 14/14; ascii+case clean; CI runner deny/allow verified | 1 open: H-01 C-P1 (self-modifying-gate) | 2026-06-15 |
-| INC-2a | POSIX edge-case hardening + H-01 gate-from-base (I2 partial) | claude-opus-4-8[1m] | high | checks/spec-gate-policy.sh, checks/ascii-ps1.sh, checks/spec-gate-ci.sh, .github/workflows/sdad-gates.yml | Win+GitBash 9/9 (spaced paths + base-policy override); eval 14/14 | H-01 resolved; INC-2b (matrix) pending | 2026-06-15 |
+|-----------|---------|-------|--------|-------|-------|-------------|------|
+| SPEC | Pyplan versioning patch spec | claude-opus-4-8 | high | SPEC.md | n/a | n/a | 2026-06-25 |
+| I1 | .gitignore snapshots exception | claude-opus-4-8 | low | .gitignore | PASS (untracked confirmed) | clean | 2026-06-25 |
+| I2 | project-init Pyplan scaffold (hybrid) + .sh ASCII | claude-opus-4-8 | high | project-init.ps1/.sh | PASS (8/8: 4 bash + 4 ps) | clean | 2026-06-25 |
+| I2b | ASCII hardening + extend ratchet to .sh | claude-opus-4-8 | high | install.sh, install.ps1, checks/ascii-ps1.ps1/.sh, eval 06/07 | $eval PASS 14/14 | clean | 2026-06-25 |
+| I3 | CLAUDE.md snapshot protocol (4 changes) | claude-opus-4-8 | high | Claude.md | $eval PASS 14/14 | clean (net +10) | 2026-06-25 |
+| I4 | mcp SKILL.md snapshot convention | claude-opus-4-8 | low | pyplan/mcp/SKILL.md | review (consistent w/ I3) | clean | 2026-06-25 |
+| I5 | USER_GUIDE Pyplan versioning §7 | claude-opus-4-8 | low | docs/SDAD_v5_USER_GUIDE.md | review (1-8 consecutive) | clean | 2026-06-25 |
+| I6 | v6 brief Ix + I4/I9 notes | claude-opus-4-8 | low | SDAD_v6_BUILD_BRIEF.md | review (Ix after I3, 2 notes) | clean | 2026-06-25 |
+| I7 | DECISIONS.md patch log (HUB BLOCK) | claude-opus-4-8 | low | DECISIONS.md | review | clean | 2026-06-25 |
 
 ---
 
-G7 AI Development Methodology | SDAD v5.1 "CI Foundation" | SPEC.md
+G7 AI Development Methodology | SDAD v5.2 Pyplan Versioning Patch | SPEC.md

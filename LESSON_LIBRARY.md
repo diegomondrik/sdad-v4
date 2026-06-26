@@ -100,3 +100,20 @@ Transferable lessons captured across SDAD projects. Surfaced automatically in Ph
 - **Origin:** SDAD v5.1 INC-2b ($qa finding H-02). Scenario 07-precommit-blocks copied an
   installed `.git/hooks/pre-commit` (absent on a clean runner); fixed to construct the hook
   itself. Confirmed green on the GitHub Actions windows runner.
+
+### L-07 — A code-ratchet must cover every file with the same failure mode, not just the one that triggered the lesson
+- **Category:** Workflow
+- **Tags:** `#stack:powershell` `#stack:bash` `#phase:build`
+- **Signal:** You have a guardrail enforced in code (a linter, ratchet, or check) that was
+  born from a single concrete incident, and it scopes itself to *one* file type while sibling
+  files share the identical failure mode but go unchecked. The rule reads as "done" but the
+  hole is still open — a sibling file can reintroduce the exact bug the ratchet was meant to kill.
+- **Principle:** When you convert a lesson into a mechanical check, audit its scope before
+  closing: enumerate every file class that can fail the same way and make the check cover all
+  of them. Extending the scan glob and the commit-time hook is cheap; discovering the gap in
+  production is not. Pair the scope extension with a regression subcase so the wider coverage
+  can't be silently reverted.
+- **Origin:** SDAD v5.2 Pyplan versioning patch (I2b). L-01's ASCII ratchet covered only
+  `.ps1`, but `install.sh` / `project-init.sh` broke on fresh machines the same way; extended
+  `checks/ascii-ps1` (+ both installers' pre-commit glob) to `.ps1` + `.sh` and added eval
+  subcases in 06-ascii-check. Complements [[L-01]].

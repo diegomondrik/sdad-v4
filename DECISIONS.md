@@ -688,3 +688,37 @@ Impact: CLAUDE.md +60 lines net (at budget limit); SPEC_blank.md +56 lines (§E+
         templates); assert-claude-md.ps1 baseline changed from hardcoded v4.3 to
         dynamic latest-tag (collateral fix: enables +60 per release, not +60 from v4.3 forever).
 ════════════════════════════════════════════════════════
+
+════════════════════════════════════════════════════════
+📋 HUB BLOCK — DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-25
+Increment: Pyplan versioning patch — SDAD v5.2 (no version bump)
+Model: claude-opus-4-8
+Decision: Add a Pyplan model export + commit convention (.sdad/pyplan-snapshots/
+          YYYYMMDD-incN-slug.ppl) to the Build-via-AI Protocol, Pyplan increment
+          checklist, and $qa Layer 5. Wire it into .gitignore, project-init
+          (hybrid CLAUDE.md/--pyplan detection + testable --scaffold-only mode),
+          the pyplan/mcp skill, USER_GUIDE, and the v6 Build Brief (increment Ix).
+          Collateral hardening (developer-directed): the L-01 ASCII ratchet, which
+          only covered .ps1, now covers .sh too — install.sh and project-init.sh
+          sanitized to pure ASCII, checks/ascii-ps1 (.ps1 + .sh mirror) and both
+          installers' pre-commit glob extended to *.sh, eval scenarios 06/07 updated.
+Rationale: Pyplan application state was not versioned in git; the committed .ppl
+           files close the gap without requiring GitHub or any remote — local git
+           history is sufficient for recovery. The .sh ASCII gap was a latent
+           cross-platform installer failure (same class as L-01 for .ps1), confirmed
+           from field experience; ratcheting it in code prevents recurrence.
+Alternatives considered: (a) rely on Pyplan's internal version history — rejected:
+           not developer-controlled, not linked to SDAD increments, not portable.
+           (b) require a GitHub remote — rejected: unnecessary friction, the local
+           .ppl files give the same recovery guarantee. (c) exempt .sh from the ASCII
+           ratchet (claude's initial F-2 proposal) — rejected by developer: the
+           installer breaks on fresh machines, so the rule must be enforced, not waived.
+Impact: .gitignore (+3 lines); project-init.ps1/.sh (hybrid scaffold + .sh ASCII);
+        install.sh (ASCII rewrite); install.ps1 + checks/ascii-ps1.ps1/.sh (pre-commit
+        + scan glob extended to .sh); CLAUDE.md +10 lines net (at patch budget);
+        pyplan/mcp SKILL.md (+3 sections); USER_GUIDE §7 (renumber old §7->§8);
+        SDAD_v6_BUILD_BRIEF.md (+Ix increment + I4/I9 notes); SPEC.md regenerated.
+        $eval PASS 14/14 (golden dataset caught a §13 header regression mid-build).
+════════════════════════════════════════════════════════
