@@ -771,3 +771,34 @@ Build discoveries logged this increment:
   branches, must be built") is false: skill exists on main (200 lines, v4.2, commit
   6a6f233), and 6 branches exist. I2 downgraded HIGH->MEDIUM, rescoped to "extend".
 - BR-17: .ppl format unverified + no sample -> I1 hybrid (stub parser, not real parser).
+
+## Increment I2 -- Extend pyplan-mcp skill (read-access role + audit framing)
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I2 -- extend pyplan-mcp (rescoped MEDIUM per BR-16)
+Model: claude-opus-4-8 . effort high
+Decision: I2 EXTENDS the existing v4.2 pyplan-mcp skill (it was not missing -- BR-16),
+          adding two sections: (1) MCP read-access as evidence acquisition path (b)
+          for $audit/I1, and (2) auditing exposed @mcp_tool nodes in $audit producer
+          context with the BR-03 severity mapping. The mechanical detections are
+          mechanized in .sdad/audit/lib/mcp_lint.py (Python AST), wrapped by
+          checks/mcp-tool-audit (.ps1 + .sh, python-or-skip).
+Rationale: The brief's "build the missing skill" was wrong (BR-16). The real gap was
+          the read-access role and an audit-context detector. AST over regex because
+          Pyplan nodes are Python -- the detections are real (untyped param, called
+          result, non-serializable return), not pattern guesses. Per BR-04 the
+          mechanical findings are a check; token-logging and scope-creep stay with
+          the auditor (need the node logic + the SS-D contract).
+Alternatives considered: (a) regex linter -- rejected: brittle, false negatives on
+          multiline signatures. (b) make python a hard pre-commit dependency --
+          rejected: the wrapper NOTE-skips when python is absent (CI safety); on a
+          Pyplan dev machine python is present and the lint really runs.
+Impact: pyplan/mcp/SKILL.md (+2 sections, header/footer -> v6); mcp_lint.py;
+        checks/mcp-tool-audit.ps1 + .sh; mcp_clean.py + mcp_defects.py fixtures;
+        eval scenario 16-mcp-tool-audit. $eval core 16/16 PASS.
+QA: Layer 1 -- lint uses ast.parse (no execution of audited node code). Layer 4 --
+        non-serializable-return is heuristic, labeled confidence: medium.
+════════════════════════════════════════════════════════

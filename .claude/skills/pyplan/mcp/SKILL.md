@@ -1,5 +1,5 @@
 # Pyplan MCP Skill
-# SDAD v4.2 — .claude/skills/pyplan/mcp/SKILL.md
+# SDAD v6 — .claude/skills/pyplan/mcp/SKILL.md
 # G7 AI Development Methodology
 # On-demand skill — loads when @mcp_tool, MCP tools, dynamic tools, §D, or
 # mcp_tool decorator are detected in a Pyplan project context.
@@ -196,5 +196,59 @@ Category for all Pyplan MCP findings: **Pyplan**
 
 ---
 
-G7 AI Development Methodology | SDAD v4.2
+## MCP Read-Access — Evidence Acquisition for $audit (v6, I1)
+
+Beyond the producer role above, the MCP also serves as a **read path** for the
+`$audit` lifecycle. A Pyplan model is server-side; the auditor cannot read it as
+files. When the client instance exposes MCP read endpoints, this skill is the
+defined way to acquire model evidence (acquisition path (b) in
+`.sdad/audit/SCHEMA.md`; `.ppl` export is the primary path (a), MCP read is the
+enhancement — BR-01).
+
+Read-access protocol:
+- Discover the model graph via the instance's MCP read endpoints (node ids,
+  types, dependencies, `result=` presence, `@mcp_tool` decoration).
+- Map each node into the `node-graph.json` schema (id, type, has_result_assigned,
+  dependencies, code_snippet, mcp_decorated).
+- Whatever the MCP does not expose (e.g. interface internals, DB credentials) is
+  declared as a gap with `status: not_assessable` — never inferred.
+- MCP availability is per-instance and not guaranteed. If read endpoints are
+  absent, fall back to `.ppl` export or manual acquisition and record the path
+  used in the evidence manifest.
+
+Security on read: the auditor never logs or stores OAuth tokens in the evidence
+(Layer 1, P0). Evidence under `.sdad/audit/<project>/evidence/` must be free of
+tokens, credentials, and PII.
+
+---
+
+## Auditing Exposed MCP Tools — $audit Producer Context (v6, I2)
+
+In `$audit`, the producer-context checks above are run against a model the team
+did **not** build. The deterministic detections are mechanized in
+`.sdad/audit/lib/mcp_lint.py` (invoked via `checks/mcp-tool-audit`), so the
+auditor consumes findings rather than re-detecting them by eye (BR-04). The lint
+parses the Python with an AST — the checks are real, not regex guesses.
+
+Unified severity mapping (BR-03):
+
+| Finding | Band | Rule |
+|---------|------|------|
+| `result = fn()` — function called, not assigned | CRITICAL | 6 (silent failure of the whole tool) |
+| OAuth token logged or surfaced in a node result | CRITICAL | Layer 1 P0 |
+| Parameter untyped, or typed but not via `Annotated[...]` | HIGH | 3 |
+| Likely non-serializable return (DataFrame/xarray, no conversion) | HIGH | 5 (medium confidence — labeled) |
+| Tool exposes more than its declared §D contract (scope creep) | MEDIUM | Layer 1 P2 |
+| Missing or trivial docstring | MEDIUM | 4 |
+
+`mcp_lint.py` covers the mechanical rows (CRITICAL result-called, HIGH untyped /
+non-annotated param, HIGH non-serializable return, MEDIUM weak docstring). Token
+exposure and scope creep require reading the node logic + §D contract and are
+judged by the auditor, not the lint. Every non-serializable-return finding
+carries a confidence label — a static heuristic raises the floor, it does not
+replace a human read for a borderline case.
+
+---
+
+G7 AI Development Methodology | SDAD v6
 Pyplan MCP Skill — .claude/skills/pyplan/mcp/SKILL.md
