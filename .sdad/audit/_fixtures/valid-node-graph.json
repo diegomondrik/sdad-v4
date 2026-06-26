@@ -1,0 +1,27 @@
+{
+  "project": "fixture-demo",
+  "acquired_at": "2026-06-26",
+  "acquisition_path": "manual",
+  "pyplan_version": "unknown",
+  "nodes": [
+    {
+      "id": "revenue",
+      "type": "function",
+      "has_result_assigned": true,
+      "dependencies": ["units", "price"],
+      "code_snippet": "result = units * price",
+      "mcp_decorated": false
+    },
+    {
+      "id": "units",
+      "type": "data",
+      "has_result_assigned": true,
+      "dependencies": [],
+      "code_snippet": "result = pp.read_csv('units.csv')",
+      "mcp_decorated": false
+    }
+  ],
+  "gaps": [
+    { "area": "interfaces", "reason": "no interface export supplied", "status": "not_assessable" }
+  ]
+}

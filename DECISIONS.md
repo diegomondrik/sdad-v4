@@ -722,3 +722,52 @@ Impact: .gitignore (+3 lines); project-init.ps1/.sh (hybrid scaffold + .sh ASCII
         SDAD_v6_BUILD_BRIEF.md (+Ix increment + I4/I9 notes); SPEC.md regenerated.
         $eval PASS 14/14 (golden dataset caught a §13 header regression mid-build).
 ════════════════════════════════════════════════════════
+
+---
+
+# SDAD v6.0 "Pyplan Audit Edition" -- audit lifecycle build
+
+Spec: SPEC.md (APPROVED 2026-06-26). Brief: SDAD_v6_PYPLAN_AUDIT_BRIEF.md.
+Increments I1-I10 per brief section 3.
+
+## Increment I1 -- Pyplan model access / evidence acquisition layer (hybrid)
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I1 -- evidence acquisition layer (hybrid, BR-17)
+Model: claude-opus-4-8 . effort high
+Decision: Ship I1 as protocol + schema + deterministic check + documented parser
+          STUB, NOT a .ppl parser. The .ppl binary format is unverified and no real
+          fixture exists, so a real parser would be guesswork. node-graph.json +
+          manifest.md schemas defined in .sdad/audit/SCHEMA.md; checks/audit-evidence
+          (.ps1 + .sh) validates structure deterministically (BR-04); acquire-evidence
+          (.ps1 + .sh) emits a declared not_assessable gap instead of crashing or
+          fabricating when no model can be acquired.
+Rationale: A file-based agent cannot read a server-side Pyplan model. The honest
+          minimal viable layer for a methodology repo is a validated representation
+          the auditor populates (manual / MCP read / future .ppl parse), with gaps
+          declared, not a parser written against a format we have never seen.
+Alternatives considered: (a) write a full .ppl parser now -- rejected: no format,
+          no sample; would be untested guesswork (violates epistemic honesty).
+          (b) protocol-only with no executable check -- rejected: mechanical
+          structure validation belongs in code per the Governance Axiom (BR-04).
+          Developer chose the hybrid of the two.
+Impact: NEW .sdad/audit/SCHEMA.md; checks/audit-evidence.ps1 + .sh;
+        .sdad/audit/lib/acquire-evidence.ps1 + .sh; 2 fixtures under
+        .sdad/audit/_fixtures/; eval scenario 15-audit-evidence-schema.
+        SPEC.md: BR-16 (I2 is extend-not-build -- brief was factually wrong, skill
+        exists on main at v4.2/200 lines), BR-17 (hybrid I1), I1/I2 notes, typed
+        s13 fixed to 8 columns. $eval core 15/15 PASS (caught the s13 regression).
+        No CLAUDE.md change (v6 wiring deferred to I9 per plan).
+QA: Layer 1 low-confidence -- quoted project name could break JSON interpolation,
+        but fails safe (validator rejects). Layer 4 should-improve -- eval 15 covers
+        only the PS path; .sh mirrors untested (strengthen in I7).
+════════════════════════════════════════════════════════
+
+Build discoveries logged this increment:
+- BR-16: pyplan-mcp skill is NOT missing. Brief I2 claim ("absent from main, no other
+  branches, must be built") is false: skill exists on main (200 lines, v4.2, commit
+  6a6f233), and 6 branches exist. I2 downgraded HIGH->MEDIUM, rescoped to "extend".
+- BR-17: .ppl format unverified + no sample -> I1 hybrid (stub parser, not real parser).

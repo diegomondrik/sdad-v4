@@ -1,0 +1,18 @@
+{
+  "project": "fixture-bad",
+  "acquired_at": "2026-06-26",
+  "acquisition_path": "ftp",
+  "pyplan_version": "unknown",
+  "nodes": [
+    {
+      "id": "",
+      "has_result_assigned": "yes",
+      "dependencies": [],
+      "code_snippet": "result = 1",
+      "mcp_decorated": false
+    }
+  ],
+  "gaps": [
+    { "area": "x", "reason": "y", "status": "skipped" }
+  ]
+}
