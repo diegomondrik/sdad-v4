@@ -136,3 +136,23 @@ Transferable lessons captured across SDAD projects. Surfaced automatically in Ph
   and 6 branches existed. I2 was re-scoped HIGH-build -> MEDIUM-extend and logged as BR-16 in
   SPEC.md/DECISIONS.md before any code was written. Complements [[L-02]] (a premise can be
   wrong even when the surrounding plan is right).
+
+### L-09 -- Output captured from an external `& powershell` call is an array; `-match`/`-notmatch` on it filters, it does not return a boolean
+- **Category:** Environment
+- **Tags:** `#stack:powershell` `#phase:build`
+- **Signal:** A PowerShell test or scenario captures another script's output with
+  `$out = & powershell -File check.ps1 ...` and then branches on `$out -match 'x'` or
+  `$out -notmatch 'x'`. The assertion fails (or passes) for the wrong reason even though the
+  expected line is clearly present in the output. The same code reads correctly to the eye.
+- **Principle:** Multi-line output captured into a variable is a `string[]`, not a `string`.
+  The `-match`/`-notmatch` operators applied to an array return the *filtered subset of
+  elements*, not `$true`/`$false`: a non-empty filtered array is truthy regardless of whether
+  the element you cared about matched, so an `if ($out -notmatch 'token')` fires whenever ANY
+  line lacks the token. Collapse the output first -- `$text = ($out | Out-String)` -- and match
+  against the single string. Capture `$LASTEXITCODE` into a variable on the line immediately
+  after the call, before any transform, since `Out-String` and other pipeline ops reset it.
+- **Origin:** SDAD v6 I4. Eval scenarios 17/18 captured the ratchet output as an array and used
+  `$out -notmatch 'margin'` / `-notmatch 'cash_flow'`; both failed in the runner although the
+  checks worked when run by hand. Fixed by `($out | Out-String)` + a saved `$code` before
+  matching. Sibling of [[L-01]] / [[L-03]] (PS 5.1 / PowerShell semantics traps that only
+  surface under the harness, not in a manual run).
