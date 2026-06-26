@@ -122,7 +122,31 @@ it is enforcing the one discipline that matters most.
 
 ---
 
-## 7. If something feels stuck
+## 7. Pyplan projects — keeping your model in version control
+
+On Pyplan projects, every Build-via-AI increment changes the application logic
+directly inside your Pyplan instance. SDAD tracks *what* changed in DECISIONS.md,
+but the actual model file lives in Pyplan's workspace — not in git — until you
+export it.
+
+After `$qa` passes on each increment, export the model and commit it:
+
+1. Export the model from the Pyplan UI (or via the MCP export endpoint if your
+   Pyplan version supports it).
+2. Save the file to `.sdad/pyplan-snapshots/` using the naming convention SDAD
+   proposes: `YYYYMMDD-incN-slug.ppl`.
+3. Include it in the atomic commit for the increment.
+
+The committed `.ppl` files are your version history of the model. If the Pyplan
+workspace is lost or corrupted, you can restore any prior increment's state by
+loading its `.ppl` file. No GitHub required — local git commits are sufficient.
+
+If you do have a remote (GitHub, GitLab, or a backup remote), push after each
+session for an off-machine copy.
+
+---
+
+## 8. If something feels stuck
 
 - **"It refused to write code."** You are missing an approved spec. Run `$spec` →
   `$specout`, approve it. **[v5 gate]**
