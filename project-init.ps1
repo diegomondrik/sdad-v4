@@ -12,12 +12,56 @@
 # Usage (Option B -- download first):
 #   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/project-init.ps1" -OutFile "project-init.ps1"
 #   powershell -ExecutionPolicy Bypass -File ".\project-init.ps1"
+#
+# Flags:
+#   -Pyplan        Force Pyplan project: scaffold .sdad/pyplan-snapshots/ for
+#                  model snapshots. Without it, the script auto-detects Pyplan by
+#                  reading CLAUDE.md for an uncommented "PROJECT_PLATFORM: pyplan".
+#   -ScaffoldOnly  Run only Pyplan detection + snapshot-folder scaffold, then exit
+#                  (no prompts, no downloads). Used to test the scaffold in isolation.
+
+param(
+    [switch]$Pyplan,
+    [switch]$ScaffoldOnly
+)
 
 $ErrorActionPreference = "Stop"
 $REPO = "https://raw.githubusercontent.com/diegomondrik/sdad-v4/main"
 
 # Section sign, kept out of the source bytes (L-01). Used only in generated docs.
 $S = [char]0x00A7
+
+# ---- Pyplan detection + snapshot scaffold (hybrid: flag OR CLAUDE.md) ------
+
+function Test-IsPyplanProject {
+    param([switch]$Flag)
+    if ($Flag) { return $true }
+    if (Test-Path "CLAUDE.md") {
+        $claudeMd = Get-Content "CLAUDE.md" -Raw
+        if ($claudeMd -match '(?m)^\s*PROJECT_PLATFORM:\s*pyplan(\s|$)') { return $true }
+    }
+    return $false
+}
+
+function Initialize-PyplanSnapshots {
+    if (-not (Test-Path ".sdad\pyplan-snapshots")) {
+        New-Item -ItemType Directory -Path ".sdad\pyplan-snapshots" | Out-Null
+    }
+    Set-Content -Path ".sdad\pyplan-snapshots\.gitkeep" -Value "" -Encoding Ascii
+}
+
+$isPyplan = Test-IsPyplanProject -Flag:$Pyplan
+
+# Scaffold-only mode: detect, scaffold if Pyplan, then exit before any prompt.
+if ($ScaffoldOnly) {
+    if ($isPyplan) {
+        Initialize-PyplanSnapshots
+        Write-Host "scaffold: created .sdad/pyplan-snapshots/.gitkeep"
+    } else {
+        Write-Host "scaffold: skipped (not a Pyplan project)"
+    }
+    return
+}
 
 Write-Host ""
 Write-Host "======================================" -ForegroundColor Cyan
@@ -283,6 +327,13 @@ foreach ($d in @(".sdad", ".sdad\flows")) {
         New-Item -ItemType Directory -Path $d | Out-Null
         Write-Host "  $d/ directory created." -ForegroundColor Green
     }
+}
+
+# Pyplan projects: scaffold the model-snapshot folder so it exists and is
+# tracked from day one (the .gitignore exception keeps .ppl files versioned).
+if ($isPyplan) {
+    Initialize-PyplanSnapshots
+    Write-Host "  .sdad/pyplan-snapshots/ created (Pyplan project)." -ForegroundColor Green
 }
 
 # project.md -- project registry

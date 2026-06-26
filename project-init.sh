@@ -1,9 +1,22 @@
 #!/usr/bin/env bash
-# SDAD v5.0 — Project Initializer (Mac / Linux)
+# SDAD v5.0 -- Project Initializer (Mac / Linux)
 # Run from inside the project repo you want to initialize.
 #
 # Usage:
 #   bash <(curl -fsSL https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/project-init.sh)
+#
+# Flags:
+#   --pyplan         Force Pyplan project: scaffold .sdad/pyplan-snapshots/ for
+#                    model snapshots. Without it, the script auto-detects Pyplan
+#                    by reading CLAUDE.md for an uncommented
+#                    "PROJECT_PLATFORM: pyplan".
+#   --scaffold-only  Run only Pyplan detection + snapshot-folder scaffold, then
+#                    exit (no prompts, no downloads). Used to test the scaffold
+#                    in isolation.
+#
+# L-01 rule: this file is pure ASCII. The section sign used in the generated SPEC
+# template is emitted via printf '\xc2\xa7' so this source stays ASCII-clean while
+# the produced SPEC.md keeps SDAD's section notation.
 
 set -e
 
@@ -14,13 +27,54 @@ YELLOW='\033[1;33m'
 WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 
+# Section sign, kept out of the source bytes (L-01). Used only in generated docs.
+S=$(printf '\xc2\xa7')
+
+# ---- Flag parsing ---------------------------------------------------------
+
+PYPLAN=0
+SCAFFOLD_ONLY=0
+for arg in "$@"; do
+    case "$arg" in
+        --pyplan) PYPLAN=1 ;;
+        --scaffold-only) SCAFFOLD_ONLY=1 ;;
+    esac
+done
+
+# ---- Pyplan detection + snapshot scaffold (hybrid: flag OR CLAUDE.md) ------
+
+is_pyplan_project() {
+    [ "$PYPLAN" = "1" ] && return 0
+    if [ -f "CLAUDE.md" ] && \
+       grep -Eq '^[[:space:]]*PROJECT_PLATFORM:[[:space:]]*pyplan([[:space:]]|$)' CLAUDE.md; then
+        return 0
+    fi
+    return 1
+}
+
+scaffold_pyplan_snapshots() {
+    mkdir -p .sdad/pyplan-snapshots
+    : > .sdad/pyplan-snapshots/.gitkeep
+}
+
+# Scaffold-only mode: detect, scaffold if Pyplan, then exit before any prompt.
+if [ "$SCAFFOLD_ONLY" = "1" ]; then
+    if is_pyplan_project; then
+        scaffold_pyplan_snapshots
+        echo "scaffold: created .sdad/pyplan-snapshots/.gitkeep"
+    else
+        echo "scaffold: skipped (not a Pyplan project)"
+    fi
+    exit 0
+fi
+
 echo ""
 echo -e "${CYAN}======================================"
-echo -e "  SDAD v5.0 — Project Initializer"
+echo -e "  SDAD v5.0 -- Project Initializer"
 echo -e "======================================${NC}"
 echo ""
 
-# ── 1. Verify Claude Code is installed ────────────────────────────────────────
+# ---- 1. Verify Claude Code is installed -----------------------------------
 
 echo -e "${YELLOW}Checking Claude Code...${NC}"
 if command -v claude &> /dev/null; then
@@ -32,7 +86,7 @@ else
     bash <(curl -fsSL https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/install.sh)
 fi
 
-# ── 2. Verify git repo ────────────────────────────────────────────────────────
+# ---- 2. Verify git repo ---------------------------------------------------
 
 echo -e "${YELLOW}Checking git repository...${NC}"
 if git status &> /dev/null; then
@@ -43,13 +97,13 @@ else
     echo -e "  ${GREEN}Git initialized.${NC}"
 fi
 
-# ── 3. Collect project info ───────────────────────────────────────────────────
+# ---- 3. Collect project info ----------------------------------------------
 
 echo ""
 echo -e "${CYAN}Project setup"
-echo -e "─────────────────────────────────────${NC}"
+echo -e "-------------------------------------${NC}"
 
-# Project name — infer from folder name as default
+# Project name -- infer from folder name as default
 FOLDER_NAME=$(basename "$PWD")
 read -p "Project name [$FOLDER_NAME]: " PROJECT_NAME_INPUT
 PROJECT_NAME="${PROJECT_NAME_INPUT:-$FOLDER_NAME}"
@@ -64,39 +118,39 @@ read -p "Client name (leave blank if internal project): " CLIENT_NAME
 # Compliance tier
 echo ""
 echo -e "${CYAN}Compliance tier:${NC}"
-echo "  1  Tier 1 — Standard   (internal tools, POCs, scripts)"
-echo "  2  Tier 2 — Business   (SaaS, customer-facing, user data)"
-echo "  3  Tier 3 — Enterprise (regulated environments, corporate IT)"
+echo "  1  Tier 1 - Standard   (internal tools, POCs, scripts)"
+echo "  2  Tier 2 - Business   (SaaS, customer-facing, user data)"
+echo "  3  Tier 3 - Enterprise (regulated environments, corporate IT)"
 echo ""
 read -p "Select tier [1]: " TIER_INPUT
 
 case "$TIER_INPUT" in
-    2) TIER="Tier 2 — Business" ;;
-    3) TIER="Tier 3 — Enterprise" ;;
-    *) TIER="Tier 1 — Standard" ;;
+    2) TIER="Tier 2 - Business" ;;
+    3) TIER="Tier 3 - Enterprise" ;;
+    *) TIER="Tier 1 - Standard" ;;
 esac
 
 TODAY=$(date +%Y-%m-%d)
 
-# ── 4. Create SPEC.md ─────────────────────────────────────────────────────────
+# ---- 4. Create SPEC.md ----------------------------------------------------
 
 echo ""
 echo -e "${YELLOW}Creating project files...${NC}"
 
 if [ -f "SPEC.md" ]; then
-    echo -e "  ${YELLOW}SPEC.md already exists — skipping.${NC}"
+    echo -e "  ${YELLOW}SPEC.md already exists -- skipping.${NC}"
 else
     cat > SPEC.md << SPECEOF
-# SPEC.md — $PROJECT_NAME
+# SPEC.md -- $PROJECT_NAME
 **Version:** 1.0
 **Date:** $TODAY
 **Developer:** $DEV_NAME
 **Compliance Tier:** $TIER
-**Status:** Draft — run \$spec to fill in requirements
+**Status:** Draft -- run \$spec to fill in requirements
 
 ---
 
-## §1 — Vision & Objective
+## ${S}1 - Vision & Objective
 
 **Problem:**
 [Describe the problem this project solves]
@@ -110,7 +164,7 @@ else
 
 ---
 
-## §2 — Users & Roles
+## ${S}2 - Users & Roles
 
 | Role | Description | Access |
 |------|-------------|--------|
@@ -118,20 +172,20 @@ else
 
 ---
 
-## §3 — Functional Flows
+## ${S}3 - Functional Flows
 
-### Flow 1 — [Name]
+### Flow 1 - [Name]
 [Step-by-step flow description]
 
 ---
 
-## §4 — Data Model
+## ${S}4 - Data Model
 
 [Entities, data structures, key files]
 
 ---
 
-## §5 — Technical Architecture
+## ${S}5 - Technical Architecture
 
 **Stack:**
 - [Language / Framework]
@@ -144,14 +198,14 @@ else
 
 ---
 
-## §6 — Business Rules
+## ${S}6 - Business Rules
 
 1. [Business rule 1]
 2. [Business rule 2]
 
 ---
 
-## §7 — Integrations & APIs
+## ${S}7 - Integrations & APIs
 
 | Integration | Endpoint | Usage |
 |-------------|----------|-------|
@@ -159,7 +213,7 @@ else
 
 ---
 
-## §8 — Testing Strategy
+## ${S}8 - Testing Strategy
 
 | Test | Type | Trigger |
 |------|------|---------|
@@ -167,7 +221,7 @@ else
 
 ---
 
-## §9 — Security & Compliance ($TIER)
+## ${S}9 - Security & Compliance ($TIER)
 
 **Assets to protect:**
 - [asset 1]
@@ -177,24 +231,24 @@ else
 
 ---
 
-## §10 — Definition of Done
+## ${S}10 - Definition of Done
 
 An increment is complete when:
 - [ ] All acceptance criteria from SPEC.md met
 - [ ] Tests pass without errors
 - [ ] No regressions introduced
 - [ ] README or RUNBOOK updated if behavior changed
-- [ ] SPEC.md §13 AI Authorship Log entry delivered
+- [ ] SPEC.md ${S}13 AI Authorship Log entry delivered
 
 ---
 
-## §11 — Out of Scope
+## ${S}11 - Out of Scope
 
 - [Out of scope item 1]
 
 ---
 
-## §12 — Open Decisions
+## ${S}12 - Open Decisions
 
 | # | Decision | Status |
 |---|----------|--------|
@@ -202,7 +256,7 @@ An increment is complete when:
 
 ---
 
-## §13 — AI Authorship Log
+## ${S}13 - AI Authorship Log
 
 | Increment | Feature | Model | Effort | Files | Tests | QA findings | Date |
 |-----------|---------|-------|--------|-------|-------|-------------|------|
@@ -211,13 +265,13 @@ SPECEOF
     echo -e "  ${GREEN}SPEC.md created.${NC}"
 fi
 
-# ── 5. Create LESSON_LIBRARY.md ───────────────────────────────────────────────
+# ---- 5. Create LESSON_LIBRARY.md ------------------------------------------
 
 if [ -f "LESSON_LIBRARY.md" ]; then
-    echo -e "  ${YELLOW}LESSON_LIBRARY.md already exists — preserving.${NC}"
+    echo -e "  ${YELLOW}LESSON_LIBRARY.md already exists -- preserving.${NC}"
 else
     cat > LESSON_LIBRARY.md << LESSONEOF
-# LESSON_LIBRARY.md — $PROJECT_NAME
+# LESSON_LIBRARY.md -- $PROJECT_NAME
 # Transferable patterns captured during development.
 # Entries are proposed by Claude after \$qa runs and added with your approval.
 # Version: 5.0 | Created: $TODAY
@@ -226,27 +280,27 @@ else
 
 ## How to use
 
-- \$lesson             — show all entries grouped by category
-- \$lesson [keyword]   — filter by keyword, category, or stack
-- \$lesson [L-XX]      — show full entry
-- \$lesson new         — guided entry creation
+- \$lesson             -- show all entries grouped by category
+- \$lesson [keyword]   -- filter by keyword, category, or stack
+- \$lesson [L-XX]      -- show full entry
+- \$lesson new         -- guided entry creation
 
 ---
 
 ## Entries
 
-*(No entries yet — they will appear here after your first \$qa run)*
+*(No entries yet -- they will appear here after your first \$qa run)*
 LESSONEOF
     echo -e "  ${GREEN}LESSON_LIBRARY.md created.${NC}"
 fi
 
-# ── 6. Create DECISIONS.md ────────────────────────────────────────────────────
+# ---- 6. Create DECISIONS.md -----------------------------------------------
 
 if [ -f "DECISIONS.md" ]; then
-    echo -e "  ${YELLOW}DECISIONS.md already exists — preserving.${NC}"
+    echo -e "  ${YELLOW}DECISIONS.md already exists -- preserving.${NC}"
 else
     cat > DECISIONS.md << DECEOF
-# DECISIONS.md — $PROJECT_NAME
+# DECISIONS.md -- $PROJECT_NAME
 # Design decisions log. Written automatically by \$build after each increment.
 # Version: 5.0 | Created: $TODAY
 
@@ -259,15 +313,22 @@ DECEOF
     echo -e "  ${GREEN}DECISIONS.md created.${NC}"
 fi
 
-# ── 7. Create .sdad/ structure ────────────────────────────────────────────────
+# ---- 7. Create .sdad/ structure -------------------------------------------
 
 mkdir -p .sdad/flows
 echo -e "  ${GREEN}.sdad/ structure created.${NC}"
 
+# Pyplan projects: scaffold the model-snapshot folder so it exists and is
+# tracked from day one (the .gitignore exception keeps .ppl files versioned).
+if is_pyplan_project; then
+    scaffold_pyplan_snapshots
+    echo -e "  ${GREEN}.sdad/pyplan-snapshots/ created (Pyplan project).${NC}"
+fi
+
 CLIENT_LINE="${CLIENT_NAME:-Internal project}"
 
 cat > .sdad/project.md << PROJEOF
-# .sdad/project.md — $PROJECT_NAME
+# .sdad/project.md -- $PROJECT_NAME
 Created: $TODAY
 Developer: $DEV_NAME
 Client: $CLIENT_LINE
@@ -282,7 +343,7 @@ SDAD version: 5.0
 PROJEOF
 echo -e "  ${GREEN}.sdad/project.md created.${NC}"
 
-# ── 8. Seed the v5 harness layer (download-if-missing) ─────────────────────────
+# ---- 8. Seed the v5 harness layer (download-if-missing) -------------------
 
 echo ""
 echo -e "${YELLOW}Seeding the v5 harness layer...${NC}"
@@ -311,7 +372,7 @@ done
 chmod +x checks/*.sh .sdad/lib/*.sh 2>/dev/null || true
 echo -e "  ${GREEN}harness layer ready (checks/, .sdad/eval/, .sdad/lib/).${NC}"
 
-# ── 9. Update .gitignore ──────────────────────────────────────────────────────
+# ---- 9. Update .gitignore -------------------------------------------------
 
 IGNORE_ENTRY=".sdad/agent_output.tmp"
 
@@ -327,7 +388,7 @@ else
     echo -e "  ${GREEN}.gitignore created.${NC}"
 fi
 
-# ── 10. Done ──────────────────────────────────────────────────────────────────
+# ---- 10. Done -------------------------------------------------------------
 
 echo ""
 echo -e "${GREEN}======================================"
@@ -351,5 +412,5 @@ echo -e "${CYAN}Next step: open Claude Code and run${NC}"
 echo -e "${WHITE}  claude${NC}"
 echo ""
 echo -e "${CYAN}Then start with:${NC}"
-echo -e "${WHITE}  \$spec   — define requirements${NC}"
+echo -e "${WHITE}  \$spec   -- define requirements${NC}"
 echo ""
