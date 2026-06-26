@@ -117,3 +117,22 @@ Transferable lessons captured across SDAD projects. Surfaced automatically in Ph
   `.ps1`, but `install.sh` / `project-init.sh` broke on fresh machines the same way; extended
   `checks/ascii-ps1` (+ both installers' pre-commit glob) to `.ps1` + `.sh` and added eval
   subcases in 06-ascii-check. Complements [[L-01]].
+
+### L-08 -- Verify a brief's factual claims against the real repo before accepting an increment's scope
+- **Category:** Workflow
+- **Tags:** `#stack:git` `#phase:build` `#phase:spec`
+- **Signal:** A build brief asserts repo state as fact -- "this skill/file is missing", "must
+  be built from scratch", "there are no other branches" -- and that assertion sets the scope
+  and severity of an increment. The brief reads authoritative, so the claim is taken at face
+  value and an increment is planned around it without a check.
+- **Principle:** A brief is an input, not ground truth about the filesystem. Before accepting
+  the scope of any increment that rests on a state claim, verify it cheaply against the repo
+  (`git ls-files`, `git log -- <path>`, `git branch -a`, read the file). If reality differs,
+  re-scope explicitly and record the correction as a numbered decision -- do not silently
+  build to the wrong plan. Cheap to check now; expensive to discover after building from scratch
+  something that already existed.
+- **Origin:** SDAD v6 I2. The brief claimed `pyplan-mcp` was "absent from main... must be
+  built, not recovered"; it existed on `main` (200 lines, v4.2, history from commit 6a6f233)
+  and 6 branches existed. I2 was re-scoped HIGH-build -> MEDIUM-extend and logged as BR-16 in
+  SPEC.md/DECISIONS.md before any code was written. Complements [[L-02]] (a premise can be
+  wrong even when the surrounding plan is right).
