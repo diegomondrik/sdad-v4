@@ -147,6 +147,33 @@ update mechanism brings the repo to N+1 without clobbering project state (SPEC/D
 LESSON remain intact).
 **Advantage:** the portfolio runs a governed, known version; fixes propagate; drift is visible.
 
+### Ix — Pyplan model versioning as first-class git convention — P0 (Pyplan)
+**Component:** S (state management) for Pyplan platform layer.
+**Problem:** v5.2 documents Build-via-AI increments in DECISIONS.md and §13 but
+does not commit the Pyplan model file to git. In a multi-developer team (I9),
+there is no shared, versioned model state — each developer works from whatever is
+live in the shared instance. Combined with I9's lock requirement, the absence of
+a committed model snapshot means "I have the lock" does not answer "from what base
+am I building?" The v5.2 patch introduces the convention locally; v6 lifts it to
+CI and portfolio governance.
+**Build:**
+- CI gate (builds on I1): fail a PR that closes a Build-via-AI increment without a
+  `.ppl` snapshot committed in `.sdad/pyplan-snapshots/` matching the increment's
+  naming convention. Same gate logic as the spec gate — enforced in the pipeline,
+  not only locally.
+- `$verify` extension: check whether the installed Pyplan version exposes a model
+  export MCP endpoint; update §7 with the finding. Flag if the export is still
+  manual-only (v1 limitation) so the team knows the step cannot be automated yet.
+- `.gitattributes` merge strategy for `.ppl` files: binary format → set
+  `*.ppl merge=ours` with a documented team decision on conflict resolution
+  (recorded in DECISIONS.md). Without this, parallel branches with different
+  snapshots produce unresolvable merge conflicts.
+**Tests:** a PR closing a Build-via-AI increment without a snapshot → CI fails.
+With snapshot → CI passes. Two branches with different `.ppl` files → merge
+resolves via declared strategy with no corruption.
+**Advantage:** model state is reproducible from git on any machine; CI enforces the
+discipline across the team; the merge strategy prevents silent binary corruption.
+
 ### I4 — Merge-friendly collaborative state — P1
 **Component:** S, restructured for concurrency.
 **Problem:** DECISIONS.md and §13 are single appended files at the repo root. With parallel
@@ -163,6 +190,11 @@ conflicts. The v5 atomic-commit-per-increment rule makes cross-branch merges wor
 **Tests:** two simulated parallel increments on two branches merge with no conflict; the
 generated §13 table matches the 8-column schema; eval scenario 11 still passes.
 **Advantage:** eliminates the daily merge friction of a 4-5 dev team.
+
+Note (Ix dependency): I4 restructures DECISIONS.md and §13 for parallel increments.
+Extend the same restructuring to `.sdad/pyplan-snapshots/` naming — the per-increment
+file convention (decisions/NNN-feature.md) maps naturally to snapshots/NNN-feature.ppl,
+so the branch-per-increment pattern works cleanly for both.
 
 ### I5 — Portfolio governance layer — P1
 **Component:** the multi-client governance the org flagged as priority.
@@ -241,6 +273,11 @@ increments; for Pyplan, two developers can run Build-via-AI against the same liv
 **Tests:** two developers cannot both claim the same increment; a Pyplan Build-via-AI lock
 prevents concurrent live edits in a simulated scenario.
 **Advantage:** removes the parallel-collision and live-instance-corruption risks.
+
+Note (Ix dependency): increment locking (I9) and model snapshot versioning (Ix) are
+complementary. The lock answers "who is building now"; the committed snapshot answers
+"from what model state." Both are required for safe parallel Build-via-AI on a shared
+Pyplan instance. Implement Ix before or alongside I9.
 
 ### I10 — Team cost & model governance — P3
 **Build:** turn model routing from advisory into measured and optionally enforced — portfolio
