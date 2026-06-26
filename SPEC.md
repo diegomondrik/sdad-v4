@@ -364,6 +364,7 @@ No open decisions remain. All resolved before $specout.
 | Spec | SDAD v6.0 SPEC.md | claude-opus-4-8 | high | SPEC.md | n/a (spec) | none | 2026-06-26 |
 | I1 | Evidence acquisition layer (hybrid) | claude-opus-4-8 | high | SCHEMA.md, checks/audit-evidence.ps1+.sh, acquire-evidence.ps1+.sh, 2 fixtures, eval scenario 15 | eval 15 PASS; core 15/15 | none | 2026-06-26 |
 | I2 | Extend pyplan-mcp (read-access + audit) | claude-opus-4-8 | high | pyplan/mcp/SKILL.md (+2 sections, v6), mcp_lint.py, checks/mcp-tool-audit.ps1+.sh, 2 py fixtures, eval scenario 16 | eval 16 PASS; core 16/16 | none | 2026-06-26 |
+| I3 | Business dimension (alignment core + domain profiles) | claude-opus-4-8 | high | skills business-alignment/, domain-finance/, domain-supply-chain/ SKILL.md; fixture finance-double-count.node-graph.json | fixture valid (audit-evidence exit 0); core 16/16; behavioral tests -> llm-smoke/I7 | none | 2026-06-26 |
 
 ---
 

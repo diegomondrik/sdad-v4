@@ -802,3 +802,46 @@ Impact: pyplan/mcp/SKILL.md (+2 sections, header/footer -> v6); mcp_lint.py;
 QA: Layer 1 -- lint uses ast.parse (no execution of audited node code). Layer 4 --
         non-serializable-return is heuristic, labeled confidence: medium.
 ════════════════════════════════════════════════════════
+
+## Increment I3 -- Business dimension (alignment core + domain profiles)
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I3 -- business dimension (HIGH)
+Model: claude-opus-4-8 . effort high
+Decision: I3 ships the business dimension as a domain-agnostic core skill
+          (business-alignment, I3a) plus two checklist-level domain profiles
+          (domain-finance, domain-supply-chain, I3b). business-alignment owns the
+          three alignment checks (measurable objective, traceable rules, value-vs-
+          cost), the elicitation gate (BR-09: no input -> not-assessable, never
+          fabricate), and confidence labelling (BR-10). Domain profiles supply the
+          domain-correctness layer (5b): KPIs, formulas, trap assumptions, red flags
+          (BR-05). A synthetic finance fixture (finance-double-count.node-graph.json)
+          carries a planted consolidation double-count, replicated as the worked
+          example in domain-finance so I7 LLM smoke can assert the catch.
+Rationale: Separation of concerns -- alignment (does the model serve the goal?) is
+          domain-agnostic and lives in one skill; domain correctness (is THIS the
+          right COGS/safety-stock formula?) is per-domain and lives in profiles
+          loaded by PROJECT_DOMAIN. Checklist depth (BR-05), not full methodology:
+          enough to catch the canonical traps, explicit not-assessable everywhere
+          input is missing (BR-06/07/09). The COGS/inventory seam is encoded
+          reciprocally in both profiles so a multi-domain model flags it once.
+Alternatives considered: (a) fold domain checks into business-alignment -- rejected:
+          would force a domain-specific skill to load on every alignment check and
+          bloat past checklist level. (b) build all six domains now -- rejected per
+          BR-06: finance + supply-chain are the v6 starter set; the rest are
+          not-assessable until a profile exists (creation path BR-08, fires in $build
+          via the data-delta pause pattern, never mid-audit fabrication).
+Impact: 3 new skills under .claude/skills/ (business-alignment, domain-finance,
+        domain-supply-chain); 1 synthetic fixture under .sdad/audit/_fixtures/.
+        Per test-scope decision (developer 2026-06-26): deterministic coverage =
+        fixture validates against checks/audit-evidence + core stays 16/16;
+        behavioral tests (catch the double-count, multi-domain seam) deferred to
+        llm-smoke/I7 (audit eval scenarios). No CLAUDE.md change (v6 wiring -> I9).
+QA: Layer 1 -- fixture is synthetic, no tokens/credentials/PII. Layer 2 -- skills
+        follow the on-demand SKILL.md format; cross-links resolve. Note (not a
+        finding): business-alignment references $audit, wired in I5 -- forward
+        reference by design. eval core 16/16 PASS; fixture audit-evidence exit 0.
+════════════════════════════════════════════════════════

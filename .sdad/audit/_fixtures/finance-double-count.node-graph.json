@@ -1,0 +1,51 @@
+{
+  "project": "fixture-finance-consolidation",
+  "acquired_at": "2026-06-26",
+  "acquisition_path": "manual",
+  "pyplan_version": "unknown",
+  "nodes": [
+    {
+      "id": "sub_a_revenue",
+      "type": "data",
+      "has_result_assigned": true,
+      "dependencies": [],
+      "code_snippet": "result = pp.read_csv('subsidiary_a_revenue.csv')  # standalone revenue, subsidiary A",
+      "mcp_decorated": false
+    },
+    {
+      "id": "sub_b_revenue",
+      "type": "data",
+      "has_result_assigned": true,
+      "dependencies": [],
+      "code_snippet": "result = pp.read_csv('subsidiary_b_revenue.csv')  # standalone revenue, subsidiary B (includes sales to A)",
+      "mcp_decorated": false
+    },
+    {
+      "id": "intercompany_sales",
+      "type": "data",
+      "has_result_assigned": true,
+      "dependencies": [],
+      "code_snippet": "result = pp.read_csv('intercompany_sales.csv')  # B -> A sales, ALREADY inside sub_b_revenue",
+      "mcp_decorated": false
+    },
+    {
+      "id": "group_revenue",
+      "type": "function",
+      "has_result_assigned": true,
+      "dependencies": ["sub_a_revenue", "sub_b_revenue"],
+      "code_snippet": "result = sub_a_revenue + sub_b_revenue  # gross sum of the two legal entities",
+      "mcp_decorated": false
+    },
+    {
+      "id": "consolidated_revenue",
+      "type": "function",
+      "has_result_assigned": true,
+      "dependencies": ["group_revenue", "intercompany_sales"],
+      "code_snippet": "result = group_revenue + intercompany_sales  # PLANTED DEFECT: intercompany must be ELIMINATED (subtracted), not added -- it is already inside sub_b_revenue, so this double-counts it",
+      "mcp_decorated": false
+    }
+  ],
+  "gaps": [
+    { "area": "interfaces", "reason": "synthetic fixture: no interface export supplied", "status": "not_assessable" }
+  ]
+}
