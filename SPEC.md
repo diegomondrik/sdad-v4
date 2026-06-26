@@ -365,6 +365,7 @@ No open decisions remain. All resolved before $specout.
 | I1 | Evidence acquisition layer (hybrid) | claude-opus-4-8 | high | SCHEMA.md, checks/audit-evidence.ps1+.sh, acquire-evidence.ps1+.sh, 2 fixtures, eval scenario 15 | eval 15 PASS; core 15/15 | none | 2026-06-26 |
 | I2 | Extend pyplan-mcp (read-access + audit) | claude-opus-4-8 | high | pyplan/mcp/SKILL.md (+2 sections, v6), mcp_lint.py, checks/mcp-tool-audit.ps1+.sh, 2 py fixtures, eval scenario 16 | eval 16 PASS; core 16/16 | none | 2026-06-26 |
 | I3 | Business dimension (alignment core + domain profiles) | claude-opus-4-8 | high | skills business-alignment/, domain-finance/, domain-supply-chain/ SKILL.md; fixture finance-double-count.node-graph.json | fixture valid (audit-evidence exit 0); core 16/16; behavioral tests -> llm-smoke/I7 | none | 2026-06-26 |
+| I4 | pyplan-audit orchestrator (5 dimensions) + 2 ratchet checks | claude-opus-4-8 | high | skills/pyplan-audit/SKILL.md; agents/business-analyst.md; checks missing-result-assign + circular-deps (.ps1+.sh); 2 defect fixtures; eval scenarios 17, 18 | core 18/18 PASS; behavioral multi-dim test -> I7 | none | 2026-06-26 |
 
 ---
 

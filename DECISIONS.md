@@ -845,3 +845,47 @@ QA: Layer 1 -- fixture is synthetic, no tokens/credentials/PII. Layer 2 -- skill
         finding): business-alignment references $audit, wired in I5 -- forward
         reference by design. eval core 16/16 PASS; fixture audit-evidence exit 0.
 ════════════════════════════════════════════════════════
+
+## Increment I4 -- pyplan-audit orchestrator (five-dimension model) + ratchet checks
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I4 -- pyplan-audit orchestrator (HIGH, scoped I4-full per developer 2026-06-26)
+Model: claude-opus-4-8 . effort high
+Decision: I4 ships the audit engine as a COMPOSITION orchestrator
+          (.claude/skills/pyplan-audit/SKILL.md) that defines the five-dimension
+          model (1 dev/arch, 2 security, 3 usability, 4 quality, 5 business ->
+          5a alignment + 5b domain) and maps each dimension to EXISTING skills/
+          agents -- it owns no detection logic of its own. Adds the business-analyst
+          agent (5a, elicitation-fed, BR-09 gate) orchestrated via agent-run, and
+          the two mechanical ratchet checks that had no home in the post-I3 plan:
+          missing-result-assign and circular-deps (.ps1 authoritative + .sh
+          python-or-skip mirror), each with a defect fixture and eval scenario
+          (17, 18). The orchestrator consumes all four ratchets (audit-evidence,
+          mcp-tool-audit, + the two new) as pre-computed evidence (BR-04).
+Rationale: Composition over rewrite -- when a composed skill improves, the audit
+          improves for free, no duplication. The mechanical checks belong in
+          checks/ per BR-04 (the LLM auditor never re-detects what a ratchet covers
+          deterministically); I4-full gave them a home rather than leaving two
+          SPEC-S5 checks orphaned. Severity reconciliation contract defined here;
+          full report template deferred to I8. not-assessable everywhere evidence/
+          elicitation/profile is missing (epistemic honesty), never fabricate.
+Alternatives considered: (a) I4-core (orchestrator only), defer the 2 checks --
+          rejected: no later increment owned them and the orchestrator needs them
+          as evidence on day one. (b) fold detection into the orchestrator skill --
+          rejected: duplicates pyplan-qa-platform + the agents, breaks the
+          "improves for free" property. (c) make python a hard dep for the .sh
+          checks -- rejected: NOTE-skip when python absent (CI safety), real run on
+          the Pyplan dev machine.
+Impact: 1 new skill (pyplan-audit), 1 new agent (business-analyst), 2 new checks
+          (missing-result-assign, circular-deps; .ps1+.sh), 2 defect fixtures, 2
+          eval scenarios. eval core 18/18 PASS. No CLAUDE.md change (v6 wiring ->
+          I5/I9). $audit command + spec-gate allowlist -> I5.
+QA: Layer 1 -- checks parse JSON only, never execute audited node code (no eval/
+          Invoke-Expression); fixtures synthetic, no secrets. Layer 4 -- scenario
+          array-match bug (Write-Host output captured as array) fixed with
+          Out-String before -match. All 12 composition references resolve to real
+          files.
+════════════════════════════════════════════════════════

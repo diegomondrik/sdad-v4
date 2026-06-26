@@ -1,0 +1,33 @@
+{
+  "project": "fixture-missing-result",
+  "acquired_at": "2026-06-26",
+  "acquisition_path": "manual",
+  "pyplan_version": "unknown",
+  "nodes": [
+    {
+      "id": "price",
+      "type": "data",
+      "has_result_assigned": true,
+      "dependencies": [],
+      "code_snippet": "result = pp.read_csv('price.csv')",
+      "mcp_decorated": false
+    },
+    {
+      "id": "margin",
+      "type": "function",
+      "has_result_assigned": false,
+      "dependencies": ["price"],
+      "code_snippet": "price * 0.3  # PLANTED DEFECT: no result= assigned, node never calculates",
+      "mcp_decorated": false
+    },
+    {
+      "id": "summary_screen",
+      "type": "interface",
+      "has_result_assigned": false,
+      "dependencies": ["margin"],
+      "code_snippet": "# interface node -- legitimately has no result= (must NOT be flagged)",
+      "mcp_decorated": false
+    }
+  ],
+  "gaps": []
+}
