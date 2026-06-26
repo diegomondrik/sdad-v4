@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# SDAD v5.2 — Installer for Mac / Linux
-# Spec-Driven AI Development — G7 AI Development Methodology
+# SDAD v5.2 -- Installer for Mac / Linux
+# Spec-Driven AI Development -- G7 AI Development Methodology
 # Version: 5.2 | 2026
+#
+# L-01 rule: this file is pure ASCII -- no em-dashes, accents, arrows, or section
+# symbols. Windows PowerShell 5.1 and some POSIX shells misread non-ASCII bytes
+# and the installer breaks on fresh machines. Ratcheted by checks/ascii-ps1.
 #
 # Run from inside the project repo where you want SDAD installed:
 #
@@ -18,11 +22,11 @@ NC='\033[0m'
 
 echo ""
 echo "============================================"
-echo "  SDAD v5.2 — Installer"
+echo "  SDAD v5.2 -- Installer"
 echo "============================================"
 echo ""
 
-# ─── STEP 1: Check prerequisites ─────────────────────────────────────────────
+# --- STEP 1: Check prerequisites -------------------------------------------
 
 echo -e "${YELLOW}[ 1/7 ] Checking prerequisites...${NC}"
 
@@ -30,7 +34,7 @@ echo -e "${YELLOW}[ 1/7 ] Checking prerequisites...${NC}"
 if command -v node &>/dev/null; then
     NODE_MAJOR=$(node --version | sed 's/v//' | cut -d. -f1)
     if [ "$NODE_MAJOR" -lt 18 ]; then
-        echo -e "${RED}  ERROR  Node.js $(node --version) found — v18+ required.${NC}"
+        echo -e "${RED}  ERROR  Node.js $(node --version) found -- v18+ required.${NC}"
         echo -e "${RED}         Install from https://nodejs.org and re-run.${NC}"
         exit 1
     fi
@@ -62,7 +66,7 @@ else
     echo -e "${GREEN}  OK     git initialized${NC}"
 fi
 
-# ─── STEP 2: Create .claude/ folder structure ─────────────────────────────────
+# --- STEP 2: Create .claude/ folder structure ------------------------------
 
 echo ""
 echo -e "${YELLOW}[ 2/7 ] Creating .claude/ folder structure...${NC}"
@@ -97,7 +101,7 @@ mkdir -p \
 
 echo -e "${GREEN}  OK     Folder structure created${NC}"
 
-# ─── STEP 3: Download and install skill files ─────────────────────────────────
+# --- STEP 3: Download and install skill files ------------------------------
 
 echo ""
 echo -e "${YELLOW}[ 3/7 ] Downloading skill files...${NC}"
@@ -180,14 +184,14 @@ if [ -n "$GIT_DIR" ]; then
         cat > "$PC" << 'PCEOF'
 #!/bin/sh
 # SDAD v5 -- pre-commit ratchet (.git/hooks is not versioned by git itself).
-# Blocks commits that stage a non-ASCII .ps1 (L-01). Bypass: --no-verify.
-staged=$(git diff --cached --name-only --diff-filter=ACM -- '*.ps1' 2>/dev/null)
+# Blocks commits that stage a non-ASCII .ps1 or .sh (L-01). Bypass: --no-verify.
+staged=$(git diff --cached --name-only --diff-filter=ACM -- '*.ps1' '*.sh' 2>/dev/null)
 [ -n "$staged" ] || exit 0
 repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
 check="$repo_root/checks/ascii-ps1.sh"
 [ -f "$check" ] || exit 0
 if ! sh "$check" $staged; then
-  echo "pre-commit: blocked by SDAD L-01 ratchet (non-ASCII .ps1 staged)." >&2
+  echo "pre-commit: blocked by SDAD L-01 ratchet (non-ASCII .ps1/.sh staged)." >&2
   echo "Fix the offending bytes (see output above) or use --no-verify if intentional." >&2
   exit 1
 fi
@@ -199,15 +203,15 @@ PCEOF
 fi
 
 # settings.json registers the three hooks via the cross-platform dispatcher
-# (.claude/hooks/run-hook.sh — .sh on macOS/Linux, .ps1 on Windows/Git Bash).
+# (.claude/hooks/run-hook.sh -- .sh on macOS/Linux, .ps1 on Windows/Git Bash).
 # Never overwritten if the project already has one.
 if [ -f ".claude/settings.json" ]; then
-    echo -e "${CYAN}  SKIP   .claude/settings.json already exists — not overwritten${NC}"
+    echo -e "${CYAN}  SKIP   .claude/settings.json already exists -- not overwritten${NC}"
 else
     download_skill ".claude/settings.json"
 fi
 
-# ─── STEP 4: Install CLAUDE.md ───────────────────────────────────────────────
+# --- STEP 4: Install CLAUDE.md ---------------------------------------------
 
 echo ""
 echo -e "${YELLOW}[ 4/7 ] Installing CLAUDE.md...${NC}"
@@ -226,7 +230,7 @@ else
     echo -e "${GREEN}  OK     CLAUDE.md installed${NC}"
 fi
 
-# ─── STEP 5: Initialize project files ────────────────────────────────────────
+# --- STEP 5: Initialize project files --------------------------------------
 
 echo ""
 echo -e "${YELLOW}[ 5/7 ] Initializing project files...${NC}"
@@ -236,14 +240,14 @@ if [ ! -f "SPEC.md" ]; then
     curl -fsSL "$REPO/SPEC_blank.md" -o SPEC.md
     echo -e "${GREEN}  OK     SPEC.md initialized (blank template)${NC}"
 else
-    echo -e "${CYAN}  SKIP   SPEC.md already exists — not overwritten${NC}"
+    echo -e "${CYAN}  SKIP   SPEC.md already exists -- not overwritten${NC}"
 fi
 
 # LESSON_LIBRARY.md
 if [ ! -f "LESSON_LIBRARY.md" ]; then
     cat > LESSON_LIBRARY.md << 'EOF'
 # LESSON_LIBRARY.md
-# Project lesson library — entries added automatically after each $qa run.
+# Project lesson library -- entries added automatically after each $qa run.
 # Format: L-XX | Category | Title | Signal | Principle
 
 ## Entries
@@ -252,7 +256,7 @@ _No entries yet. Run $qa on your first completed increment._
 EOF
     echo -e "${GREEN}  OK     LESSON_LIBRARY.md created (blank)${NC}"
 else
-    echo -e "${CYAN}  SKIP   LESSON_LIBRARY.md already exists — preserved${NC}"
+    echo -e "${CYAN}  SKIP   LESSON_LIBRARY.md already exists -- preserved${NC}"
 fi
 
 # .gitignore
@@ -268,7 +272,7 @@ else
     echo -e "${GREEN}  OK     .gitignore created${NC}"
 fi
 
-# ─── STEP 6: Register Pyplan MCP server globally ─────────────────────────────
+# --- STEP 6: Register Pyplan MCP server ------------------------------------
 
 echo ""
 echo -e "${YELLOW}[ 6/7 ] Registering Pyplan MCP server...${NC}"
@@ -285,7 +289,7 @@ else
     fi
 fi
 
-# ─── STEP 7: Summary ─────────────────────────────────────────────────────────
+# --- STEP 7: Summary -------------------------------------------------------
 
 echo ""
 echo -e "${YELLOW}[ 7/7 ] Installation complete${NC}"
@@ -295,17 +299,17 @@ echo -e "${GREEN}  SDAD v5.2 installed successfully${NC}"
 echo -e "${GREEN}============================================${NC}"
 echo ""
 echo "Files installed:"
-echo "  CLAUDE.md                                — core instructions (v5.2)"
-echo "  .claude/skills/                          — AI Architect, AI Engineer, harness + on-demand skills"
-echo "  .claude/agents/                          — code-reviewer, security-auditor, test-generator + HANDOFF"
-echo "  .claude/hooks/                           — session hooks + PreToolUse spec-gate (.sh + .ps1)"
-echo "  .claude/settings.json                    — hook registration (if new)"
-echo "  checks/ascii-ps1                          — lesson-to-guardrail ratchet (L-01)"
-echo "  .git/hooks/pre-commit                     — ASCII ratchet hard stop"
-echo "  .sdad/lib/agent-run                       — \$agent liveness wrapper (600s timeout)"
-echo "  .sdad/eval/                               — \$eval golden dataset + runner"
-echo "  Pyplan MCP                               — registered globally (dev.pyplan.com)"
-echo "  SPEC.md / LESSON_LIBRARY.md               — blank templates (if new)"
+echo "  CLAUDE.md                                -- core instructions (v5.2)"
+echo "  .claude/skills/                          -- AI Architect, AI Engineer, harness + on-demand skills"
+echo "  .claude/agents/                          -- code-reviewer, security-auditor, test-generator + HANDOFF"
+echo "  .claude/hooks/                           -- session hooks + PreToolUse spec-gate (.sh + .ps1)"
+echo "  .claude/settings.json                    -- hook registration (if new)"
+echo "  checks/ascii-ps1                          -- lesson-to-guardrail ratchet (L-01, .ps1 + .sh)"
+echo "  .git/hooks/pre-commit                     -- ASCII ratchet hard stop"
+echo "  .sdad/lib/agent-run                       -- \$agent liveness wrapper (600s timeout)"
+echo "  .sdad/eval/                               -- \$eval golden dataset + runner"
+echo "  Pyplan MCP                               -- registered globally (dev.pyplan.com)"
+echo "  SPEC.md / LESSON_LIBRARY.md               -- blank templates (if new)"
 echo ""
 echo -e "${CYAN}Next step:${NC}"
 echo "  Start Claude Code: claude"

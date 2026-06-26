@@ -219,14 +219,14 @@ try {
             $preCommit = @'
 #!/bin/sh
 # SDAD v5 -- pre-commit ratchet (.git/hooks is not versioned by git itself).
-# Blocks commits that stage a non-ASCII .ps1 (L-01). Bypass: --no-verify.
-staged=$(git diff --cached --name-only --diff-filter=ACM -- '*.ps1' 2>/dev/null)
+# Blocks commits that stage a non-ASCII .ps1 or .sh (L-01). Bypass: --no-verify.
+staged=$(git diff --cached --name-only --diff-filter=ACM -- '*.ps1' '*.sh' 2>/dev/null)
 [ -n "$staged" ] || exit 0
 repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
 check="$repo_root/checks/ascii-ps1.sh"
 [ -f "$check" ] || exit 0
 if ! sh "$check" $staged; then
-  echo "pre-commit: blocked by SDAD L-01 ratchet (non-ASCII .ps1 staged)." >&2
+  echo "pre-commit: blocked by SDAD L-01 ratchet (non-ASCII .ps1/.sh staged)." >&2
   echo "Fix the offending bytes (see output above) or use --no-verify if intentional." >&2
   exit 1
 fi

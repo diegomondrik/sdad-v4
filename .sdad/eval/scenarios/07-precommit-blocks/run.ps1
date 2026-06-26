@@ -23,13 +23,13 @@ try {
     # a CRLF shebang breaks sh ("bad interpreter"). No BOM.
     $hookBody = @'
 #!/bin/sh
-staged=$(git diff --cached --name-only --diff-filter=ACM -- '*.ps1' 2>/dev/null)
+staged=$(git diff --cached --name-only --diff-filter=ACM -- '*.ps1' '*.sh' 2>/dev/null)
 [ -n "$staged" ] || exit 0
 repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
 check="$repo_root/checks/ascii-ps1.sh"
 [ -f "$check" ] || exit 0
 if ! sh "$check" $staged; then
-  echo "pre-commit: blocked by SDAD L-01 ratchet (non-ASCII .ps1 staged)." >&2
+  echo "pre-commit: blocked by SDAD L-01 ratchet (non-ASCII .ps1/.sh staged)." >&2
   exit 1
 fi
 exit 0
