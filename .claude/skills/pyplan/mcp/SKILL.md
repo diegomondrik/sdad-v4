@@ -117,10 +117,35 @@ a running Pyplan instance), SDAD enforces the same discipline as $build:
 3. Wait for developer approval.
 4. After execution: DECISIONS.md entry + §13 update.
 5. Run $qa on the modified increment.
+5.5. After $qa passes, export the Pyplan model snapshot (see Model Snapshot
+   Convention below) and include it in the increment's atomic commit.
 6. Run MCP surface checklist on any @mcp_tool node touched.
 7. If the modification created or changed an HTML interface (the default
    interface type for AI-built screens), run the HTML interface surface
    checklist (pyplan-interfaces skill, section 11.8).
+
+### Model Snapshot Convention
+
+After $qa passes on a Build-via-AI increment, export the Pyplan model:
+
+```
+Path:    .sdad/pyplan-snapshots/YYYYMMDD-incN-slug.ppl
+Naming:  date in YYYYMMDD - inc + zero-padded number - short feature slug
+Example: .sdad/pyplan-snapshots/20260625-inc03-revenue-nodes.ppl
+```
+
+Export mechanism (Pyplan MCP v1):
+- If the MCP exposes an export/snapshot endpoint: use it and note the endpoint
+  name in §7.
+- If not (v1 current behavior): export manually from the Pyplan UI before
+  committing. The step is still mandatory.
+
+The snapshot is committed in the same atomic commit as DECISIONS.md and the §13
+update. One commit = one increment = one known model state.
+
+Recovery: to restore a prior increment's model state, load the corresponding
+.ppl file in Pyplan. Git history gives the full restore timeline. No GitHub
+required — local git commits are sufficient for recovery.
 
 ---
 
@@ -137,6 +162,8 @@ a running Pyplan instance), SDAD enforces the same discipline as $build:
 - Docstrings precise enough for an external LLM to invoke correctly
 - Return values verified serializable
 - No tool depends on interactive agent behavior or mutable session state
+- Snapshot: .sdad/pyplan-snapshots/ contains a .ppl file for this Build-via-AI
+  increment, named correctly (YYYYMMDD-incN-slug.ppl), present in the staged commit
 
 ---
 
@@ -149,6 +176,11 @@ Always include in §7 when §D is present:
   API may change across Pyplan updates). Lock Pyplan version in §5 if
   MCP stability is critical. |
 ```
+
+Export capability: check whether the installed Pyplan version exposes a model
+export endpoint via MCP. If yes, document it in §7 and use it in the snapshot
+step. If not, the export is manual (Pyplan UI) — the snapshot step is still
+mandatory.
 
 ---
 
