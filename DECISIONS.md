@@ -986,3 +986,65 @@ QA: Layer 1 -- no security surface (skill doc only). Layer 4 -- ASCII clean
           Tier A (observed) from Tier B (structural), consistent with the
           not-assessable rule (BR-12 explicitly documents the limitation).
 ════════════════════════════════════════════════════════
+
+---
+
+## Increment I7 -- $eval audit scenarios (deterministic report-integrity ratchet)
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I7 -- $eval audit scenarios (MEDIUM; built at FRONTIER per routing)
+Model: claude-opus-4-8 . effort high
+Decision: I7 ships the deterministic core of the audit golden-dataset: a
+          report-integrity ratchet (checks/audit-report-integrity.ps1 authoritative
+          + .sh mirror) that catches a DELIBERATELY WEAKENED audit report -- the
+          literal SPEC-S8 I7 test. It enforces three integrity invariants over a
+          (report.md + manifest.md) pair:
+            A. reproducibility stamp present (BR-13: SDAD version + exact model);
+            B. no fabricated business-alignment (5a) finding when the manifest
+               declares no elicitation (BR-09);
+            C. every not_assessable gap area surfaced in the report (no silent skip).
+          Two fixtures: honest-report (passes, exit 0) and weakened-report (caught,
+          exit 1 with 5 violations incl. the B fabrication). Eval scenario 21 asserts
+          both. This mechanizes brief I7 (b) not-assessable honesty and (c) evidence-
+          gap surfacing per BR-04.
+Rationale: The §8 I7 test ("runner catches a deliberately weakened audit") and the
+          §10 DoD ("v5 core + new audit scenarios -> clean pass") are fully met
+          deterministically and verified now (core 21/21, ps1+sh parity confirmed in
+          Git Bash). A deterministic ratchet is a reliable regression gate; a flaky
+          LLM gate is not.
+Scope call (honest coverage over false confidence): the LLM-judgment behavioral
+          items (catch the intercompany double-count, the multi-domain COGS seam,
+          multi-dimension severity) are NOT mechanizable and were NOT shipped as
+          llm-smoke scenarios this increment, because:
+            1. an empirical attempt revealed the EXISTING llm-smoke.ps1 release gate
+               is BROKEN on Windows -- Start-Process -FilePath "claude" cannot launch
+               the npm shim (claude resolves to claude.ps1, an ExternalScript;
+               "%1 is not a valid Win32 application"). This is a pre-existing v5-I3
+               defect, not an I7 regression; the gate has never run on this machine.
+            2. shipping an unverifiable, flaky LLM gate would create false confidence.
+          The behavioral coverage remains the auditor's runtime job, backed by the
+          I3 domain-* skills + the finance-double-count fixture. Recommended follow-up
+          (separate task): fix the llm-smoke launcher cross-platform (Win shim vs
+          Unix binary), THEN add audit behavioral scenarios as a working release gate.
+Alternatives considered: (a) add llm-smoke audit scenarios now -- rejected: the gate
+          is broken on Windows and the scenarios could not be verified (false
+          confidence). (b) fix the llm-smoke launcher inline in I7 -- rejected: scope
+          creep into pre-existing v5 infra + needs its own cross-platform testing; the
+          file is also in the session-start EOL-only modified set. Flagged for a
+          dedicated increment instead.
+Impact: 1 new check (audit-report-integrity, .ps1+.sh), 2 fixtures (honest + weakened
+          report dirs), 1 eval scenario (21). Core 21/21 PASS. No CLAUDE.md change.
+          Two bugs found and fixed DURING this increment's own check authoring:
+          (1) elicitation-none regex broke on markdown bold ("**Elicitation:** none")
+              -> Rule B silently skipped; fixed to tolerate non-alphanumerics.
+          (2) .sh Rule C used tr -d '[:space:]' which ate the newline separator and
+              concatenated gap areas; fixed to tr -d '[:blank:]'.
+QA: Layer 1 -- the check only reads text, never executes audited content. Layer 2 --
+          ps1 authoritative + sh mirror, parity verified on both fixtures in Git Bash.
+          Layer 4 -- ASCII clean (scenario 06 PASS). FINDING (P2, pre-existing, NOT
+          fixed here): llm-smoke.ps1 Start-Process launch is broken on Windows; the
+          LLM release gate cannot run until the launcher is fixed.
+════════════════════════════════════════════════════════

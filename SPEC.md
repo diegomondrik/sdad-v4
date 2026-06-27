@@ -368,6 +368,7 @@ No open decisions remain. All resolved before $specout.
 | I4 | pyplan-audit orchestrator (5 dimensions) + 2 ratchet checks | claude-opus-4-8 | high | skills/pyplan-audit/SKILL.md; agents/business-analyst.md; checks missing-result-assign + circular-deps (.ps1+.sh); 2 defect fixtures; eval scenarios 17, 18 | core 18/18 PASS; behavioral multi-dim test -> I7 | none | 2026-06-26 |
 | I5 | $audit command + spec-gate AUDIT_ACTIVE allowlist | claude-opus-4-8 | high | checks/spec-gate-policy.ps1+.sh (AUDIT_ACTIVE); skills/pyplan-audit/SKILL.md (+command lifecycle); eval scenario 19 | core 19/19 PASS; behavioral 5-dim report test -> I7 | none (1 LOW inherited from $docfinal sentinel trust model) | 2026-06-26 |
 | I6 | Usability sub-protocol (Tier A live / Tier B convention-only) | claude-sonnet-4-6 | medium | skills/pyplan-audit/SKILL.md (+usability section); audit/SCHEMA.md (+App Access field); fixture no-app-access/manifest.md; eval scenario 20 | core 20/20 PASS | none | 2026-06-26 |
+| I7 | $eval audit scenarios -- deterministic report-integrity ratchet | claude-opus-4-8 | high | checks/audit-report-integrity.ps1+.sh; fixtures honest-report/ + weakened-report/ (manifest+report); eval scenario 21 | core 21/21 PASS; honest=0 / weakened caught (5 violations incl. B) on both ps1+sh | 1 P2 pre-existing (llm-smoke Start-Process broken on Windows; flagged, not fixed in I7) | 2026-06-26 |
 
 ---
 
