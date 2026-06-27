@@ -156,3 +156,26 @@ Transferable lessons captured across SDAD projects. Surfaced automatically in Ph
   checks worked when run by hand. Fixed by `($out | Out-String)` + a saved `$code` before
   matching. Sibling of [[L-01]] / [[L-03]] (PS 5.1 / PowerShell semantics traps that only
   surface under the harness, not in a manual run).
+
+### L-10 -- Start-Process cannot launch an npm CLI shim on Windows; Get-Command finding it is not enough
+- **Category:** Environment
+- **Tags:** `#stack:powershell` `#stack:windows` `#stack:nodejs` `#phase:build` `#phase:qa`
+- **Signal:** A PowerShell script launches a Node/npm-installed CLI with
+  `Start-Process -FilePath "claude"` (or any npm global: `eslint`, `tsc`, `prettier`...) and
+  dies with `"%1 is not a valid Win32 application"` -- even though `Get-Command claude`
+  resolves it. The same CLI runs fine when typed directly in the shell.
+- **Principle:** npm global executables on Windows are not `.exe` files -- they are generated
+  `.ps1` / `.cmd` shim scripts (`%APPDATA%\npm\claude.ps1`). `Start-Process -FilePath` requires a
+  real Win32 image and cannot execute a script shim, so it throws. `Get-Command` succeeding only
+  proves the shim is on PATH, not that `Start-Process` can launch it. Either invoke the shim
+  through its interpreter -- `(Get-Command claude).Source` then `powershell -NoProfile -File <shim>`
+  (or `cmd /c claude ...`) -- or use the call operator `& claude ...` when you do not need
+  Start-Process's process-handle/timeout features. A release gate that uses `Start-Process` on a
+  shim has never actually run on Windows; verify by observing a real PASS, not just "no error at
+  registration". Sibling of [[L-01]] / [[L-03]] / [[L-09]] (Windows/PS harness traps that pass a
+  glance but fail at runtime).
+- **Origin:** SDAD v6 I7. Discovered empirically while attempting to add audit behavioral LLM
+  scenarios to `.sdad/eval/llm-smoke.ps1`: the pre-existing `Start-Process -FilePath "claude"`
+  release-gate launch fails on Windows because `claude` is `claude.ps1`. The LLM smoke gate had
+  never run on this machine. I7 shipped its tests as deterministic ratchets instead; the launcher
+  fix was flagged as a separate task.
