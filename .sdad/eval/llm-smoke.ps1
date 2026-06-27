@@ -30,23 +30,27 @@ $failed = 0
 foreach ($s in $scenarios) {
     $tmp = Join-Path $env:TEMP ("sdad-llm-" + $s.name + "-$PID")
     New-Item -ItemType Directory -Path $tmp -Force | Out-Null
-    $outFile = Join-Path $tmp "out.txt"
-    $errFile = Join-Path $tmp "err.txt"
     try {
         Copy-Item (Join-Path $repo "CLAUDE.md") (Join-Path $tmp "CLAUDE.md")
 
-        $p = Start-Process -FilePath "claude" -ArgumentList @("--print", $s.prompt) `
-            -WorkingDirectory $tmp -NoNewWindow -PassThru `
-            -RedirectStandardOutput $outFile -RedirectStandardError $errFile
-        if (-not $p.WaitForExit($timeoutSec * 1000)) {
-            try { $p.Kill() } catch {}
+        # L-10: Start-Process cannot launch an npm CLI shim (.ps1) on Windows.
+        # Use Start-Job instead -- child PowerShell process resolves shims natively.
+        $job = Start-Job -ScriptBlock {
+            param($dir, $prompt)
+            Set-Location $dir
+            & claude --print $prompt 2>&1
+        } -ArgumentList $tmp, $s.prompt
+
+        $finished = Wait-Job $job -Timeout $timeoutSec
+        if (-not $finished) {
+            Stop-Job $job -PassThru | Remove-Job -Force -ErrorAction SilentlyContinue
             Write-Host "FAIL llm:$($s.name) (timeout after $timeoutSec s)"
             $failed++
             continue
         }
-
-        $reply = ""
-        if (Test-Path $outFile) { $reply = Get-Content $outFile -Raw -Encoding UTF8 }
+        $output = Receive-Job $job
+        Remove-Job $job -Force -ErrorAction SilentlyContinue
+        $reply = if ($output) { ($output | ForEach-Object { "$_" }) -join "`n" } else { "" }
         $missing = @()
         foreach ($rx in $s.patterns) {
             if ($reply -notmatch "(?i)$rx") { $missing += $rx }
