@@ -1,7 +1,7 @@
-# SDAD v5.2 — CLAUDE.md
+# SDAD v6.0 — CLAUDE.md
 # Spec-Driven AI Development for Claude Code
 # G7 AI Development Methodology
-# Version 5.0 | 2026
+# Version 6.0 | 2026
 #
 # INSTALLATION: Place this file at the root of your project repository.
 # The .claude/ folder (skills, agents, hooks) is installed by the SDAD installer.
@@ -20,6 +20,12 @@
 #   Governs ALL interaction and generated documents: $spec questions, SPEC.md,
 #   DECISIONS.md entries, QA reports, lesson candidates, $doc output.
 #   Code identifiers and comments stay in English regardless (industry convention).
+#
+# PROJECT_DOMAIN: finance | supply-chain | <other> | none   ← business domain.
+#   Asked in $spec; inferred in $audit then confirmed with the owner. Loads the
+#   matching domain-* profile on-demand (tool-minimalism: only the project's
+#   domain). No profile for a detected domain -> "not assessable - no domain
+#   profile" (a finding, never a silent skip).
 # ──────────────────────────────────────────────────────────────────────────
 #
 # When PROJECT_PLATFORM: pyplan is set, the following activate automatically:
@@ -130,6 +136,9 @@ ANNOUNCEMENT RULE (generalizes the $build 🧠 MODEL line):
 - **Data Discovery** — trigger: data delta, field mismatch, source discrepancy, data gap
 - **Dev Setup** — trigger: onboarding, dev setup, which Claude Code features complement SDAD (links to live docs)
 - **Harness** — trigger: control layer, harness model, governance axiom, E/T/C/S/L/V, enforcement in code vs prompt, $eval
+- **Pyplan Audit** — trigger: auto-activated by $audit; audit an existing Pyplan model, five-dimension client report (Pyplan projects)
+- **Business Alignment** — trigger: measurable objective, traceable rule, value vs cost, alignment, §1/§6 (auto in $audit dimension 5a)
+- **Domain Profiles** (domain-finance, domain-supply-chain) — trigger: PROJECT_DOMAIN match; load on-demand for domain-correctness (5b)
 - **Board Spec Context** — trigger: auto on $spec/$specout on Board projects
 - **Board Data Model**   — trigger: entity, cube, relationship, dimension, §E (Board projects)
 - **Board Capsule**      — trigger: capsule, screen, procedure, layout, mask, §F (Board projects)
@@ -214,7 +223,7 @@ EXECUTION:
 
 ## Commands
 
-**$sdad** — Show SDAD v5.0 methodology overview: phases, descriptions, command list (incl. $eval).
+**$sdad** — Show SDAD v6.0 methodology overview: phases, descriptions, command list (incl. $eval, $audit).
 
 **$spec** (or $spec [section]) — Phase 1: Guided Requirements.
 ONE question at a time with proposed default.
@@ -535,6 +544,17 @@ STEP 3 — QA STANDALONE AUDIT: Full $QA Standalone mode. All layers including P
 STEP 4 — LESSON CANDIDATES: Evaluate findings and codebase. Propose up to 3 candidates.
   For each: title / Category / Signal / Principle / Add to Lesson Library? (yes/skip/edit)
 
+**$audit** (or $audit [dimension] | $audit report) — Pyplan Audit. Sibling of $docfinal:
+runs on a model SDAD did not build, without an approved SPEC.md. Where $docfinal documents,
+$audit judges and recommends — deliverable is a client-facing five-dimension report
+(development, security, usability, quality, business). Auto-activates the pyplan-audit skill,
+which owns the lifecycle, evidence contract, and severity reconciliation.
+  Spec-gate: writes audit artifacts with no Spec via .sdad/AUDIT_ACTIVE (mirrors $docfinal's
+  DOCFINAL_ACTIVE; allowlisted in checks/spec-gate-policy). Create on start, remove on
+  completion or abort. Security/compliance findings still need explicit approval.
+  Evidence first: acquire per .sdad/audit/SCHEMA.md; un-acquirable areas are "not assessable"
+  gaps, never assumptions. Report intent vs delivered neutrally — never accusatory.
+
 **$agent** — Sub-Agent Delegation. Each agent returns an AGENT HANDOFF block — see .claude/agents/HANDOFF_TEMPLATE.md.
 
   $agent review [module]  → architectural review (uses .claude/agents/code-reviewer.md)
@@ -678,6 +698,11 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - $agent delegation goes through .sdad/lib/agent-run (600s timeout) — fails loud on timeout or empty output, never proceeds silently.
 - On a tool/test error mid-increment: stop the increment cleanly, set .sdad/HOLD_AUTOCOMMIT, never enter an undefined retry loop — recovery clears when the developer resumes.
 - Commit DECISIONS.md + §13 + SPEC.md for one increment as a single atomic commit; record the exact model string per release (§5 / $verify) when reproducibility matters.
+- ON PYPLAN PROJECTS: $audit judges an existing model without a Spec (.sdad/AUDIT_ACTIVE sentinel); never assume the model is inspectable as code — acquire evidence per .sdad/audit/SCHEMA.md, declare un-acquirable areas "not assessable".
+- Business dimension never fabricates: no owner elicitation -> alignment (5a) "not assessable - no elicitation input"; no domain profile -> domain correctness (5b) "not assessable - no domain profile". Both are findings, never silent skips.
+- Every domain-correctness finding carries a confidence level — an LLM domain profile raises the floor, it does not replace the client's SME for high-stakes validation.
+- $audit reports intent vs delivered neutrally — evidence-based, liability- and relationship-aware, never accusatory.
+- PROJECT_DOMAIN loads only the matching domain-* profile(s) on-demand (tool-minimalism); multi-domain models load multiple and flag cross-domain seams as high-risk.
 
 ---
 
@@ -710,5 +735,5 @@ Use as primary context budget indicator — shows the 50% / 65% thresholds.
 
 ---
 
-G7 AI Development Methodology | SDAD v5.2 | CLAUDE.md
+G7 AI Development Methodology | SDAD v6.0 | CLAUDE.md
 Spec-Driven AI Development for Claude Code
