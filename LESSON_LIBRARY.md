@@ -179,3 +179,20 @@ Transferable lessons captured across SDAD projects. Surfaced automatically in Ph
   release-gate launch fails on Windows because `claude` is `claude.ps1`. The LLM smoke gate had
   never run on this machine. I7 shipped its tests as deterministic ratchets instead; the launcher
   fix was flagged as a separate task.
+
+### L-11 -- `git add` silently no-ops when the path case mismatches the index entry on Windows
+- **Category:** Environment
+- **Tags:** `#stack:git` `#stack:windows` `#phase:build`
+- **Signal:** You run `git add <File>`, the command exits 0 with no error, but `git diff --cached`
+  is empty and `git status` still shows the file unstaged. On Windows (case-insensitive FS), the
+  only clue is that the path case you supplied does not match the exact case stored in the git index.
+- **Principle:** On a case-insensitive filesystem (Windows, default macOS), `git add <Path>`
+  silently no-ops when `<Path>` case differs from the index entry -- no error, no warning, exit 0.
+  Before staging, confirm the tracked name with `git ls-files | Select-String <name>`. Stage by
+  that exact name: `git add -- "Claude.md"`, not `git add "CLAUDE.md"`. Always verify staging
+  landed with `git diff --cached --stat` before committing. Sibling of [[L-04]] (same root: git
+  case behavior on Windows) -- L-04 covers referencing the file on case-sensitive surfaces; L-11
+  covers failing to stage it locally.
+- **Origin:** SDAD v6 I9. `git add "CLAUDE.md"` exited 0 but staged nothing because git tracks
+  the file as `Claude.md`. The staging had silently no-opped; caught only by checking
+  `git diff --cached` (empty). Fixed by staging with the exact tracked name.
