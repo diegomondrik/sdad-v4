@@ -889,3 +889,57 @@ QA: Layer 1 -- checks parse JSON only, never execute audited node code (no eval/
           Out-String before -match. All 12 composition references resolve to real
           files.
 ════════════════════════════════════════════════════════
+
+---
+
+## Increment I5 -- $audit command + spec-gate AUDIT_ACTIVE allowlist
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I5 -- $audit command + spec-gate allowlist (HIGH, closes the methodology surface)
+Model: claude-opus-4-8 . effort high
+Decision: I5 makes $audit a real command -- a SIBLING of $docfinal that runs
+          WITHOUT an approved SPEC.md. (1) Spec-gate: the .sdad/AUDIT_ACTIVE
+          sentinel is added to the shared policy modules (checks/spec-gate-policy
+          .ps1 + .sh), mirroring DOCFINAL_ACTIVE; this single source of truth is
+          consumed by both the local PreToolUse hook and the CI gate, so no hook
+          edit is needed. (2) The $audit command lifecycle (modes, sentinel
+          create/remove discipline, pre-audit ingestion order: evidence I1 ->
+          declared-intent via markitdown -> domain confirm -> elicitation, then the
+          five-dimension run + reconciliation + neutral report) is documented in the
+          pyplan-audit skill -- the orchestrator that already auto-activates on
+          $audit -- NOT in CLAUDE.md. (3) eval scenario 19 (gate-allow-audit)
+          mirrors scenario 04: AUDIT_ACTIVE sentinel allows a code write with no
+          SPEC.md.
+Rationale: The skill auto-activates on $audit regardless of CLAUDE.md, so the
+          command works before the CLAUDE.md text lands. Putting the lifecycle in
+          the (on-demand) skill keeps it off the CLAUDE.md +60 line budget, per the
+          "voluminous -> on-demand skills" [LOCK]. Editing the policy modules (clean
+          files) rather than the hook keeps the session-start pre-modified hook out
+          of the commit, and keeps local + CI enforcement on one source of truth.
+Alternatives considered: (a) register $audit in CLAUDE.md Commands/$sdad now --
+          DEFERRED to I9 (developer decision 2026-06-26) so the whole v6 CLAUDE.md
+          wiring is one atomic edit against the line budget. (b) a separate command
+          skill distinct from pyplan-audit -- rejected: pyplan-audit is already
+          "the engine behind the $audit command"; a second skill would split the
+          lifecycle from the orchestration it drives. (c) edit the spec-gate hook
+          for the allowlist -- rejected: the hook is a thin adapter; the decision
+          logic lives in the policy module (the actual single source of truth).
+Impact: 2 policy modules edited (spec-gate-policy.ps1 + .sh, +2 lines each), 1 skill
+          extended (pyplan-audit, +command lifecycle section, on-demand -- no
+          CLAUDE.md cost), 1 new eval scenario (19). eval core 19/19 PASS. No
+          CLAUDE.md change (deferred to I9). .sdad/AUDIT_ACTIVE needs no .gitignore
+          change -- .sdad/* is already ignored (runtime state, never committed).
+QA: Layer 1 (Security) -- the AUDIT_ACTIVE sentinel reuses the EXACT trust model
+          of DOCFINAL_ACTIVE: it only lifts the no-Spec block, grants no other
+          allowance; security/compliance fixes still need explicit approval. Known
+          inherited property (NOT introduced by I5, LOW): a forced-committed
+          .sdad/AUDIT_ACTIVE could pass the CI spec-gate in the PR checkout, exactly
+          as DOCFINAL_ACTIVE could; L-05 hardening protects the policy LOGIC (trusted
+          base ref), not sentinel presence. Accepted at $docfinal; mirrored
+          faithfully. Layer 2 -- single source of truth respected (policy module not
+          hook); .ps1/.sh mirrored. Layer 4 -- ASCII clean (scenario 06 PASS); skill
+          section cross-references BR-14 + the policy file paths.
+════════════════════════════════════════════════════════

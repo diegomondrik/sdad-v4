@@ -38,6 +38,9 @@ foreach ($prefix in @('docs/', '.sdad/', '.claude/', 'hub/')) {
 # $docfinal sentinel
 if (Test-Path (Join-Path $proj '.sdad/DOCFINAL_ACTIVE')) { exit 0 }
 
+# $audit sentinel -- $audit runs without an approved Spec, same as $docfinal (BR-14)
+if (Test-Path (Join-Path $proj '.sdad/AUDIT_ACTIVE')) { exit 0 }
+
 # R2 code-file denylist; unknown extensions default to allow
 $codeExt = @('.py', '.js', '.ts', '.jsx', '.tsx', '.ps1', '.psm1', '.sh',
              '.bat', '.cmd', '.sql', '.html', '.css', '.json', '.yaml',

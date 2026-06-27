@@ -153,6 +153,62 @@ report when the MCP read path was used. See the `pyplan-mcp` skill.
 
 ---
 
+## The `$audit` command (lifecycle)
+
+`$audit` is the command that drives this orchestrator. It is a **sibling of
+`$docfinal`**: both run on a model SDAD did not necessarily build, and both run
+**without an approved `SPEC.md`**. Where `$docfinal` *documents* retroactively,
+`$audit` *judges and recommends* — its deliverable is a client-facing audit report,
+and it is itself a `$QA` Standalone run extended with the five-dimension model and
+the evidence/severity contract above.
+
+### Modes
+- `$audit` — full five-dimension lifecycle (all steps below).
+- `$audit [dimension]` — run a single dimension (1..5, or `5a`/`5b`); the others are
+  reported `not_assessable - not requested`, never silently dropped.
+- `$audit report` — (re)generate the report from already-acquired evidence and the
+  reconciled findings, without re-running acquisition.
+
+### Spec-gate: runs without a Spec (BR-14)
+`$audit` legitimately writes audit artifacts with no approved Spec. The spec-gate
+allows this via the `.sdad/AUDIT_ACTIVE` sentinel (mirrors `$docfinal`'s
+`.sdad/DOCFINAL_ACTIVE`; both are allowlisted in `checks/spec-gate-policy.{ps1,sh}`,
+the single source of truth shared by the local hook and CI):
+1. On `$audit` start, create `.sdad/AUDIT_ACTIVE` (empty sentinel; it is runtime
+   state — `.sdad/*` is git-ignored, never committed).
+2. On completion **or abort**, remove it, so the gate returns to enforcing the Spec
+   for normal `$build`. Always remove it on the way out, including error paths.
+
+The sentinel only lifts the *no-Spec* block; it grants no other allowance. Security
+and compliance findings still require explicit developer approval before any fix.
+
+### Pre-audit ingestion (runs before the five-dimension run)
+1. **Evidence (I1).** Acquire the model representation per `.sdad/audit/SCHEMA.md`
+   into `.sdad/audit/<project>/evidence/` — `.ppl` export (primary, stub in v6) /
+   MCP read (enhancement) / manual (always available). Emit the evidence manifest
+   (acquisition path, timestamp, Pyplan version if known, declared gaps). Un-acquired
+   areas become `status: not_assessable`, never assumptions.
+2. **Declared intent.** Ingest prior sales/discovery docs, blueprints, and POCs via
+   markitdown (`convert_local`, local trusted files only) into
+   `.sdad/audit/<project>/ingest/`. This material is **declared-intent /
+   claims-to-verify, timestamped — not ground truth.** The audit verifies these
+   claims against acquired evidence; it never treats a sales claim as delivered fact.
+3. **Domain.** Detect `PROJECT_DOMAIN`, confirm with the owner, load matching
+   `domain-*` profile(s) (see "Domain detection and loading" above).
+4. **Elicitation.** Run the `business-alignment` elicitation for the declared
+   objective; with no owner input, dimension 5a is `not_assessable - no elicitation
+   input` (BR-09) — never fabricated.
+
+Then run the five-dimension audit, reconcile severities (BR-03), and generate the
+report. The report states intent vs delivered **neutrally** (BR-11) — liability- and
+relationship-aware, never accusatory.
+
+(The `$audit` command is registered in CLAUDE.md `Commands` / `$sdad` in I9, with the
+rest of the v6 CLAUDE.md wiring, to keep that edit atomic against the line budget.
+The skill auto-activates on `$audit` regardless, so the command works before then.)
+
+---
+
 ## Report shape (full template -> I8)
 
 Executive summary -> evidence manifest (acquisition path, gaps, SDAD version +
