@@ -1120,3 +1120,22 @@ QA: Layer 2 -- version stamp header/footer parity verified by scenario 08. Layer
           within the [LOCK] +60 line budget. No code surface. Line 675's "v5.2
           versioning patch" left as accurate history (not a stamp the assert reads).
 ════════════════════════════════════════════════════════
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I10 -- Docs regeneration + apply-v6 installer
+Model: claude-sonnet-4-6
+Decision: Regenerate all docs to v6 under new canonical names; ship apply-v6.*
+  as idempotent self-deleting ASCII upgrade scripts; update install.* and
+  project-init.* to v6.0 with full new file manifest (22 scenarios, 8 checks,
+  4 new skills, .sdad/audit/ scaffold).
+Rationale: Release does not close until docs match the shipped version.
+  apply-v6.* follows the established apply-vX pattern.
+Alternatives considered: in-place rename of v5 docs -- rejected (version slug
+  removal cleaner for installers and long-term navigation).
+Impact: 12 files changed. New docs: INSTALL_GUIDE, DEVELOPER_GUIDE,
+  DEVELOPER_MANUAL, ONBOARDING_PYPLAN, USAGE_AND_SHORTCUTS. Old v5 docs remain
+  as historical reference (superseded). Commit bcb28eb.
+════════════════════════════════════════════════════════

@@ -371,6 +371,7 @@ No open decisions remain. All resolved before $specout.
 | I7 | $eval audit scenarios -- deterministic report-integrity ratchet | claude-opus-4-8 | high | checks/audit-report-integrity.ps1+.sh; fixtures honest-report/ + weakened-report/ (manifest+report); eval scenario 21 | core 21/21 PASS; honest=0 / weakened caught (5 violations incl. B) on both ps1+sh | 1 P2 pre-existing (llm-smoke Start-Process broken on Windows; flagged, not fixed in I7) | 2026-06-26 |
 | I8 | Audit report template + severity reconciliation | claude-sonnet-4-6 | medium | skills/pyplan-audit/report-template.md; fixtures equiv-A/ + equiv-B/ (manifest+report); eval scenario 22 | core 22/22 PASS; both fixtures pass audit-report-integrity; identical severity fingerprint | none | 2026-06-26 |
 | I9 | CLAUDE.md v6 wiring (version 6.0, $audit, PROJECT_DOMAIN) | claude-opus-4-8 | high | CLAUDE.md (atomic, commit cf1d705) | structural assert exit 0; core 22/22 PASS | none (+35 lines vs v5.2 tag baseline, under +60 budget) | 2026-06-26 |
+| I10 | Docs regeneration + apply-v6 installer | claude-sonnet-4-6 | low | apply-v6.ps1 apply-v6.sh install.ps1 install.sh project-init.ps1 project-init.sh CHANGELOG.md docs/INSTALL_GUIDE.md docs/DEVELOPER_GUIDE.md docs/DEVELOPER_MANUAL.md docs/ONBOARDING_PYPLAN.md docs/USAGE_AND_SHORTCUTS.md (commit bcb28eb) | ASCII ratchet clean; core 22/22 PASS | none | 2026-06-26 |
 
 ---
 
