@@ -369,6 +369,8 @@ No open decisions remain. All resolved before $specout.
 | I5 | $audit command + spec-gate AUDIT_ACTIVE allowlist | claude-opus-4-8 | high | checks/spec-gate-policy.ps1+.sh (AUDIT_ACTIVE); skills/pyplan-audit/SKILL.md (+command lifecycle); eval scenario 19 | core 19/19 PASS; behavioral 5-dim report test -> I7 | none (1 LOW inherited from $docfinal sentinel trust model) | 2026-06-26 |
 | I6 | Usability sub-protocol (Tier A live / Tier B convention-only) | claude-sonnet-4-6 | medium | skills/pyplan-audit/SKILL.md (+usability section); audit/SCHEMA.md (+App Access field); fixture no-app-access/manifest.md; eval scenario 20 | core 20/20 PASS | none | 2026-06-26 |
 | I7 | $eval audit scenarios -- deterministic report-integrity ratchet | claude-opus-4-8 | high | checks/audit-report-integrity.ps1+.sh; fixtures honest-report/ + weakened-report/ (manifest+report); eval scenario 21 | core 21/21 PASS; honest=0 / weakened caught (5 violations incl. B) on both ps1+sh | 1 P2 pre-existing (llm-smoke Start-Process broken on Windows; flagged, not fixed in I7) | 2026-06-26 |
+| I8 | Audit report template + severity reconciliation | claude-sonnet-4-6 | medium | skills/pyplan-audit/report-template.md; fixtures equiv-A/ + equiv-B/ (manifest+report); eval scenario 22 | core 22/22 PASS; both fixtures pass audit-report-integrity; identical severity fingerprint | none | 2026-06-26 |
+| I9 | CLAUDE.md v6 wiring (version 6.0, $audit, PROJECT_DOMAIN) | claude-opus-4-8 | high | CLAUDE.md (atomic, commit cf1d705) | structural assert exit 0; core 22/22 PASS | none (+35 lines vs v5.2 tag baseline, under +60 budget) | 2026-06-26 |
 
 ---
 

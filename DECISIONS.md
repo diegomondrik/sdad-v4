@@ -1048,3 +1048,75 @@ QA: Layer 1 -- the check only reads text, never executes audited content. Layer 
           fixed here): llm-smoke.ps1 Start-Process launch is broken on Windows; the
           LLM release gate cannot run until the launcher is fixed.
 ════════════════════════════════════════════════════════
+
+---
+
+## Increment I8 -- audit report template + severity reconciliation (MEDIUM)
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I8 -- audit report template + severity reconciliation (MEDIUM)
+Model: claude-sonnet-4-6 . effort medium
+Decision: I8 ships the client-facing audit deliverable template
+          (.claude/skills/pyplan-audit/report-template.md): executive summary ->
+          evidence manifest -> five dimensions (1,2,3,4,5a,5b) -> prioritized
+          improvement backlog, with the BR-03 severity reconciliation table inlined
+          (CRITICAL/HIGH/MEDIUM/LOW + not-assessable) so a report is self-checkable
+          without loading the skill. Determinism is proven by two fixtures carrying
+          the SAME findings in DIFFERENT prose (equiv-A / equiv-B) + eval scenario 22
+          -- the SPEC-S8 I8 test: equivalent findings -> identical classification.
+Rationale: The template must satisfy the I7 audit-report-integrity invariants
+          mechanically (reproducibility stamp, 5a verdict line, gap surfacing).
+          Scenario 22 asserts BOTH fixtures pass the integrity check AND share an
+          identical severity fingerprint (5a verdict + per-band counts), so wording
+          cannot change the classification.
+Alternatives considered: (a) keep the severity table only in the skill -- rejected,
+          the report would not be self-contained/auditable on its own. (b) a single
+          fixture -- rejected, cannot prove wording-independence (needs an A/B pair).
+Impact: 1 template, 2 fixtures (equiv-A/B manifest+report), 1 eval scenario (22).
+          Core 22/22 PASS. No CLAUDE.md change in this increment. PROCESS NOTE: this
+          entry + the SPEC.md S13 row were recorded in the I9 record commit -- the I8
+          code commit (1d0d37e) was code-only, a deviation from the atomic
+          DECISIONS+S13+code rule, recovered here.
+QA: Layer 1 -- template + fixtures are inert text; the check only reads, never
+          executes audited content. Layer 4 -- scenario 22 ASCII clean (06 PASS).
+          No new external dependency.
+════════════════════════════════════════════════════════
+
+---
+
+## Increment I9 -- CLAUDE.md v6 wiring (HIGH)
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I9 -- CLAUDE.md v6 wiring (HIGH, FRONTIER per routing)
+Model: claude-opus-4-8 . effort high
+Decision: I9 lands all v6 methodology prose in CLAUDE.md as ONE atomic commit
+          (cf1d705): version 5.2 -> 6.0 (header AND footer bumped together, required
+          by assert-claude-md header/footer parity); PROJECT_DOMAIN in the project
+          declaration (asked in $spec, inferred in $audit, loads the matching
+          domain-* profile on-demand); $audit registered in Commands as the $docfinal
+          sibling (no Spec via .sdad/AUDIT_ACTIVE) + named in the $sdad overview;
+          three on-demand skills registered (Pyplan Audit, Business Alignment, Domain
+          Profiles); five v6 behavior rules (model-access gate, business
+          not-assessable for missing-elicitation AND missing-domain-profile,
+          domain-confidence labeling, neutral intent-vs-delivered framing,
+          PROJECT_DOMAIN on-demand load).
+Rationale: Atomic CLAUDE.md-only commit keeps the +60 line-budget edit isolated and
+          reviewable; detail pushed to the pyplan-audit / business-alignment /
+          domain-* skills per the "CLAUDE.md stays lean" [LOCK].
+Alternatives considered: (a) add CHANGELOG [6.0] here -- deferred to I10 so all doc
+          regeneration is grouped and this commit stays CLAUDE.md-only. (b) split the
+          version bump from the wiring -- rejected: the assert requires header/footer
+          to match in a single consistent state.
+Impact: CLAUDE.md only. +25 physical lines; +35 vs the v5.2 tag baseline (704),
+          under the 764 limit (assert-claude-md dynamic tag baseline). Structural
+          assert exit 0; full $eval 22/22 PASS.
+QA: Layer 2 -- version stamp header/footer parity verified by scenario 08. Layer 4 --
+          within the [LOCK] +60 line budget. No code surface. Line 675's "v5.2
+          versioning patch" left as accurate history (not a stamp the assert reads).
+════════════════════════════════════════════════════════
