@@ -722,3 +722,420 @@ Impact: .gitignore (+3 lines); project-init.ps1/.sh (hybrid scaffold + .sh ASCII
         SDAD_v6_BUILD_BRIEF.md (+Ix increment + I4/I9 notes); SPEC.md regenerated.
         $eval PASS 14/14 (golden dataset caught a §13 header regression mid-build).
 ════════════════════════════════════════════════════════
+
+---
+
+# SDAD v6.0 "Pyplan Audit Edition" -- audit lifecycle build
+
+Spec: SPEC.md (APPROVED 2026-06-26). Brief: SDAD_v6_PYPLAN_AUDIT_BRIEF.md.
+Increments I1-I10 per brief section 3.
+
+## Increment I1 -- Pyplan model access / evidence acquisition layer (hybrid)
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I1 -- evidence acquisition layer (hybrid, BR-17)
+Model: claude-opus-4-8 . effort high
+Decision: Ship I1 as protocol + schema + deterministic check + documented parser
+          STUB, NOT a .ppl parser. The .ppl binary format is unverified and no real
+          fixture exists, so a real parser would be guesswork. node-graph.json +
+          manifest.md schemas defined in .sdad/audit/SCHEMA.md; checks/audit-evidence
+          (.ps1 + .sh) validates structure deterministically (BR-04); acquire-evidence
+          (.ps1 + .sh) emits a declared not_assessable gap instead of crashing or
+          fabricating when no model can be acquired.
+Rationale: A file-based agent cannot read a server-side Pyplan model. The honest
+          minimal viable layer for a methodology repo is a validated representation
+          the auditor populates (manual / MCP read / future .ppl parse), with gaps
+          declared, not a parser written against a format we have never seen.
+Alternatives considered: (a) write a full .ppl parser now -- rejected: no format,
+          no sample; would be untested guesswork (violates epistemic honesty).
+          (b) protocol-only with no executable check -- rejected: mechanical
+          structure validation belongs in code per the Governance Axiom (BR-04).
+          Developer chose the hybrid of the two.
+Impact: NEW .sdad/audit/SCHEMA.md; checks/audit-evidence.ps1 + .sh;
+        .sdad/audit/lib/acquire-evidence.ps1 + .sh; 2 fixtures under
+        .sdad/audit/_fixtures/; eval scenario 15-audit-evidence-schema.
+        SPEC.md: BR-16 (I2 is extend-not-build -- brief was factually wrong, skill
+        exists on main at v4.2/200 lines), BR-17 (hybrid I1), I1/I2 notes, typed
+        s13 fixed to 8 columns. $eval core 15/15 PASS (caught the s13 regression).
+        No CLAUDE.md change (v6 wiring deferred to I9 per plan).
+QA: Layer 1 low-confidence -- quoted project name could break JSON interpolation,
+        but fails safe (validator rejects). Layer 4 should-improve -- eval 15 covers
+        only the PS path; .sh mirrors untested (strengthen in I7).
+════════════════════════════════════════════════════════
+
+Build discoveries logged this increment:
+- BR-16: pyplan-mcp skill is NOT missing. Brief I2 claim ("absent from main, no other
+  branches, must be built") is false: skill exists on main (200 lines, v4.2, commit
+  6a6f233), and 6 branches exist. I2 downgraded HIGH->MEDIUM, rescoped to "extend".
+- BR-17: .ppl format unverified + no sample -> I1 hybrid (stub parser, not real parser).
+
+## Increment I2 -- Extend pyplan-mcp skill (read-access role + audit framing)
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I2 -- extend pyplan-mcp (rescoped MEDIUM per BR-16)
+Model: claude-opus-4-8 . effort high
+Decision: I2 EXTENDS the existing v4.2 pyplan-mcp skill (it was not missing -- BR-16),
+          adding two sections: (1) MCP read-access as evidence acquisition path (b)
+          for $audit/I1, and (2) auditing exposed @mcp_tool nodes in $audit producer
+          context with the BR-03 severity mapping. The mechanical detections are
+          mechanized in .sdad/audit/lib/mcp_lint.py (Python AST), wrapped by
+          checks/mcp-tool-audit (.ps1 + .sh, python-or-skip).
+Rationale: The brief's "build the missing skill" was wrong (BR-16). The real gap was
+          the read-access role and an audit-context detector. AST over regex because
+          Pyplan nodes are Python -- the detections are real (untyped param, called
+          result, non-serializable return), not pattern guesses. Per BR-04 the
+          mechanical findings are a check; token-logging and scope-creep stay with
+          the auditor (need the node logic + the SS-D contract).
+Alternatives considered: (a) regex linter -- rejected: brittle, false negatives on
+          multiline signatures. (b) make python a hard pre-commit dependency --
+          rejected: the wrapper NOTE-skips when python is absent (CI safety); on a
+          Pyplan dev machine python is present and the lint really runs.
+Impact: pyplan/mcp/SKILL.md (+2 sections, header/footer -> v6); mcp_lint.py;
+        checks/mcp-tool-audit.ps1 + .sh; mcp_clean.py + mcp_defects.py fixtures;
+        eval scenario 16-mcp-tool-audit. $eval core 16/16 PASS.
+QA: Layer 1 -- lint uses ast.parse (no execution of audited node code). Layer 4 --
+        non-serializable-return is heuristic, labeled confidence: medium.
+════════════════════════════════════════════════════════
+
+## Increment I3 -- Business dimension (alignment core + domain profiles)
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I3 -- business dimension (HIGH)
+Model: claude-opus-4-8 . effort high
+Decision: I3 ships the business dimension as a domain-agnostic core skill
+          (business-alignment, I3a) plus two checklist-level domain profiles
+          (domain-finance, domain-supply-chain, I3b). business-alignment owns the
+          three alignment checks (measurable objective, traceable rules, value-vs-
+          cost), the elicitation gate (BR-09: no input -> not-assessable, never
+          fabricate), and confidence labelling (BR-10). Domain profiles supply the
+          domain-correctness layer (5b): KPIs, formulas, trap assumptions, red flags
+          (BR-05). A synthetic finance fixture (finance-double-count.node-graph.json)
+          carries a planted consolidation double-count, replicated as the worked
+          example in domain-finance so I7 LLM smoke can assert the catch.
+Rationale: Separation of concerns -- alignment (does the model serve the goal?) is
+          domain-agnostic and lives in one skill; domain correctness (is THIS the
+          right COGS/safety-stock formula?) is per-domain and lives in profiles
+          loaded by PROJECT_DOMAIN. Checklist depth (BR-05), not full methodology:
+          enough to catch the canonical traps, explicit not-assessable everywhere
+          input is missing (BR-06/07/09). The COGS/inventory seam is encoded
+          reciprocally in both profiles so a multi-domain model flags it once.
+Alternatives considered: (a) fold domain checks into business-alignment -- rejected:
+          would force a domain-specific skill to load on every alignment check and
+          bloat past checklist level. (b) build all six domains now -- rejected per
+          BR-06: finance + supply-chain are the v6 starter set; the rest are
+          not-assessable until a profile exists (creation path BR-08, fires in $build
+          via the data-delta pause pattern, never mid-audit fabrication).
+Impact: 3 new skills under .claude/skills/ (business-alignment, domain-finance,
+        domain-supply-chain); 1 synthetic fixture under .sdad/audit/_fixtures/.
+        Per test-scope decision (developer 2026-06-26): deterministic coverage =
+        fixture validates against checks/audit-evidence + core stays 16/16;
+        behavioral tests (catch the double-count, multi-domain seam) deferred to
+        llm-smoke/I7 (audit eval scenarios). No CLAUDE.md change (v6 wiring -> I9).
+QA: Layer 1 -- fixture is synthetic, no tokens/credentials/PII. Layer 2 -- skills
+        follow the on-demand SKILL.md format; cross-links resolve. Note (not a
+        finding): business-alignment references $audit, wired in I5 -- forward
+        reference by design. eval core 16/16 PASS; fixture audit-evidence exit 0.
+════════════════════════════════════════════════════════
+
+## Increment I4 -- pyplan-audit orchestrator (five-dimension model) + ratchet checks
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I4 -- pyplan-audit orchestrator (HIGH, scoped I4-full per developer 2026-06-26)
+Model: claude-opus-4-8 . effort high
+Decision: I4 ships the audit engine as a COMPOSITION orchestrator
+          (.claude/skills/pyplan-audit/SKILL.md) that defines the five-dimension
+          model (1 dev/arch, 2 security, 3 usability, 4 quality, 5 business ->
+          5a alignment + 5b domain) and maps each dimension to EXISTING skills/
+          agents -- it owns no detection logic of its own. Adds the business-analyst
+          agent (5a, elicitation-fed, BR-09 gate) orchestrated via agent-run, and
+          the two mechanical ratchet checks that had no home in the post-I3 plan:
+          missing-result-assign and circular-deps (.ps1 authoritative + .sh
+          python-or-skip mirror), each with a defect fixture and eval scenario
+          (17, 18). The orchestrator consumes all four ratchets (audit-evidence,
+          mcp-tool-audit, + the two new) as pre-computed evidence (BR-04).
+Rationale: Composition over rewrite -- when a composed skill improves, the audit
+          improves for free, no duplication. The mechanical checks belong in
+          checks/ per BR-04 (the LLM auditor never re-detects what a ratchet covers
+          deterministically); I4-full gave them a home rather than leaving two
+          SPEC-S5 checks orphaned. Severity reconciliation contract defined here;
+          full report template deferred to I8. not-assessable everywhere evidence/
+          elicitation/profile is missing (epistemic honesty), never fabricate.
+Alternatives considered: (a) I4-core (orchestrator only), defer the 2 checks --
+          rejected: no later increment owned them and the orchestrator needs them
+          as evidence on day one. (b) fold detection into the orchestrator skill --
+          rejected: duplicates pyplan-qa-platform + the agents, breaks the
+          "improves for free" property. (c) make python a hard dep for the .sh
+          checks -- rejected: NOTE-skip when python absent (CI safety), real run on
+          the Pyplan dev machine.
+Impact: 1 new skill (pyplan-audit), 1 new agent (business-analyst), 2 new checks
+          (missing-result-assign, circular-deps; .ps1+.sh), 2 defect fixtures, 2
+          eval scenarios. eval core 18/18 PASS. No CLAUDE.md change (v6 wiring ->
+          I5/I9). $audit command + spec-gate allowlist -> I5.
+QA: Layer 1 -- checks parse JSON only, never execute audited node code (no eval/
+          Invoke-Expression); fixtures synthetic, no secrets. Layer 4 -- scenario
+          array-match bug (Write-Host output captured as array) fixed with
+          Out-String before -match. All 12 composition references resolve to real
+          files.
+════════════════════════════════════════════════════════
+
+---
+
+## Increment I5 -- $audit command + spec-gate AUDIT_ACTIVE allowlist
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I5 -- $audit command + spec-gate allowlist (HIGH, closes the methodology surface)
+Model: claude-opus-4-8 . effort high
+Decision: I5 makes $audit a real command -- a SIBLING of $docfinal that runs
+          WITHOUT an approved SPEC.md. (1) Spec-gate: the .sdad/AUDIT_ACTIVE
+          sentinel is added to the shared policy modules (checks/spec-gate-policy
+          .ps1 + .sh), mirroring DOCFINAL_ACTIVE; this single source of truth is
+          consumed by both the local PreToolUse hook and the CI gate, so no hook
+          edit is needed. (2) The $audit command lifecycle (modes, sentinel
+          create/remove discipline, pre-audit ingestion order: evidence I1 ->
+          declared-intent via markitdown -> domain confirm -> elicitation, then the
+          five-dimension run + reconciliation + neutral report) is documented in the
+          pyplan-audit skill -- the orchestrator that already auto-activates on
+          $audit -- NOT in CLAUDE.md. (3) eval scenario 19 (gate-allow-audit)
+          mirrors scenario 04: AUDIT_ACTIVE sentinel allows a code write with no
+          SPEC.md.
+Rationale: The skill auto-activates on $audit regardless of CLAUDE.md, so the
+          command works before the CLAUDE.md text lands. Putting the lifecycle in
+          the (on-demand) skill keeps it off the CLAUDE.md +60 line budget, per the
+          "voluminous -> on-demand skills" [LOCK]. Editing the policy modules (clean
+          files) rather than the hook keeps the session-start pre-modified hook out
+          of the commit, and keeps local + CI enforcement on one source of truth.
+Alternatives considered: (a) register $audit in CLAUDE.md Commands/$sdad now --
+          DEFERRED to I9 (developer decision 2026-06-26) so the whole v6 CLAUDE.md
+          wiring is one atomic edit against the line budget. (b) a separate command
+          skill distinct from pyplan-audit -- rejected: pyplan-audit is already
+          "the engine behind the $audit command"; a second skill would split the
+          lifecycle from the orchestration it drives. (c) edit the spec-gate hook
+          for the allowlist -- rejected: the hook is a thin adapter; the decision
+          logic lives in the policy module (the actual single source of truth).
+Impact: 2 policy modules edited (spec-gate-policy.ps1 + .sh, +2 lines each), 1 skill
+          extended (pyplan-audit, +command lifecycle section, on-demand -- no
+          CLAUDE.md cost), 1 new eval scenario (19). eval core 19/19 PASS. No
+          CLAUDE.md change (deferred to I9). .sdad/AUDIT_ACTIVE needs no .gitignore
+          change -- .sdad/* is already ignored (runtime state, never committed).
+QA: Layer 1 (Security) -- the AUDIT_ACTIVE sentinel reuses the EXACT trust model
+          of DOCFINAL_ACTIVE: it only lifts the no-Spec block, grants no other
+          allowance; security/compliance fixes still need explicit approval. Known
+          inherited property (NOT introduced by I5, LOW): a forced-committed
+          .sdad/AUDIT_ACTIVE could pass the CI spec-gate in the PR checkout, exactly
+          as DOCFINAL_ACTIVE could; L-05 hardening protects the policy LOGIC (trusted
+          base ref), not sentinel presence. Accepted at $docfinal; mirrored
+          faithfully. Layer 2 -- single source of truth respected (policy module not
+          hook); .ps1/.sh mirrored. Layer 4 -- ASCII clean (scenario 06 PASS); skill
+          section cross-references BR-14 + the policy file paths.
+════════════════════════════════════════════════════════
+
+---
+
+## Increment I6 -- Usability sub-protocol (live walkthrough + convention-only Tier B)
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I6 -- Usability sub-protocol (MEDIUM)
+Model: claude-sonnet-4-6 . effort medium
+Decision: Usability (dimension 3) gets an explicit two-tier sub-protocol in the
+          pyplan-audit skill. Tier A (live app accessible): walkthrough of user
+          flows, per-interface rendering check, screenshot/description evidence.
+          Tier B (app NOT accessible, BR-12): declare limitation with exact wording
+          "convention-only -- live walkthrough not performed", run structural proxies
+          only (node-ids, input validation metadata, dead interface nodes), cap all
+          findings at MEDIUM severity. The manifest.md gains a required `App Access:
+          true | false` field (SCHEMA.md section 4 extended); absence = gap.
+          Fixture no-app-access/manifest.md exercises Tier B. Eval scenario 20 is
+          a static contract check: SKILL.md must contain "convention-only",
+          "live walkthrough not performed", and "App Access"; fixture must declare
+          "App Access: false" and "convention-only".
+Rationale: Without a Tier B path, an auditor missing app access would either halt
+          the whole audit or silently omit usability. Both are wrong. The two-tier
+          model ensures usability is ALWAYS reported -- either fully or with an
+          explicit, actionable limitation declaration. The MEDIUM severity cap for
+          Tier B prevents false CRITICALs from structural proxies that are not
+          observed behavior (epistemic honesty, same principle as BR-09/BR-10).
+Alternatives considered: (a) mark usability "not assessable" when no app --
+          rejected: structural proxies do add value; "not assessable" would be
+          a silent skip disguised as honest, which is worse. (b) no severity cap --
+          rejected: a convention-compliance finding is inherently lower-confidence
+          than observed behavior; capping at MEDIUM preserves the trust model.
+Impact: 1 skill extended (pyplan-audit, +usability section), 1 schema updated
+          (SCHEMA.md +App Access field), 1 new fixture (no-app-access/manifest.md),
+          1 new eval scenario (20). Core 20/20 PASS. No CLAUDE.md change.
+QA: Layer 1 -- no security surface (skill doc only). Layer 4 -- ASCII clean
+          (scenario 06 PASS); Tier B severity cap prevents false P0/P1 from
+          convention-only proxies. Layer 5 -- usability sub-protocol distinguishes
+          Tier A (observed) from Tier B (structural), consistent with the
+          not-assessable rule (BR-12 explicitly documents the limitation).
+════════════════════════════════════════════════════════
+
+---
+
+## Increment I7 -- $eval audit scenarios (deterministic report-integrity ratchet)
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I7 -- $eval audit scenarios (MEDIUM; built at FRONTIER per routing)
+Model: claude-opus-4-8 . effort high
+Decision: I7 ships the deterministic core of the audit golden-dataset: a
+          report-integrity ratchet (checks/audit-report-integrity.ps1 authoritative
+          + .sh mirror) that catches a DELIBERATELY WEAKENED audit report -- the
+          literal SPEC-S8 I7 test. It enforces three integrity invariants over a
+          (report.md + manifest.md) pair:
+            A. reproducibility stamp present (BR-13: SDAD version + exact model);
+            B. no fabricated business-alignment (5a) finding when the manifest
+               declares no elicitation (BR-09);
+            C. every not_assessable gap area surfaced in the report (no silent skip).
+          Two fixtures: honest-report (passes, exit 0) and weakened-report (caught,
+          exit 1 with 5 violations incl. the B fabrication). Eval scenario 21 asserts
+          both. This mechanizes brief I7 (b) not-assessable honesty and (c) evidence-
+          gap surfacing per BR-04.
+Rationale: The §8 I7 test ("runner catches a deliberately weakened audit") and the
+          §10 DoD ("v5 core + new audit scenarios -> clean pass") are fully met
+          deterministically and verified now (core 21/21, ps1+sh parity confirmed in
+          Git Bash). A deterministic ratchet is a reliable regression gate; a flaky
+          LLM gate is not.
+Scope call (honest coverage over false confidence): the LLM-judgment behavioral
+          items (catch the intercompany double-count, the multi-domain COGS seam,
+          multi-dimension severity) are NOT mechanizable and were NOT shipped as
+          llm-smoke scenarios this increment, because:
+            1. an empirical attempt revealed the EXISTING llm-smoke.ps1 release gate
+               is BROKEN on Windows -- Start-Process -FilePath "claude" cannot launch
+               the npm shim (claude resolves to claude.ps1, an ExternalScript;
+               "%1 is not a valid Win32 application"). This is a pre-existing v5-I3
+               defect, not an I7 regression; the gate has never run on this machine.
+            2. shipping an unverifiable, flaky LLM gate would create false confidence.
+          The behavioral coverage remains the auditor's runtime job, backed by the
+          I3 domain-* skills + the finance-double-count fixture. Recommended follow-up
+          (separate task): fix the llm-smoke launcher cross-platform (Win shim vs
+          Unix binary), THEN add audit behavioral scenarios as a working release gate.
+Alternatives considered: (a) add llm-smoke audit scenarios now -- rejected: the gate
+          is broken on Windows and the scenarios could not be verified (false
+          confidence). (b) fix the llm-smoke launcher inline in I7 -- rejected: scope
+          creep into pre-existing v5 infra + needs its own cross-platform testing; the
+          file is also in the session-start EOL-only modified set. Flagged for a
+          dedicated increment instead.
+Impact: 1 new check (audit-report-integrity, .ps1+.sh), 2 fixtures (honest + weakened
+          report dirs), 1 eval scenario (21). Core 21/21 PASS. No CLAUDE.md change.
+          Two bugs found and fixed DURING this increment's own check authoring:
+          (1) elicitation-none regex broke on markdown bold ("**Elicitation:** none")
+              -> Rule B silently skipped; fixed to tolerate non-alphanumerics.
+          (2) .sh Rule C used tr -d '[:space:]' which ate the newline separator and
+              concatenated gap areas; fixed to tr -d '[:blank:]'.
+QA: Layer 1 -- the check only reads text, never executes audited content. Layer 2 --
+          ps1 authoritative + sh mirror, parity verified on both fixtures in Git Bash.
+          Layer 4 -- ASCII clean (scenario 06 PASS). FINDING (P2, pre-existing, NOT
+          fixed here): llm-smoke.ps1 Start-Process launch is broken on Windows; the
+          LLM release gate cannot run until the launcher is fixed.
+════════════════════════════════════════════════════════
+
+---
+
+## Increment I8 -- audit report template + severity reconciliation (MEDIUM)
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I8 -- audit report template + severity reconciliation (MEDIUM)
+Model: claude-sonnet-4-6 . effort medium
+Decision: I8 ships the client-facing audit deliverable template
+          (.claude/skills/pyplan-audit/report-template.md): executive summary ->
+          evidence manifest -> five dimensions (1,2,3,4,5a,5b) -> prioritized
+          improvement backlog, with the BR-03 severity reconciliation table inlined
+          (CRITICAL/HIGH/MEDIUM/LOW + not-assessable) so a report is self-checkable
+          without loading the skill. Determinism is proven by two fixtures carrying
+          the SAME findings in DIFFERENT prose (equiv-A / equiv-B) + eval scenario 22
+          -- the SPEC-S8 I8 test: equivalent findings -> identical classification.
+Rationale: The template must satisfy the I7 audit-report-integrity invariants
+          mechanically (reproducibility stamp, 5a verdict line, gap surfacing).
+          Scenario 22 asserts BOTH fixtures pass the integrity check AND share an
+          identical severity fingerprint (5a verdict + per-band counts), so wording
+          cannot change the classification.
+Alternatives considered: (a) keep the severity table only in the skill -- rejected,
+          the report would not be self-contained/auditable on its own. (b) a single
+          fixture -- rejected, cannot prove wording-independence (needs an A/B pair).
+Impact: 1 template, 2 fixtures (equiv-A/B manifest+report), 1 eval scenario (22).
+          Core 22/22 PASS. No CLAUDE.md change in this increment. PROCESS NOTE: this
+          entry + the SPEC.md S13 row were recorded in the I9 record commit -- the I8
+          code commit (1d0d37e) was code-only, a deviation from the atomic
+          DECISIONS+S13+code rule, recovered here.
+QA: Layer 1 -- template + fixtures are inert text; the check only reads, never
+          executes audited content. Layer 4 -- scenario 22 ASCII clean (06 PASS).
+          No new external dependency.
+════════════════════════════════════════════════════════
+
+---
+
+## Increment I9 -- CLAUDE.md v6 wiring (HIGH)
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I9 -- CLAUDE.md v6 wiring (HIGH, FRONTIER per routing)
+Model: claude-opus-4-8 . effort high
+Decision: I9 lands all v6 methodology prose in CLAUDE.md as ONE atomic commit
+          (cf1d705): version 5.2 -> 6.0 (header AND footer bumped together, required
+          by assert-claude-md header/footer parity); PROJECT_DOMAIN in the project
+          declaration (asked in $spec, inferred in $audit, loads the matching
+          domain-* profile on-demand); $audit registered in Commands as the $docfinal
+          sibling (no Spec via .sdad/AUDIT_ACTIVE) + named in the $sdad overview;
+          three on-demand skills registered (Pyplan Audit, Business Alignment, Domain
+          Profiles); five v6 behavior rules (model-access gate, business
+          not-assessable for missing-elicitation AND missing-domain-profile,
+          domain-confidence labeling, neutral intent-vs-delivered framing,
+          PROJECT_DOMAIN on-demand load).
+Rationale: Atomic CLAUDE.md-only commit keeps the +60 line-budget edit isolated and
+          reviewable; detail pushed to the pyplan-audit / business-alignment /
+          domain-* skills per the "CLAUDE.md stays lean" [LOCK].
+Alternatives considered: (a) add CHANGELOG [6.0] here -- deferred to I10 so all doc
+          regeneration is grouped and this commit stays CLAUDE.md-only. (b) split the
+          version bump from the wiring -- rejected: the assert requires header/footer
+          to match in a single consistent state.
+Impact: CLAUDE.md only. +25 physical lines; +35 vs the v5.2 tag baseline (704),
+          under the 764 limit (assert-claude-md dynamic tag baseline). Structural
+          assert exit 0; full $eval 22/22 PASS.
+QA: Layer 2 -- version stamp header/footer parity verified by scenario 08. Layer 4 --
+          within the [LOCK] +60 line budget. No code surface. Line 675's "v5.2
+          versioning patch" left as accurate history (not a stamp the assert reads).
+════════════════════════════════════════════════════════
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I10 -- Docs regeneration + apply-v6 installer
+Model: claude-sonnet-4-6
+Decision: Regenerate all docs to v6 under new canonical names; ship apply-v6.*
+  as idempotent self-deleting ASCII upgrade scripts; update install.* and
+  project-init.* to v6.0 with full new file manifest (22 scenarios, 8 checks,
+  4 new skills, .sdad/audit/ scaffold).
+Rationale: Release does not close until docs match the shipped version.
+  apply-v6.* follows the established apply-vX pattern.
+Alternatives considered: in-place rename of v5 docs -- rejected (version slug
+  removal cleaner for installers and long-term navigation).
+Impact: 12 files changed. New docs: INSTALL_GUIDE, DEVELOPER_GUIDE,
+  DEVELOPER_MANUAL, ONBOARDING_PYPLAN, USAGE_AND_SHORTCUTS. Old v5 docs remain
+  as historical reference (superseded). Commit bcb28eb.
+════════════════════════════════════════════════════════

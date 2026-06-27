@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# SDAD v5.2 -- Installer for Mac / Linux
+# SDAD v6.0 -- Installer for Mac / Linux
 # Spec-Driven AI Development -- G7 AI Development Methodology
-# Version: 5.2 | 2026
+# Version: 6.0 | 2026
 #
 # L-01 rule: this file is pure ASCII -- no em-dashes, accents, arrows, or section
 # symbols. Windows PowerShell 5.1 and some POSIX shells misread non-ASCII bytes
@@ -22,7 +22,7 @@ NC='\033[0m'
 
 echo ""
 echo "============================================"
-echo "  SDAD v5.2 -- Installer"
+echo "  SDAD v6.0 -- Installer"
 echo "============================================"
 echo ""
 
@@ -83,6 +83,10 @@ mkdir -p \
     .claude/skills/pyplan/qa-platform \
     .claude/skills/pyplan/spec-context \
     .claude/skills/pyplan/mcp \
+    .claude/skills/pyplan-audit \
+    .claude/skills/business-alignment \
+    .claude/skills/domain-finance \
+    .claude/skills/domain-supply-chain \
     .claude/skills/decision-architecture \
     .claude/skills/data-discovery \
     .claude/skills/dev-setup \
@@ -97,7 +101,8 @@ mkdir -p \
     .claude/hooks \
     checks \
     .sdad/lib \
-    .sdad/eval
+    .sdad/eval \
+    .sdad/audit/lib
 
 echo -e "${GREEN}  OK     Folder structure created${NC}"
 
@@ -129,6 +134,11 @@ download_skill ".claude/skills/pyplan/interfaces/SKILL.md"
 download_skill ".claude/skills/pyplan/qa-platform/SKILL.md"
 download_skill ".claude/skills/pyplan/spec-context/SKILL.md"
 download_skill ".claude/skills/pyplan/mcp/SKILL.md"
+download_skill ".claude/skills/pyplan-audit/SKILL.md"
+download_skill ".claude/skills/pyplan-audit/report-template.md"
+download_skill ".claude/skills/business-alignment/SKILL.md"
+download_skill ".claude/skills/domain-finance/SKILL.md"
+download_skill ".claude/skills/domain-supply-chain/SKILL.md"
 download_skill ".claude/skills/decision-architecture/SKILL.md"
 download_skill ".claude/skills/data-discovery/SKILL.md"
 download_skill ".claude/skills/dev-setup/SKILL.md"
@@ -156,21 +166,43 @@ download_skill ".claude/hooks/pre-tool-use-spec-gate.ps1"
 download_skill ".claude/hooks/pre-tool-use-spec-gate.sh"
 chmod +x .claude/hooks/*.sh 2>/dev/null
 
-# v5 harness layer: lesson ratchet, $agent wrapper, $eval golden-dataset seed
+# Harness layer: lesson ratchet, agent wrapper, audit library, eval golden dataset
 download_skill "checks/ascii-ps1.ps1"
 download_skill "checks/ascii-ps1.sh"
+# v6 ratchet checks
+download_skill "checks/audit-evidence.ps1"
+download_skill "checks/audit-evidence.sh"
+download_skill "checks/mcp-tool-audit.ps1"
+download_skill "checks/mcp-tool-audit.sh"
+download_skill "checks/missing-result-assign.ps1"
+download_skill "checks/missing-result-assign.sh"
+download_skill "checks/circular-deps.ps1"
+download_skill "checks/circular-deps.sh"
+download_skill "checks/spec-gate-policy.ps1"
+download_skill "checks/spec-gate-policy.sh"
+download_skill "checks/audit-report-integrity.ps1"
+download_skill "checks/audit-report-integrity.sh"
 download_skill ".sdad/lib/agent-run.ps1"
 download_skill ".sdad/lib/agent-run.sh"
+# $audit evidence library
+download_skill ".sdad/audit/lib/acquire-evidence.ps1"
+download_skill ".sdad/audit/lib/acquire-evidence.sh"
+download_skill ".sdad/audit/SCHEMA.md"
 download_skill ".sdad/eval/run-eval.ps1"
 download_skill ".sdad/eval/llm-smoke.ps1"
 download_skill ".sdad/eval/lib/assert-claude-md.ps1"
+# 22 eval scenarios
 for n in 01-gate-deny-no-spec 02-gate-allow-approved 03-gate-allow-docs \
          04-gate-allow-docfinal 05-gate-fail-open 06-ascii-check \
          07-precommit-blocks 08-claude-md-structural 09-eval-detects-regression \
-         10-agent-timeout 11-typed-section13 12-hold-autocommit; do
+         10-agent-timeout 11-typed-section13 12-hold-autocommit \
+         13-claude-md-case 14-ci-spec-gate-policy 15-audit-evidence-schema \
+         16-mcp-tool-audit 17-missing-result-assign 18-circular-deps \
+         19-gate-allow-audit 20-audit-usability-no-app \
+         21-audit-report-integrity 22-severity-determinism; do
     download_skill ".sdad/eval/scenarios/$n/run.ps1"
 done
-chmod +x checks/*.sh .sdad/lib/*.sh 2>/dev/null
+chmod +x checks/*.sh .sdad/lib/*.sh .sdad/audit/lib/*.sh 2>/dev/null
 
 # git pre-commit ratchet -- .git/hooks is not versioned by git, so write inline.
 GIT_DIR=$(git rev-parse --git-dir 2>/dev/null || true)
@@ -262,13 +294,13 @@ fi
 # .gitignore
 if [ -f ".gitignore" ]; then
     if ! grep -q "SDAD v" .gitignore 2>/dev/null; then
-        printf "\n# SDAD v5.2\n.claude/.session_tmp\n.sdad/agent_output.tmp\n.sdad/gate.log\n*.tmp\n" >> .gitignore
+        printf "\n# SDAD v6.0\n.claude/.session_tmp\n.sdad/agent_output.tmp\n.sdad/gate.log\n.sdad/AUDIT_ACTIVE\n.sdad/HOLD_AUTOCOMMIT\n*.tmp\n" >> .gitignore
         echo -e "${GREEN}  OK     .gitignore updated${NC}"
     else
         echo -e "${CYAN}  SKIP   .gitignore already has SDAD entries${NC}"
     fi
 else
-    printf "# SDAD v5.2\n.claude/.session_tmp\n.sdad/agent_output.tmp\n.sdad/gate.log\n*.tmp\n" > .gitignore
+    printf "# SDAD v6.0\n.claude/.session_tmp\n.sdad/agent_output.tmp\n.sdad/gate.log\n.sdad/AUDIT_ACTIVE\n.sdad/HOLD_AUTOCOMMIT\n*.tmp\n" > .gitignore
     echo -e "${GREEN}  OK     .gitignore created${NC}"
 fi
 
@@ -295,21 +327,22 @@ echo ""
 echo -e "${YELLOW}[ 7/7 ] Installation complete${NC}"
 echo ""
 echo -e "${GREEN}============================================${NC}"
-echo -e "${GREEN}  SDAD v5.2 installed successfully${NC}"
+echo -e "${GREEN}  SDAD v6.0 installed successfully${NC}"
 echo -e "${GREEN}============================================${NC}"
 echo ""
 echo "Files installed:"
-echo "  CLAUDE.md                                -- core instructions (v5.2)"
-echo "  .claude/skills/                          -- AI Architect, AI Engineer, harness + on-demand skills"
+echo "  CLAUDE.md                                -- core instructions (v6.0)"
+echo "  .claude/skills/                          -- all skills including v6 audit + domain profiles"
 echo "  .claude/agents/                          -- code-reviewer, security-auditor, test-generator + HANDOFF"
 echo "  .claude/hooks/                           -- session hooks + PreToolUse spec-gate (.sh + .ps1)"
 echo "  .claude/settings.json                    -- hook registration (if new)"
-echo "  checks/ascii-ps1                          -- lesson-to-guardrail ratchet (L-01, .ps1 + .sh)"
-echo "  .git/hooks/pre-commit                     -- ASCII ratchet hard stop"
-echo "  .sdad/lib/agent-run                       -- \$agent liveness wrapper (600s timeout)"
-echo "  .sdad/eval/                               -- \$eval golden dataset + runner"
+echo "  checks/                                  -- ratchets: ascii-ps1 + v6 audit/mcp/node-graph (8 checks)"
+echo "  .git/hooks/pre-commit                    -- ASCII ratchet hard stop"
+echo "  .sdad/lib/agent-run                      -- \$agent liveness wrapper (600s timeout)"
+echo "  .sdad/audit/                             -- evidence + report workspace for \$audit"
+echo "  .sdad/eval/                              -- \$eval golden dataset + runner (22 scenarios)"
 echo "  Pyplan MCP                               -- registered globally (dev.pyplan.com)"
-echo "  SPEC.md / LESSON_LIBRARY.md               -- blank templates (if new)"
+echo "  SPEC.md / LESSON_LIBRARY.md              -- blank templates (if new)"
 echo ""
 echo -e "${CYAN}Next step:${NC}"
 echo "  Start Claude Code: claude"

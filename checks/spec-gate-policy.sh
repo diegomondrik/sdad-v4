@@ -38,6 +38,9 @@ esac
 # $docfinal legitimately runs without a Spec (sentinel file)
 [ -f "$proj_norm/.sdad/DOCFINAL_ACTIVE" ] && exit 0
 
+# $audit also runs without a Spec (sentinel file, mirrors $docfinal -- BR-14)
+[ -f "$proj_norm/.sdad/AUDIT_ACTIVE" ] && exit 0
+
 # R2 code-file denylist; unknown extensions default to allow
 case "$rel_low" in
   *.py|*.js|*.ts|*.jsx|*.tsx|*.ps1|*.psm1|*.sh|*.bat|*.cmd|*.sql|*.html|*.css|*.json|*.yaml|*.yml|*.toml|*.ini|*.cs|*.java|*.go|*.rs|*.rb|*.php) ;;

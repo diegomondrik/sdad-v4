@@ -6,6 +6,13 @@ mcp.json
 .sdad/*
 !.sdad/eval/
 !.sdad/lib/
+# .sdad/audit/ (v6): methodology parts (schema, parser stub, fixtures) are versioned;
+# per-project audit output (.sdad/audit/<project>/) is runtime client state, stays ignored.
+!.sdad/audit/
+.sdad/audit/*
+!.sdad/audit/SCHEMA.md
+!.sdad/audit/lib/
+!.sdad/audit/_fixtures/
 # Pyplan model snapshots are versioned: the .ppl backup of the model after each
 # Build-via-AI increment (Pyplan projects only). See SPEC SDAD v5.2 versioning patch.
 !.sdad/pyplan-snapshots/

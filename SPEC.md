@@ -1,232 +1,359 @@
-# SPEC — SDAD v5.2 Pyplan Model Versioning Patch
+# SPEC — SDAD v6.0 Pyplan Audit Edition
 
-> SPEC STATUS: APPROVED (2026-06-25, developer: Diego Mondrik)
+> SPEC STATUS: APPROVED (2026-06-26, developer: Diego Mondrik)
 > Project: SDAD methodology repo (self-referential — SDAD builds SDAD)
 > Tier: 2 Business · Platform: generic · PROJECT_LANGUAGE: es (interaction) / en (documents)
-> Date: 2026-06-25 · Developer: Diego Mondrik
-> Input: SDAD_pyplan_versioning_brief.md (sections 0-6) + $spec anchor validation 2026-06-25
-> Predecessor: v5.1 "CI Foundation" (preserved in git history; v5.0 at tag v5.0)
-> Version impact: NONE — behavior patch to v5.2, no version bump.
+> Date: 2026-06-26 · Developer: Diego Mondrik
+> Input: SDAD_v6_PYPLAN_AUDIT_BRIEF.md (2026-06-26) + $spec Q&A session 2026-06-26
+> Predecessor: v5.2 "Pyplan Model Versioning Patch" (preserved in git history)
+> Version: 6.0 — "Pyplan Audit Edition"
 
 ---
 
 ## §1 Vision & Objective
 
-When working with Pyplan MCP, SDAD manages two separate state layers. **Methodology
-state** (SPEC.md, DECISIONS.md, LESSON_LIBRARY.md) is versioned in git by the SessionEnd
-hook — well covered. **Pyplan application state** (nodes, interfaces, model logic) lives
-in Pyplan's cloud workspace, is modified directly by the MCP, and is NOT in git.
+SDAD v5 can build a Pyplan model correctly but has no first-class way to judge one it did
+not build, and no specialist for business value and alignment — only technical and delivery
+roles. As a result, audits of existing client Pyplan implementations require manual judgment
+outside the methodology, with no repeatable structure, no evidence trail, and no client-ready
+deliverable.
 
-The gap: after a Build-via-AI increment, git holds the *record* of the change
-(DECISIONS.md, §13) but not the *artifact* (the model itself). If the Pyplan workspace is
-corrupted or lost, there is no recovery path from the repo.
+v6 adds three capabilities to the v5 harness — additive, backward-compatible, ships before v7:
 
-The fix is a single convention: export the Pyplan model after each Build-via-AI increment
-and commit the `.ppl` export alongside DECISIONS.md. The committed `.ppl` files become the
-local backup and the model's version history. No GitHub required — local git commits are
-sufficient for recovery; a remote (if configured) is a second copy.
+1. **`$audit` lifecycle** — a standalone command for auditing existing Pyplan models. Sibling
+   of `$docfinal` (which documents retroactively; `$audit` judges and recommends). Delivers a
+   five-dimension, client-facing audit report with a declared evidence manifest.
 
-This is a behavior patch to SDAD v5.2 — it does not bump the version number.
+2. **Business dimension** — a `business-alignment` skill (I3a) shared by `$build` and `$audit`
+   that enforces measurable objectives and traceable business rules, plus a domain-profile
+   library (I3b) that makes domain correctness assessable where a profile exists and explicitly
+   not-assessable where it does not. Starter profiles: `domain-finance` (FP&A) and
+   `domain-supply-chain`.
+
+3. **`pyplan-mcp` skill** — closes a documented gap: CLAUDE.md references the skill in
+   multiple sections but it does not exist. Covers `@mcp_tool` producer rules and MCP read-access
+   for the evidence acquisition layer.
+
+**Measurable success criteria (DoD-linked):**
+- `$audit` on a fixture → five-dimension report + evidence manifest, no Spec required.
+- `$eval` v5 core + new audit scenarios → clean pass on final v6 state.
+- No documentation file left at v4/v4.3/v5.
+- CLAUDE.md within +60-line net budget; version and footer = 6.0.
 
 ---
 
 ## §2 Users & Roles
 
-| Role | Description | Access |
-|------|-------------|--------|
-| SDAD developer (Pyplan project) | Runs Build-via-AI increments against a Pyplan instance; exports and commits the model snapshot per increment | Full repo + Pyplan workspace |
-| SDAD maintainer (this repo) | Applies this patch to the methodology artefacts | Full repo |
-
-The patch changes methodology behavior only — no end-user-facing software surface.
+| Role | Description | Interaction with v6 |
+|------|-------------|---------------------|
+| SDAD developer (Pyplan project) | Runs `$build` increments on Pyplan models | Sees `business-alignment` on-demand; `domain-*` profile loads if `PROJECT_DOMAIN` is set |
+| SDAD auditor | Runs `$audit` on an existing Pyplan client model | Primary user of the new lifecycle; drives evidence acquisition, domain detection, report generation |
+| SDAD maintainer | Applies v6 to the methodology repo | Runs `apply-v6.ps1` / `.sh`; controls which domain profiles exist |
+| End client (Pyplan owner) | Provides elicitation input for business-alignment and domain confirmation | Passive — receives the audit report; queried by the auditor for elicitation |
 
 ---
 
 ## §3 Functional Flows
 
-### Flow 1 — Build-via-AI increment with model snapshot (Pyplan projects)
+### Flow 1 — `$audit` full lifecycle
 
-After each Build-via-AI increment closes:
+```
+1. Pre-audit ingestion
+   a. Acquire model evidence via I1 (primary: .ppl export; enhancement: MCP read endpoints;
+      fallback: manual export/screenshots)
+   b. Ingest prior sales/discovery docs, blueprints, POCs via markitdown
+      → declared-intent / claims-to-verify, timestamped, NOT ground truth
+   c. Emit evidence manifest: acquisition path, timestamp, Pyplan version if available,
+      declared gaps ("not assessable")
 
-1. MCP modifies the model (increment announced and approved per existing protocol).
-2. `$qa` on the increment — must pass before export.
-3. **Export the Pyplan model** — via MCP export endpoint if available (D-1), otherwise
-   manually from the Pyplan UI → save as
-   `.sdad/pyplan-snapshots/YYYYMMDD-incN-slug.ppl`.
-4. **Atomic commit:** DECISIONS.md + §13 update + the `.ppl` snapshot — one commit per
-   increment.
-5. *(Optional — only with a remote configured)* `git push`.
+2. Domain detection + confirmation
+   a. Infer PROJECT_DOMAIN from data sources, node/KPI naming, interfaces, ingested docs
+   b. Confirm with owner
+   c. Load matching domain-* profile(s); multi-domain = multiple profiles
+   d. If no profile exists: mark dimension "not assessable - no domain profile" → backlog entry
 
-Recovery: load the corresponding `.ppl` in Pyplan; git history gives the restore timeline.
+3. Business elicitation (business-alignment skill, on-demand)
+   a. Structured elicitation of declared business objective from the owner
+   b. If owner unavailable: mark "not assessable - no elicitation input"; no fabrication
 
-### Flow 2 — Project initialization scaffolds the snapshots folder (Pyplan projects)
+4. Five-dimension audit run
+   (1) Development/architecture  → code-reviewer agent + ratchet output
+   (2) Security                  → security-auditor agent (QA Layer 1)
+   (3) Usability                 → live walkthrough + screenshots if app available;
+                                   convention-compliance only if not (declared in report)
+   (4) Quality/maintainability   → pyplan-qa-platform layer + ratchet output
+   (5) Business                  → (5a) alignment (business-alignment skill)
+                                   (5b) domain correctness (domain-* profile, if loaded)
 
-`project-init` detects a Pyplan project (CLAUDE.md contains uncommented
-`PROJECT_PLATFORM: pyplan`, OR `--pyplan` flag passed) and creates
-`.sdad/pyplan-snapshots/.gitkeep` so the folder exists and is tracked from day one.
-Non-Pyplan projects: skip silently.
+5. Severity reconciliation → unified 4-band scheme (see BR-03)
+
+6. Report generation ($audit report)
+   → executive summary, evidence manifest, one section per dimension,
+     prioritized improvement backlog
+   → English output, evidence-based, intent vs delivered, never accusatory
+   → Stamped with SDAD version + exact model string
+```
+
+### Flow 2 — `$build` with business-alignment (on-demand activation)
+
+```
+Trigger: $spec detects vague §1 objective OR §6 rule without traceable business reason
+→ business-alignment skill activates automatically
+→ enforces measurable §1, traceable §6, value-vs-cost surfacing in §12
+→ domain-* profile loads if PROJECT_DOMAIN is set and a profile exists
+```
+
+### Flow 3 — Domain profile creation (missing profile path)
+
+```
+1. Detection: PROJECT_DOMAIN inferred/declared; no matching profile in .claude/skills/
+2. In $build: pause only the increment that depends on domain judgment
+   (same pattern as structural data delta — code not requiring domain judgment continues)
+3. Guided creation: skill-creator scaffolds .claude/skills/domain-<x>/SKILL.md
+   → SME elicitation (client or G7 consultant)
+   → Without SME: profile born marked "provisional / LLM-seeded / low confidence"
+   → Mark propagates to every finding that uses the profile
+4. Materialization: profile ships via apply-v6 pattern (.claude/ is write-protected in Cowork)
+   OR as a project-level skill outside .claude/
+5. In $audit: domain without profile → "not assessable" + backlog recommendation
+   → auditor NEVER fabricates a profile mid-audit
+6. Persistence: profile committed to repo; v7 will distribute to portfolio
+```
+
+### Flow 4 — Evidence acquisition (I1 detail)
+
+```
+Acquisition paths (priority order):
+  (a) .ppl export → parsed to node-graph.json + manifest.md
+  (b) Pyplan MCP read endpoints (when enabled on the instance)
+  (c) Manual fallback: developer supplies exports/screenshots
+
+Parsed node graph per node:
+  id, type (data/function/interface/input), has_result_assigned (bool),
+  dependencies[], code_snippet (first 10 lines), mcp_decorated (bool)
+
+Output location: .sdad/audit/<project>/evidence/
+  manifest.md  — evidence manifest (human-readable)
+  node-graph.json — compact JSON for ratchet consumption
+```
+
+**Build-time decision (2026-06-26, BR-17 — hybrid I1):** no `.ppl` sample exists in the repo
+and the `.ppl` binary format is unverified. Writing a parser against a guessed format would
+violate epistemic honesty. I1 therefore ships: (1) the acquisition PROTOCOL + manifest/node-graph
+SCHEMAS, (2) a deterministic check that VALIDATES a node-graph.json against the schema, and
+(3) a documented parser STUB explicitly marked "not tested until a real .ppl fixture exists".
+The auditor populates the schema via MCP read / Pyplan UI / manual until the stub is validated.
 
 ---
 
-## §4 Data Model
+## §4 Data Model (Artifacts)
 
-| Artefact | Location | Format | Tracked in git |
-|----------|----------|--------|----------------|
-| Model snapshot | `.sdad/pyplan-snapshots/YYYYMMDD-incN-slug.ppl` | Pyplan binary `.ppl` | Yes (new exception in .gitignore) |
-| Folder keeper | `.sdad/pyplan-snapshots/.gitkeep` | empty | Yes |
-
-**Naming convention (deterministic, sortable):** `YYYYMMDD-incN-slug.ppl`
-e.g. `20260625-inc03-revenue-nodes.ppl` — date `YYYYMMDD` · `inc` + zero-padded number ·
-short feature slug.
+| Artifact | Path | Description |
+|----------|------|-------------|
+| Evidence manifest | `.sdad/audit/<project>/evidence/manifest.md` | Acquisition path, timestamp, Pyplan version, declared gaps |
+| Node graph | `.sdad/audit/<project>/evidence/node-graph.json` | Parsed node representation for ratchet + LLM consumption |
+| Audit report | `.sdad/audit/<project>/report-YYYYMMDD.md` | Client-facing five-dimension report |
+| Domain profile (finance) | `.claude/skills/domain-finance/SKILL.md` | KPIs, formulas, trap assumptions, red flags for FP&A |
+| Domain profile (supply chain) | `.claude/skills/domain-supply-chain/SKILL.md` | KPIs, formulas, trap assumptions, red flags for SC |
+| pyplan-mcp skill | `.claude/skills/pyplan/mcp/SKILL.md` | @mcp_tool producer rules + MCP read-access for I1 |
+| business-alignment skill | `.claude/skills/business-alignment/SKILL.md` | Alignment checks, elicitation protocol, not-assessable rules |
+| pyplan-audit skill | `.claude/skills/pyplan-audit/SKILL.md` | Orchestration, five-dimension model, report template |
+| AUDIT_ACTIVE sentinel | `.sdad/AUDIT_ACTIVE` | Spec-gate allowlist extension (mirrors DOCFINAL_ACTIVE) |
+| Installer | `apply-v6.ps1` + `apply-v6.sh` | Ships .claude/ changes; idempotent, self-deleting, ASCII |
 
 ---
 
 ## §5 Technical Architecture
 
-**Stack:** PowerShell 5.1 (`.ps1`) + Bash (`.sh`) for init scripts; Markdown for
-methodology artefacts (CLAUDE.md, skills, guides, briefs); git for versioning.
+### New skills (v6)
 
-**Components touched by this patch:**
+```
+.claude/skills/
+  pyplan/mcp/SKILL.md          — I2: EXTEND existing v4.2 skill (read-access role)
+  business-alignment/SKILL.md  — I3a: domain-agnostic alignment core (NEW)
+  domain-finance/SKILL.md      — I3b: FP&A profile (checklist level, NEW)
+  domain-supply-chain/SKILL.md — I3b: supply chain profile (checklist level, NEW)
+  pyplan-audit/SKILL.md        — I4: five-dimension audit orchestrator (NEW)
+```
 
-| Component | Role | Change |
-|-----------|------|--------|
-| `.gitignore` | Ignore rules | Add `!.sdad/pyplan-snapshots/` exception |
-| `project-init.ps1` / `.sh` | Project bootstrap | Add Pyplan detection (hybrid) + snapshots scaffold; `.sh` sanitized to pure ASCII |
-| `install.sh` | Installer | Sanitize to pure ASCII (I2b) — runs on fresh machines |
-| `checks/ascii-ps1.ps1` / `.sh` | ASCII ratchet | Extend scan glob from `*.ps1` to `*.ps1` + `*.sh` (I2b) |
-| `CLAUDE.md` | Methodology control | Build-via-AI step 5.5, Pyplan checklist, QA Layer 5, Behavior rule |
-| `.claude/skills/pyplan/mcp/SKILL.md` | MCP skill | Snapshot convention, QA integration, $verify note |
-| `docs/SDAD_v5_USER_GUIDE.md` | User guide | New §7 Pyplan versioning (renumber old §7→§8) |
-| `SDAD_v6_BUILD_BRIEF.md` | v6 plan | New increment Ix + I4/I9 dependency notes |
-| `DECISIONS.md` | Decisions log | HUB BLOCK entry for this patch |
+**Build-time correction (2026-06-26, BR-16):** the brief's I2 claim that `pyplan-mcp` is
+"absent from main, must be built, not recovered" is factually wrong. The skill EXISTS on main
+(200 lines, v4.2, commit history from `6a6f233`), and 6 branches exist. I2 is therefore an
+EXTENSION (add the MCP read-access role for I1 + audit/producer framing), not a from-scratch
+build. Severity downgraded HIGH→MEDIUM.
 
-**Model string (reproducibility):** this patch built with `claude-opus-4-8` (FRONTIER) for
-I3; `claude-sonnet-4-6` (STANDARD) acceptable for I1/I2/I4-I7 per §6.
+### New command
+`$audit` — registered in CLAUDE.md Commands and `$sdad`. Spec-gate allowlist extended with
+`.sdad/AUDIT_ACTIVE` sentinel. Runs without an approved SPEC.md (same gate as `$docfinal`).
+
+### Static ratchet extensions (checks/)
+Mechanical Pyplan findings promoted from LLM detection to deterministic checks:
+- `missing-result-assign` — nodes without `result=` assigned
+- `circular-deps` — circular dependency detection in node graph
+- `mcp-untyped-params` — `@mcp_tool` parameters without `Annotated[type, 'desc']`
+
+The LLM auditor receives ratchet output as pre-computed evidence; it does not re-detect
+what the ratchet already covers deterministically.
+
+### Composition model
+`pyplan-audit` composes existing skills — it does not rewrite them:
+- `pyplan-qa-platform` → development/architecture + quality dimensions
+- `security-auditor` agent → security dimension
+- `code-reviewer` agent → structure checks
+- `business-alignment` → business dimension (5a)
+- `domain-*` profile(s) → domain correctness (5b, loaded per PROJECT_DOMAIN)
+
+When a composed skill improves, the auditor improves automatically.
+
+### Installer
+`apply-v6.ps1` + `apply-v6.sh`: one-shot, idempotent, self-deleting, pure ASCII.
+Ships new skills + agent roles under `.claude/`; updates `install.*` / `project-init.*`
+to scaffold `.sdad/audit/` seed. Mirrors the apply-v5 pattern.
+
+### Domain-profile loading rule
+`PROJECT_DOMAIN` declared in `$spec` (developer) or inferred + confirmed in `$audit`
+(from data sources, node/KPI naming, interfaces, discovery docs).
+Multi-domain: load multiple profiles; flag cross-domain seams as high-risk.
+Profile absent: "not assessable" — finding, not a skip.
 
 ---
 
 ## §6 Business Rules
 
-- **BR-1** The export/snapshot step is conditional on `PROJECT_PLATFORM: pyplan`. It must
-  NOT be added to the general (non-Pyplan) `$build` flow.
-- **BR-2** Snapshot filename must follow `YYYYMMDD-incN-slug.ppl` exactly — deterministic
-  and sortable.
-- **BR-3** The snapshot is committed in the SAME atomic commit as DECISIONS.md and the §13
-  update. One commit = one increment = one known model state.
-- **BR-4** CLAUDE.md net inline delta for this patch: target ≤ +10 lines; overflow prose
-  goes to the skill file. (Hard ceiling remains the release budget ≤ +60.)
-- **BR-5** `project-init` detection is hybrid: automatic via CLAUDE.md
-  `PROJECT_PLATFORM: pyplan` (uncommented) as default; `--pyplan` flag as explicit
-  override. Non-Pyplan: scaffold skipped silently.
-- **BR-6** L-01 ASCII rule (EXTENDED): ALL `.ps1` AND `.sh` scripts MUST be pure ASCII.
-  Rationale: `install.sh` and `project-init.sh` run on fresh cross-platform machines and
-  non-ASCII bytes break them — the same failure class L-01 documented for `.ps1` (confirmed
-  by developer from field experience). I2b sanitizes the two non-ASCII `.sh` files
-  (`install.sh`, `project-init.sh`) and extends `checks/ascii-ps1` (both the `.ps1` and the
-  `.sh` mirror) to scan `*.sh` as well, so the rule is ratcheted in code — not just a
-  convention. The check is NOT renamed (kept `ascii-ps1` to preserve hook/eval/install
-  references); only the scan glob and header comment change.
+| ID | Rule | Origin |
+|----|------|--------|
+| BR-01 | `.ppl` export is I1's primary acquisition path; MCP read is an enhancement, not a prerequisite. I2 runs in parallel to I1. | §5.1 decision 2026-06-26 |
+| BR-02 | `business-alignment` is on-demand. Triggers: `$audit`; or vague §1/§6 detected in `$spec`/`$build`. | §5.2 decision 2026-06-26 |
+| BR-03 | Audit severity uses 4 unified bands: CRITICAL / HIGH / MEDIUM / LOW. Each finding shows band + source (H-XX, PP-XX, domain, alignment). Mapping: P0→CRITICAL, P1→HIGH, P2→MEDIUM, style→LOW. | §5.2 decision 2026-06-26 |
+| BR-04 | Mechanical findings (missing `result=`, circular deps, untyped MCP params) run as static ratchet checks. The LLM auditor consumes ratchet output as evidence. | §5.2 decision 2026-06-26 |
+| BR-05 | Domain profiles are checklist-level in v6: KPIs/metrics, typical formulas to validate, trap assumptions, red flags. Not full methodology. | §5.2 decision 2026-06-26 |
+| BR-06 | v6 starter profiles: `domain-finance` (FP&A) and `domain-supply-chain`. Deferred (not-assessable): retail/merchandising, manufacturing, HR/workforce, sales/revenue. | §5.2 decision 2026-06-26 |
+| BR-07 | Domain without profile → "not assessable - no domain profile". This is a finding (auditor recommends creating the profile). Never improvise a profile mid-audit. | §5.2 decision 2026-06-26 |
+| BR-08 | Domain profile creation path: pauses only the dependent increment (data-delta pattern) → skill-creator + SME → provisional/LLM-seeded/low-confidence until review → commit via apply pattern. Provisional mark propagates to each finding using that profile. | $spec Q&A 2026-06-26 |
+| BR-09 | Business alignment without owner elicitation → "not assessable - no elicitation input". Never fabricate alignment findings. | I3 design |
+| BR-10 | All domain-correctness findings carry a confidence level. LLM profile raises the floor; it does not replace the client's SME for high-stakes validation. | I3b design |
+| BR-11 | Audit report is evidence-based and intent-vs-delivered neutral. Never accusatory. Liability/relationship aware. | I5 design |
+| BR-12 | Usability dimension requires a live-app walkthrough. When unavailable: limited to convention-compliance; report declares the limitation explicitly. | I6 design |
+| BR-13 | Every audit report is stamped with SDAD version + exact model string. Audits are point-in-time judgments and must be reproducible/traceable. | I7 design |
+| BR-14 | `$audit` runs without an approved SPEC.md. Spec-gate extended with `.sdad/AUDIT_ACTIVE` sentinel. | I5 design |
+| BR-15 | v5 `$eval` golden dataset must pass after every v6 increment. New audit scenarios are additions, not alterations. | Hard constraint #6 |
+| BR-16 | `pyplan-mcp` already exists on main (v4.2, 200 lines). I2 EXTENDS it with the I1 read-access role + audit framing; it is not a from-scratch build. Brief I2 claim corrected. Severity HIGH→MEDIUM. | Build discovery 2026-06-26 |
+| BR-17 | I1 is hybrid: acquisition protocol + manifest/node-graph schemas + a schema-validation check ship now; the `.ppl` parser is a documented stub marked not-tested until a real `.ppl` fixture exists. No parser is written against an unverified format. | Build decision 2026-06-26 |
 
 ---
 
 ## §7 Integrations & APIs
 
-| Integration | Endpoint | Usage |
-|-------------|----------|-------|
-| Pyplan MCP server | `/ai/mcp` (model export endpoint: UNKNOWN — D-1) | Model export during snapshot step IF the endpoint exists; v1 (first release, API may change). Lock Pyplan version in §5 of consuming project if MCP stability is critical. |
-| git | local + optional remote | Atomic commit of snapshot + DECISIONS.md + §13; optional push |
+### Pyplan MCP (first-party, per-instance)
+- **Role in v6:** enhancement to I1 evidence acquisition (MCP read endpoints); primary context
+  for `pyplan-mcp` skill (producer rules).
+- **Maturity:** v1 server — first release; API may change across Pyplan updates. Document as
+  external dependency in `pyplan-audit` skill with maturity flag.
+- **Availability:** per-instance; not guaranteed on every client deployment. `.ppl` export is
+  primary precisely because MCP is not universal.
+- **CLI vs MCP (consumer context):** N/A — Pyplan MCP is producer context (`@mcp_tool`
+  decoration). No CLI preference applies here (§7 rule only applies to consumer context).
 
-No MCP-vs-CLI tradeoff applies: the export is producer-side state capture, not a consumer
-integration SDAD wraps during build.
+### markitdown (document ingestion)
+- **Role:** converts sales/discovery docs (PDF, docx, xlsx, pptx) to Markdown for pre-audit
+  ingestion. Output treated as "declared-intent / claims-to-verify", not ground truth.
+- **Security:** local trusted files only (`convert_local`). Never feed untrusted paths or URLs.
+- **Ingestion path:** `.sdad/audit/<project>/ingest/` — working copies, not deliverables.
 
 ---
 
 ## §8 Testing Strategy
 
-| Inc | Test | Type | Notes |
-|-----|------|------|-------|
-| I1 | Create `.sdad/pyplan-snapshots/test.ppl`, confirm `git status` shows it untracked (not ignored); delete it | manual | As specified in brief |
-| I2 | Scaffold logic must be testable WITHOUT triggering interactive prompts or web downloads — see F-1 note below; `project-init.sh` passes the (extended) `checks/ascii-ps1` | manual/scripted | Brief's naive test is NOT runnable as written |
-| I2b | After sanitizing, `checks/ascii-ps1` (extended to `.sh`) returns clean for all tracked `.ps1` + `.sh`; `$eval` scenario 06-ascii-check still passes | automated | High-risk: touches harness + eval |
-| I3 | `$eval` — all golden scenarios pass; inspect CLAUDE.md diff for the 4 changes, no unintended lines | automated + review | `$eval` MANDATORY after I3 |
-| I4 | Read updated SKILL.md; confirm 3 sections consistent with I3 | review | No automated test for skill files |
-| I5 | Read updated guide; section numbering correct, Pyplan-specific, matches I3/I4 | review | |
-| I6 | Read updated v6 brief; Ix positioned after I3 before I4; I4/I9 notes additive | review | |
-| I7 | DECISIONS.md HUB BLOCK entry present | review | |
+### Per-increment test gates (from brief §3)
 
-**I2 test redesign (F-1):** the existing `project-init` scripts are fully interactive
-(`Read-Host` / `read -p`) and download from the repo. The brief's test
-(`run project-init.ps1 --pyplan in a scratch folder`) would trigger all prompts and web
-fetches — not runnable non-interactively. The scaffold logic must be added as a guarded
-branch that can be exercised in isolation (e.g. an early flag/detection check that creates
-the folder before the interactive section, or an extractable function), and tested by
-asserting `.sdad/pyplan-snapshots/.gitkeep` is created with the flag and NOT created
-without it.
+| Increment | Test gate |
+|-----------|-----------|
+| I1 | Sample `.ppl` → parsed node-graph with `result=`/dependency flags; missing export path → declared gap (not crash) |
+| I2 | Fixture model with planted MCP defect (untyped param, non-serializable return) → detected at correct severity |
+| I3a | Vague §1 objective in `$spec` → flagged non-measurable; audit with no elicitation → not-assessable, not fabricated |
+| I3b | Finance model → `domain-finance` loads + catches planted consolidation double-count; model with no profile → not-assessable; finance+SC model → both profiles + COGS seam flagged |
+| I3b (creation path) | Domain without profile → creation path fires (detect → pause → skill-creator + SME → provisional → commit); does NOT hard-stop build or fabricate |
+| I4 | Fixture with planted findings across all five dimensions → each surfaced under correct dimension and severity |
+| I5 | `$audit` on fixture → five-dimension report + evidence manifest; runs without SPEC.md, allowed by spec-gate |
+| I6 | Audit with no app access → usability marked "convention-only, live walkthrough not performed" |
+| I7 | Runner catches deliberately weakened audit (fabricated business finding with no elicitation) |
+| I8 | Two fixtures with equivalent findings → identical classification |
+
+### Regression gate
+`$eval` full suite (v5 core + new audit scenarios) must pass clean before tagging 6.0.
 
 ---
 
-## §9 Security & Compliance (Tier 2 Business)
+## §9 Security & Compliance
 
-**Assets to protect:** Pyplan model `.ppl` files (may embed business logic / data
-structure), git history integrity.
+**Tier 2 Business** — SDAD is delivered to client engagements; audit reports contain
+client model findings.
 
-**Controls:**
-- `.ppl` snapshots are committed deliberately; developer is responsible for ensuring no
-  secrets/credentials are embedded in an exported model before commit (manual review —
-  surface in $qa Layer 1 when this convention is used on a real project).
-- No new network surface, no new credentials handled by this patch.
-- ASCII ratchet (L-01) protects the `.ps1` init script from Windows PowerShell 5.1 parse
-  failures — enforced in `checks/ascii-ps1` (CI + pre-commit), fails CLOSED.
-
-**Tier 2 note:** this patch adds no PII handling, no auth surface, no audit-logging
-surface of its own. The §9 obligations of the base methodology are unchanged.
+| Area | Control |
+|------|---------|
+| Document ingestion | markitdown local only (`convert_local`); no untrusted paths or URLs fed to parser |
+| Evidence storage | `.sdad/audit/<project>/evidence/` stays local to the repo; no PII or credentials in manifest |
+| MCP OAuth tokens | `pyplan-mcp` skill enforces: token never logged, never surfaced in node results (P0) |
+| Audit report | Client-facing — no internal G7 annotations or system prompts in the deliverable |
+| Domain profiles | Provisional/LLM-seeded profiles carry explicit confidence labels; no high-stakes validation without SME review |
+| Installer scripts | `apply-v6.ps1` / `.sh` are pure ASCII, idempotent, self-deleting; no credentials in argv |
 
 ---
 
 ## §10 Definition of Done
 
-- [ ] **I1** `.gitignore` has `!.sdad/pyplan-snapshots/`; a `.ppl` test file shows as
-      untracked.
-- [ ] **I2** `project-init` (both scripts) scaffolds `.sdad/pyplan-snapshots/.gitkeep` on
-      Pyplan projects (CLAUDE.md detection OR `--pyplan`); skips on non-Pyplan. Scaffold
-      logic is testable in isolation (F-1). `project-init.sh` is pure ASCII after the edit.
-- [ ] **I2b** `install.sh` and `project-init.sh` are pure ASCII; `checks/ascii-ps1` (`.ps1`
-      + `.sh` mirror) scans `*.sh` as well and returns clean for the whole repo; `$eval`
-      passes (scenario 06-ascii-check green with the extended scope).
-- [ ] **I3** CLAUDE.md has the four changes; net inline delta ≤ +10 lines (BR-4); `$eval`
-      passes clean.
-- [ ] **I4** `pyplan/mcp SKILL.md` has the three new sections, consistent with CLAUDE.md.
-- [ ] **I5** `SDAD_v5_USER_GUIDE.md` has §7 Pyplan versioning; numbering correct.
-- [ ] **I6** `SDAD_v6_BUILD_BRIEF.md` has Ix after I3, plus additive I4 + I9 notes.
-- [ ] **I7** `DECISIONS.md` has the HUB BLOCK entry for this patch.
-- [ ] **F-2 (RESOLVED — developer override):** ALL `.ps1` and `.sh` are pure ASCII and the
-      ratchet now enforces it for both (I2b). My earlier proposal to exempt `.sh` was wrong
-      — the installer breaks on fresh machines with non-ASCII bytes (developer field
-      experience). The brief's original intent stands and is now ratcheted in code.
-- [ ] **CORRECTED (F-3):** if the four I3 changes exceed +10 inline lines (estimated ~12),
-      tighten wording or move prose to the skill file to land ≤ +10, per BR-4.
+Carried from brief §4 — v6 release gate:
+
+- [ ] `$audit` produces a five-dimension report on a fixture, with declared evidence manifest,
+      runs without a Spec (spec-gate allows `.sdad/AUDIT_ACTIVE`).
+- [ ] I1 acquires `.ppl`/MCP model representation; un-acquirable areas declared as gaps.
+- [ ] `pyplan-mcp` skill exists and detects a planted MCP defect at correct severity.
+- [ ] `business-alignment` (I3a) flags non-measurable objective in `$build`; marks alignment
+      not-assessable with no elicitation (no fabrication).
+- [ ] `domain-finance` and `domain-supply-chain` each catch a planted domain-correctness defect.
+- [ ] Model with no matching profile → marked not-assessable (finding, not skip).
+- [ ] Multi-domain model → loads multiple profiles + flags cross-domain seam.
+- [ ] Domain-without-profile creation path fires correctly (detect → pause → skill-creator →
+      provisional → commit); does not hard-stop build or fabricate a profile.
+- [ ] Severity reconciliation deterministic (two equivalent findings → identical classification).
+- [ ] `$eval` v5 core + new audit scenarios → clean pass on final v6 state.
+- [ ] All `.ps1`/`.sh` pure ASCII; `apply-v6.*` idempotent + self-deleting.
+- [ ] CLAUDE.md within +60-line net budget; version + footer = 6.0.
+- [ ] Full documentation set regenerated to v6 (no doc left at v4/v4.3/v5).
+- [ ] v5.x project compatibility verified.
 
 ---
 
 ## §11 Out of Scope
 
-- `.gitattributes` `*.ppl merge=ours` binary merge strategy — deferred to v6 (Ix / I9).
-  Single-developer merges are unaffected.
-- Snapshot automation via a SessionEnd hook — deferred to v6 once the export endpoint is
-  confirmed (D-1).
-- CI gate that fails a PR closing a Build-via-AI increment without a `.ppl` snapshot —
-  this is v6 Ix, documented here as a forward reference only.
-- Any version bump of SDAD.
-- Fixing pre-existing drift unrelated to this patch (e.g. mcp SKILL.md header says "v4.2";
-  `.gitignore` duplicate `.sdad/agent_output.tmp`) — noted, not in scope.
+- Portfolio-level audit-lesson aggregation — deferred to v7 I5. In v6, auditor writes
+  lessons locally only.
+- Deep methodology-level domain profiles — v6 is checklist level only.
+- Pre-built profiles beyond finance and supply chain — retail, manufacturing, HR/workforce,
+  sales/revenue are deferred and marked not-assessable until a profile is created.
+- `$audit` for non-Pyplan projects — the audit lifecycle is Pyplan-specific in v6.
+- v7 features: CI gate relocation, portfolio governance, multi-OS parity, deploy phase.
+- Automated `.ppl` parsing of all Pyplan node types — v6 parses the subset needed for the
+  five-dimension model (id, type, result=, deps, code_snippet, mcp_decorated).
 
 ---
 
 ## §12 Open Decisions
 
-| # | Decision | Status | Resolution path |
-|---|----------|--------|-----------------|
-| D-1 | Does the installed Pyplan version expose a model export MCP endpoint? | **OPEN** (per developer instruction) | Verify against a real running Pyplan instance when this patch is used on an actual Pyplan project. This repo is `generic` — no Pyplan instance available here. If yes: document the endpoint in §7 of the consuming project's SPEC and use it in the snapshot step. If no: the export is manual (UI). CLAUDE.md language covers both cases. |
-| D-2 | I2 detection approach | **RESOLVED** | Hybrid: CLAUDE.md auto-detection (default) + `--pyplan` override (BR-5). |
+All decisions from brief §5 were resolved in the $spec session on 2026-06-26:
+
+| Decision | Resolution |
+|----------|------------|
+| §5.1 MCP as primary vs enhancement | `.ppl` export primary; MCP enhancement. I2 parallel to I1. |
+| §5.2 Domain starter set and depth | finance + supply chain; checklist level (KPIs, formulas, trap assumptions, red flags). |
+| §5.2 Deferred domains | retail, manufacturing, HR, sales — not-assessable until profile exists. |
+| §5.2 Domain creation path | Detailed in BR-08 and Flow 3. Pauses dependent increment only; never hard-stops. |
+| §5.2 business-alignment: always-on vs on-demand | On-demand. Triggers: `$audit`, or vague §1/§6. |
+| §5.2 Severity reconciliation | 4 unified bands (CRITICAL/HIGH/MEDIUM/LOW) with explicit mapping and source label. |
+| §5.2 Mechanical findings → ratchet | Static ratchet in `checks/`. LLM auditor consumes output. |
+| §5.2 Evidence manifest schema | Node graph (id, type, has_result_assigned, deps, code_snippet, mcp_decorated) + manifest.md + node-graph.json under `.sdad/audit/<project>/evidence/`. |
+
+No open decisions remain. All resolved before $specout.
 
 ---
 
@@ -234,16 +361,19 @@ surface of its own. The §9 obligations of the base methodology are unchanged.
 
 | Increment | Feature | Model | Effort | Files | Tests | QA findings | Date |
 |-----------|---------|-------|--------|-------|-------|-------------|------|
-| SPEC | Pyplan versioning patch spec | claude-opus-4-8 | high | SPEC.md | n/a | n/a | 2026-06-25 |
-| I1 | .gitignore snapshots exception | claude-opus-4-8 | low | .gitignore | PASS (untracked confirmed) | clean | 2026-06-25 |
-| I2 | project-init Pyplan scaffold (hybrid) + .sh ASCII | claude-opus-4-8 | high | project-init.ps1/.sh | PASS (8/8: 4 bash + 4 ps) | clean | 2026-06-25 |
-| I2b | ASCII hardening + extend ratchet to .sh | claude-opus-4-8 | high | install.sh, install.ps1, checks/ascii-ps1.ps1/.sh, eval 06/07 | $eval PASS 14/14 | clean | 2026-06-25 |
-| I3 | CLAUDE.md snapshot protocol (4 changes) | claude-opus-4-8 | high | Claude.md | $eval PASS 14/14 | clean (net +10) | 2026-06-25 |
-| I4 | mcp SKILL.md snapshot convention | claude-opus-4-8 | low | pyplan/mcp/SKILL.md | review (consistent w/ I3) | clean | 2026-06-25 |
-| I5 | USER_GUIDE Pyplan versioning §7 | claude-opus-4-8 | low | docs/SDAD_v5_USER_GUIDE.md | review (1-8 consecutive) | clean | 2026-06-25 |
-| I6 | v6 brief Ix + I4/I9 notes | claude-opus-4-8 | low | SDAD_v6_BUILD_BRIEF.md | review (Ix after I3, 2 notes) | clean | 2026-06-25 |
-| I7 | DECISIONS.md patch log (HUB BLOCK) | claude-opus-4-8 | low | DECISIONS.md | review | clean | 2026-06-25 |
+| Spec | SDAD v6.0 SPEC.md | claude-opus-4-8 | high | SPEC.md | n/a (spec) | none | 2026-06-26 |
+| I1 | Evidence acquisition layer (hybrid) | claude-opus-4-8 | high | SCHEMA.md, checks/audit-evidence.ps1+.sh, acquire-evidence.ps1+.sh, 2 fixtures, eval scenario 15 | eval 15 PASS; core 15/15 | none | 2026-06-26 |
+| I2 | Extend pyplan-mcp (read-access + audit) | claude-opus-4-8 | high | pyplan/mcp/SKILL.md (+2 sections, v6), mcp_lint.py, checks/mcp-tool-audit.ps1+.sh, 2 py fixtures, eval scenario 16 | eval 16 PASS; core 16/16 | none | 2026-06-26 |
+| I3 | Business dimension (alignment core + domain profiles) | claude-opus-4-8 | high | skills business-alignment/, domain-finance/, domain-supply-chain/ SKILL.md; fixture finance-double-count.node-graph.json | fixture valid (audit-evidence exit 0); core 16/16; behavioral tests -> llm-smoke/I7 | none | 2026-06-26 |
+| I4 | pyplan-audit orchestrator (5 dimensions) + 2 ratchet checks | claude-opus-4-8 | high | skills/pyplan-audit/SKILL.md; agents/business-analyst.md; checks missing-result-assign + circular-deps (.ps1+.sh); 2 defect fixtures; eval scenarios 17, 18 | core 18/18 PASS; behavioral multi-dim test -> I7 | none | 2026-06-26 |
+| I5 | $audit command + spec-gate AUDIT_ACTIVE allowlist | claude-opus-4-8 | high | checks/spec-gate-policy.ps1+.sh (AUDIT_ACTIVE); skills/pyplan-audit/SKILL.md (+command lifecycle); eval scenario 19 | core 19/19 PASS; behavioral 5-dim report test -> I7 | none (1 LOW inherited from $docfinal sentinel trust model) | 2026-06-26 |
+| I6 | Usability sub-protocol (Tier A live / Tier B convention-only) | claude-sonnet-4-6 | medium | skills/pyplan-audit/SKILL.md (+usability section); audit/SCHEMA.md (+App Access field); fixture no-app-access/manifest.md; eval scenario 20 | core 20/20 PASS | none | 2026-06-26 |
+| I7 | $eval audit scenarios -- deterministic report-integrity ratchet | claude-opus-4-8 | high | checks/audit-report-integrity.ps1+.sh; fixtures honest-report/ + weakened-report/ (manifest+report); eval scenario 21 | core 21/21 PASS; honest=0 / weakened caught (5 violations incl. B) on both ps1+sh | 1 P2 pre-existing (llm-smoke Start-Process broken on Windows; flagged, not fixed in I7) | 2026-06-26 |
+| I8 | Audit report template + severity reconciliation | claude-sonnet-4-6 | medium | skills/pyplan-audit/report-template.md; fixtures equiv-A/ + equiv-B/ (manifest+report); eval scenario 22 | core 22/22 PASS; both fixtures pass audit-report-integrity; identical severity fingerprint | none | 2026-06-26 |
+| I9 | CLAUDE.md v6 wiring (version 6.0, $audit, PROJECT_DOMAIN) | claude-opus-4-8 | high | CLAUDE.md (atomic, commit cf1d705) | structural assert exit 0; core 22/22 PASS | none (+35 lines vs v5.2 tag baseline, under +60 budget) | 2026-06-26 |
+| I10 | Docs regeneration + apply-v6 installer | claude-sonnet-4-6 | low | apply-v6.ps1 apply-v6.sh install.ps1 install.sh project-init.ps1 project-init.sh CHANGELOG.md docs/INSTALL_GUIDE.md docs/DEVELOPER_GUIDE.md docs/DEVELOPER_MANUAL.md docs/ONBOARDING_PYPLAN.md docs/USAGE_AND_SHORTCUTS.md (commit bcb28eb) | ASCII ratchet clean; core 22/22 PASS | none | 2026-06-26 |
 
 ---
 
-G7 AI Development Methodology | SDAD v5.2 Pyplan Versioning Patch | SPEC.md
+*G7 AI Development Methodology | SDAD v6.0 Pyplan Audit Edition | SPEC.md*
+*Generated by $specout on 2026-06-26 — pending developer approval*

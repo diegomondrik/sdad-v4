@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SDAD v5.0 -- Project Initializer (Mac / Linux)
+# SDAD v6.0 -- Project Initializer (Mac / Linux)
 # Run from inside the project repo you want to initialize.
 #
 # Usage:
@@ -70,7 +70,7 @@ fi
 
 echo ""
 echo -e "${CYAN}======================================"
-echo -e "  SDAD v5.0 -- Project Initializer"
+echo -e "  SDAD v6.0 -- Project Initializer"
 echo -e "======================================${NC}"
 echo ""
 
@@ -315,7 +315,8 @@ fi
 
 # ---- 7. Create .sdad/ structure -------------------------------------------
 
-mkdir -p .sdad/flows
+mkdir -p .sdad/flows .sdad/audit
+: > .sdad/audit/.gitkeep
 echo -e "  ${GREEN}.sdad/ structure created.${NC}"
 
 # Pyplan projects: scaffold the model-snapshot folder so it exists and is
@@ -333,7 +334,7 @@ Created: $TODAY
 Developer: $DEV_NAME
 Client: $CLIENT_LINE
 Compliance tier: $TIER
-SDAD version: 5.0
+SDAD version: 6.0
 
 ## Session log
 
@@ -358,18 +359,37 @@ seed_file() {
 
 seed_file "checks/ascii-ps1.ps1"
 seed_file "checks/ascii-ps1.sh"
+seed_file "checks/audit-evidence.ps1"
+seed_file "checks/audit-evidence.sh"
+seed_file "checks/mcp-tool-audit.ps1"
+seed_file "checks/mcp-tool-audit.sh"
+seed_file "checks/missing-result-assign.ps1"
+seed_file "checks/missing-result-assign.sh"
+seed_file "checks/circular-deps.ps1"
+seed_file "checks/circular-deps.sh"
+seed_file "checks/spec-gate-policy.ps1"
+seed_file "checks/spec-gate-policy.sh"
+seed_file "checks/audit-report-integrity.ps1"
+seed_file "checks/audit-report-integrity.sh"
 seed_file ".sdad/lib/agent-run.ps1"
 seed_file ".sdad/lib/agent-run.sh"
+seed_file ".sdad/audit/lib/acquire-evidence.ps1"
+seed_file ".sdad/audit/lib/acquire-evidence.sh"
+seed_file ".sdad/audit/SCHEMA.md"
 seed_file ".sdad/eval/run-eval.ps1"
 seed_file ".sdad/eval/llm-smoke.ps1"
 seed_file ".sdad/eval/lib/assert-claude-md.ps1"
 for n in 01-gate-deny-no-spec 02-gate-allow-approved 03-gate-allow-docs \
          04-gate-allow-docfinal 05-gate-fail-open 06-ascii-check \
          07-precommit-blocks 08-claude-md-structural 09-eval-detects-regression \
-         10-agent-timeout 11-typed-section13 12-hold-autocommit; do
+         10-agent-timeout 11-typed-section13 12-hold-autocommit \
+         13-claude-md-case 14-ci-spec-gate-policy 15-audit-evidence-schema \
+         16-mcp-tool-audit 17-missing-result-assign 18-circular-deps \
+         19-gate-allow-audit 20-audit-usability-no-app \
+         21-audit-report-integrity 22-severity-determinism; do
     seed_file ".sdad/eval/scenarios/$n/run.ps1"
 done
-chmod +x checks/*.sh .sdad/lib/*.sh 2>/dev/null || true
+chmod +x checks/*.sh .sdad/lib/*.sh .sdad/audit/lib/*.sh 2>/dev/null || true
 echo -e "  ${GREEN}harness layer ready (checks/, .sdad/eval/, .sdad/lib/).${NC}"
 
 # ---- 9. Update .gitignore -------------------------------------------------

@@ -9,6 +9,7 @@ $repo = (Resolve-Path "$PSScriptRoot\..\..").Path
 $timeoutSec = 300   # per call; generous -- a hung CLI must not hang the gate
 
 # OD-1 resolution: wording + regex set, one row per smoke scenario.
+# Audit behavioral scenarios added in v6 (B post-I10).
 $scenarios = @(
     @{ name = "spec-language";  prompt = '$spec'
        # Fixture has no PROJECT_LANGUAGE -> the FIRST question must be the language one.
@@ -19,6 +20,18 @@ $scenarios = @(
     @{ name = "sdad-surface";   prompt = '$sdad'
        # Overview must surface the phase/command spine.
        patterns = @('spec', 'build', 'qa') }
+    @{ name = "audit-surface";  prompt = '$audit'
+       # $audit must open an evidence acquisition phase and mention dimensions.
+       # Fixture has no SPEC.md -- $audit is allowlisted and must NOT be blocked.
+       patterns = @('evidence|acqui', 'dimension|five|audit') }
+    @{ name = "audit-not-assessable";
+       prompt = 'I am running $audit on a Pyplan model. The model owner is not available and cannot provide the business objective. What happens to the business alignment dimension?'
+       # Must declare not-assessable for alignment -- never fabricate.
+       patterns = @('not assessable|not.{0,10}assess', 'alignment|business') }
+    @{ name = "audit-domain-gap";
+       prompt = 'I am running $audit on a Pyplan model whose business domain is maritime logistics. There is no domain profile for that domain in SDAD. What happens to the domain correctness dimension?'
+       # Must declare not-assessable for domain -- never fabricate a profile.
+       patterns = @('not assessable|not.{0,10}assess', 'domain|profile') }
 )
 
 if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
@@ -30,23 +43,27 @@ $failed = 0
 foreach ($s in $scenarios) {
     $tmp = Join-Path $env:TEMP ("sdad-llm-" + $s.name + "-$PID")
     New-Item -ItemType Directory -Path $tmp -Force | Out-Null
-    $outFile = Join-Path $tmp "out.txt"
-    $errFile = Join-Path $tmp "err.txt"
     try {
         Copy-Item (Join-Path $repo "CLAUDE.md") (Join-Path $tmp "CLAUDE.md")
 
-        $p = Start-Process -FilePath "claude" -ArgumentList @("--print", $s.prompt) `
-            -WorkingDirectory $tmp -NoNewWindow -PassThru `
-            -RedirectStandardOutput $outFile -RedirectStandardError $errFile
-        if (-not $p.WaitForExit($timeoutSec * 1000)) {
-            try { $p.Kill() } catch {}
+        # L-10: Start-Process cannot launch an npm CLI shim (.ps1) on Windows.
+        # Use Start-Job instead -- child PowerShell process resolves shims natively.
+        $job = Start-Job -ScriptBlock {
+            param($dir, $prompt)
+            Set-Location $dir
+            & claude --print $prompt 2>&1
+        } -ArgumentList $tmp, $s.prompt
+
+        $finished = Wait-Job $job -Timeout $timeoutSec
+        if (-not $finished) {
+            Stop-Job $job -PassThru | Remove-Job -Force -ErrorAction SilentlyContinue
             Write-Host "FAIL llm:$($s.name) (timeout after $timeoutSec s)"
             $failed++
             continue
         }
-
-        $reply = ""
-        if (Test-Path $outFile) { $reply = Get-Content $outFile -Raw -Encoding UTF8 }
+        $output = Receive-Job $job
+        Remove-Job $job -Force -ErrorAction SilentlyContinue
+        $reply = if ($output) { ($output | ForEach-Object { "$_" }) -join "`n" } else { "" }
         $missing = @()
         foreach ($rx in $s.patterns) {
             if ($reply -notmatch "(?i)$rx") { $missing += $rx }

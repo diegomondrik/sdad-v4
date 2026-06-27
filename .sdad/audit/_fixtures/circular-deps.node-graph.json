@@ -1,0 +1,33 @@
+{
+  "project": "fixture-circular-deps",
+  "acquired_at": "2026-06-26",
+  "acquisition_path": "manual",
+  "pyplan_version": "unknown",
+  "nodes": [
+    {
+      "id": "opening_balance",
+      "type": "function",
+      "has_result_assigned": true,
+      "dependencies": ["closing_balance"],
+      "code_snippet": "result = closing_balance.shift(1)  # PLANTED DEFECT: depends on closing_balance",
+      "mcp_decorated": false
+    },
+    {
+      "id": "cash_flow",
+      "type": "function",
+      "has_result_assigned": true,
+      "dependencies": ["opening_balance"],
+      "code_snippet": "result = opening_balance + net_movement",
+      "mcp_decorated": false
+    },
+    {
+      "id": "closing_balance",
+      "type": "function",
+      "has_result_assigned": true,
+      "dependencies": ["cash_flow"],
+      "code_snippet": "result = cash_flow  # closes the loop: closing -> cash_flow -> opening -> closing",
+      "mcp_decorated": false
+    }
+  ],
+  "gaps": []
+}

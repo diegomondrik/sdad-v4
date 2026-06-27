@@ -117,3 +117,82 @@ Transferable lessons captured across SDAD projects. Surfaced automatically in Ph
   `.ps1`, but `install.sh` / `project-init.sh` broke on fresh machines the same way; extended
   `checks/ascii-ps1` (+ both installers' pre-commit glob) to `.ps1` + `.sh` and added eval
   subcases in 06-ascii-check. Complements [[L-01]].
+
+### L-08 -- Verify a brief's factual claims against the real repo before accepting an increment's scope
+- **Category:** Workflow
+- **Tags:** `#stack:git` `#phase:build` `#phase:spec`
+- **Signal:** A build brief asserts repo state as fact -- "this skill/file is missing", "must
+  be built from scratch", "there are no other branches" -- and that assertion sets the scope
+  and severity of an increment. The brief reads authoritative, so the claim is taken at face
+  value and an increment is planned around it without a check.
+- **Principle:** A brief is an input, not ground truth about the filesystem. Before accepting
+  the scope of any increment that rests on a state claim, verify it cheaply against the repo
+  (`git ls-files`, `git log -- <path>`, `git branch -a`, read the file). If reality differs,
+  re-scope explicitly and record the correction as a numbered decision -- do not silently
+  build to the wrong plan. Cheap to check now; expensive to discover after building from scratch
+  something that already existed.
+- **Origin:** SDAD v6 I2. The brief claimed `pyplan-mcp` was "absent from main... must be
+  built, not recovered"; it existed on `main` (200 lines, v4.2, history from commit 6a6f233)
+  and 6 branches existed. I2 was re-scoped HIGH-build -> MEDIUM-extend and logged as BR-16 in
+  SPEC.md/DECISIONS.md before any code was written. Complements [[L-02]] (a premise can be
+  wrong even when the surrounding plan is right).
+
+### L-09 -- Output captured from an external `& powershell` call is an array; `-match`/`-notmatch` on it filters, it does not return a boolean
+- **Category:** Environment
+- **Tags:** `#stack:powershell` `#phase:build`
+- **Signal:** A PowerShell test or scenario captures another script's output with
+  `$out = & powershell -File check.ps1 ...` and then branches on `$out -match 'x'` or
+  `$out -notmatch 'x'`. The assertion fails (or passes) for the wrong reason even though the
+  expected line is clearly present in the output. The same code reads correctly to the eye.
+- **Principle:** Multi-line output captured into a variable is a `string[]`, not a `string`.
+  The `-match`/`-notmatch` operators applied to an array return the *filtered subset of
+  elements*, not `$true`/`$false`: a non-empty filtered array is truthy regardless of whether
+  the element you cared about matched, so an `if ($out -notmatch 'token')` fires whenever ANY
+  line lacks the token. Collapse the output first -- `$text = ($out | Out-String)` -- and match
+  against the single string. Capture `$LASTEXITCODE` into a variable on the line immediately
+  after the call, before any transform, since `Out-String` and other pipeline ops reset it.
+- **Origin:** SDAD v6 I4. Eval scenarios 17/18 captured the ratchet output as an array and used
+  `$out -notmatch 'margin'` / `-notmatch 'cash_flow'`; both failed in the runner although the
+  checks worked when run by hand. Fixed by `($out | Out-String)` + a saved `$code` before
+  matching. Sibling of [[L-01]] / [[L-03]] (PS 5.1 / PowerShell semantics traps that only
+  surface under the harness, not in a manual run).
+
+### L-10 -- Start-Process cannot launch an npm CLI shim on Windows; Get-Command finding it is not enough
+- **Category:** Environment
+- **Tags:** `#stack:powershell` `#stack:windows` `#stack:nodejs` `#phase:build` `#phase:qa`
+- **Signal:** A PowerShell script launches a Node/npm-installed CLI with
+  `Start-Process -FilePath "claude"` (or any npm global: `eslint`, `tsc`, `prettier`...) and
+  dies with `"%1 is not a valid Win32 application"` -- even though `Get-Command claude`
+  resolves it. The same CLI runs fine when typed directly in the shell.
+- **Principle:** npm global executables on Windows are not `.exe` files -- they are generated
+  `.ps1` / `.cmd` shim scripts (`%APPDATA%\npm\claude.ps1`). `Start-Process -FilePath` requires a
+  real Win32 image and cannot execute a script shim, so it throws. `Get-Command` succeeding only
+  proves the shim is on PATH, not that `Start-Process` can launch it. Either invoke the shim
+  through its interpreter -- `(Get-Command claude).Source` then `powershell -NoProfile -File <shim>`
+  (or `cmd /c claude ...`) -- or use the call operator `& claude ...` when you do not need
+  Start-Process's process-handle/timeout features. A release gate that uses `Start-Process` on a
+  shim has never actually run on Windows; verify by observing a real PASS, not just "no error at
+  registration". Sibling of [[L-01]] / [[L-03]] / [[L-09]] (Windows/PS harness traps that pass a
+  glance but fail at runtime).
+- **Origin:** SDAD v6 I7. Discovered empirically while attempting to add audit behavioral LLM
+  scenarios to `.sdad/eval/llm-smoke.ps1`: the pre-existing `Start-Process -FilePath "claude"`
+  release-gate launch fails on Windows because `claude` is `claude.ps1`. The LLM smoke gate had
+  never run on this machine. I7 shipped its tests as deterministic ratchets instead; the launcher
+  fix was flagged as a separate task.
+
+### L-11 -- `git add` silently no-ops when the path case mismatches the index entry on Windows
+- **Category:** Environment
+- **Tags:** `#stack:git` `#stack:windows` `#phase:build`
+- **Signal:** You run `git add <File>`, the command exits 0 with no error, but `git diff --cached`
+  is empty and `git status` still shows the file unstaged. On Windows (case-insensitive FS), the
+  only clue is that the path case you supplied does not match the exact case stored in the git index.
+- **Principle:** On a case-insensitive filesystem (Windows, default macOS), `git add <Path>`
+  silently no-ops when `<Path>` case differs from the index entry -- no error, no warning, exit 0.
+  Before staging, confirm the tracked name with `git ls-files | Select-String <name>`. Stage by
+  that exact name: `git add -- "Claude.md"`, not `git add "CLAUDE.md"`. Always verify staging
+  landed with `git diff --cached --stat` before committing. Sibling of [[L-04]] (same root: git
+  case behavior on Windows) -- L-04 covers referencing the file on case-sensitive surfaces; L-11
+  covers failing to stage it locally.
+- **Origin:** SDAD v6 I9. `git add "CLAUDE.md"` exited 0 but staged nothing because git tracks
+  the file as `Claude.md`. The staging had silently no-opped; caught only by checking
+  `git diff --cached` (empty). Fixed by staging with the exact tracked name.

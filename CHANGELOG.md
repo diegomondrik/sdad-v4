@@ -7,6 +7,90 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [6.0] — 2026-06-26
+
+### Overview
+
+SDAD v6.0 "Pyplan Audit Edition" adds a first-class audit lifecycle (`$audit`) for existing
+Pyplan models, a business-alignment dimension shared across `$build` and `$audit`, and
+domain-correctness profiles for the functional domains SDAD projects most frequently address.
+v5.x projects are fully forward-compatible -- no migration needed, just `apply-v6.*`.
+
+Core theme: SDAD can now judge a model it did not build. Where `$docfinal` retroactively
+documents, `$audit` judges and recommends, delivering a five-dimension client-facing report
+(development/architecture, security, usability, quality, business). Evidence is acquired
+from `.ppl` model exports and/or Pyplan MCP read endpoints; un-acquirable areas are declared
+"not assessable" -- never silently skipped or fabricated.
+
+**Upgrade note:** existing v5.x checkouts: `git tag v5.2` then pull and run `apply-v6.*`.
+Fresh installs use v6.0 automatically via `install.*`.
+
+---
+
+### Added
+
+**$audit lifecycle (I1 -- I5)**
+- `$audit` command (sibling of `$docfinal`): five-dimension audit of an existing Pyplan model
+  without a Spec; runs via `.sdad/AUDIT_ACTIVE` sentinel (allowlisted in spec-gate)
+- `.sdad/audit/` workspace: evidence manifest, dimension reports, improvement backlog
+- `.sdad/audit/lib/acquire-evidence.*`: evidence acquisition (`.ppl` parse, MCP read, manual)
+- `.sdad/audit/SCHEMA.md`: evidence contract -- what must be acquired before each dimension runs
+- Spec-gate extended: `AUDIT_ACTIVE` allowlisted (same pattern as `DOCFINAL_ACTIVE`)
+
+**pyplan-audit skill (I4)**
+- `.claude/skills/pyplan-audit/SKILL.md`: five-dimension audit engine composing existing skills
+- `.claude/skills/pyplan-audit/report-template.md`: English-output client report template
+- Severity reconciliation: unified audit scheme with explicit mapping from `H-XX`, `PP-XX`,
+  and business severities -- two auditors classify identically (scenario 22 ratchet)
+
+**pyplan-mcp skill (built in this release)**
+- `.claude/skills/pyplan/mcp/SKILL.md`: `@mcp_tool` producer rules + MCP read consumer rules
+  Covers `result = _fn`, `Annotated[type, 'desc']`, serializable returns, OAuth token handling
+
+**business-alignment skill (I3a)**
+- `.claude/skills/business-alignment/SKILL.md`: domain-agnostic alignment core
+  In `$build`: flags non-measurable objectives (section 1) and untraceable business rules (section 6)
+  In `$audit`: elicitation-based alignment assessment; "not assessable" with no elicitation input
+
+**Domain profile framework + starter profiles (I3b)**
+- `PROJECT_DOMAIN` added to CLAUDE.md project declaration (asked in `$spec`, inferred in `$audit`)
+- `.claude/skills/domain-finance/SKILL.md`: FP&A correctness (consolidation, FX, NPV/IRR, WC)
+- `.claude/skills/domain-supply-chain/SKILL.md`: SC correctness (safety stock, MEIO, S&OP)
+- Load on-demand by `PROJECT_DOMAIN` (tool-minimalism: only the project domain loads)
+- Missing profile -> "not assessable -- no domain profile" (a finding, never a skip)
+- Multi-domain models load multiple profiles and flag cross-domain seams as high risk
+- Every domain finding carries a confidence level (LLM profile raises the floor, not a SME)
+
+**Usability sub-protocol (I6)**
+- Live-app walkthrough required for full usability assessment; when unavailable, the dimension
+  is limited to convention-compliance and the report declares the limitation
+
+**$eval extended to 22 scenarios (I7)**
+- Scenarios 13-22 added: CLAUDE.md case, CI spec-gate policy, audit evidence schema,
+  MCP tool audit, missing result assign, circular deps, gate-allow-audit, usability-no-app,
+  audit report integrity, severity determinism
+
+**New checks ratchets (v6)**
+- `checks/audit-evidence.*`: evidence schema validation
+- `checks/mcp-tool-audit.*`: @mcp_tool node compliance
+- `checks/missing-result-assign.*`: node graph result= assignment
+- `checks/circular-deps.*`: node graph circular dependency detection
+- `checks/spec-gate-policy.*`: spec-gate allowlist integrity
+- `checks/audit-report-integrity.*`: fabrication + gap-surfacing validation
+
+**Installer + upgrade path**
+- `apply-v6.ps1` / `apply-v6.sh`: idempotent, self-deleting, pure ASCII upgrade scripts
+- `install.*` / `project-init.*` updated to v6.0: new skills, all 22 eval scenarios,
+  `.sdad/audit/` scaffold on every new project
+
+**CLAUDE.md v6 wiring (I9)**
+- Version bump to 6.0; `$audit` registered in Commands
+- `PROJECT_DOMAIN` declaration and on-demand domain profile loading rule
+- 5 new behavior rules (model-access gate, not-assessable policy, domain confidence, neutral framing)
+- Net CLAUDE.md delta: +35 lines vs v5.2 baseline (within +60 budget)
+
+---
+
 ## [5.2] — 2026-06-24
 
 ### Overview
