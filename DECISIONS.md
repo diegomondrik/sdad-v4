@@ -943,3 +943,46 @@ QA: Layer 1 (Security) -- the AUDIT_ACTIVE sentinel reuses the EXACT trust model
           hook); .ps1/.sh mirrored. Layer 4 -- ASCII clean (scenario 06 PASS); skill
           section cross-references BR-14 + the policy file paths.
 ════════════════════════════════════════════════════════
+
+---
+
+## Increment I6 -- Usability sub-protocol (live walkthrough + convention-only Tier B)
+
+════════════════════════════════════════════════════════
+HUB BLOCK -- DECISIONS_SDAD-v4.md
+════════════════════════════════════════════════════════
+Date: 2026-06-26
+Increment: I6 -- Usability sub-protocol (MEDIUM)
+Model: claude-sonnet-4-6 . effort medium
+Decision: Usability (dimension 3) gets an explicit two-tier sub-protocol in the
+          pyplan-audit skill. Tier A (live app accessible): walkthrough of user
+          flows, per-interface rendering check, screenshot/description evidence.
+          Tier B (app NOT accessible, BR-12): declare limitation with exact wording
+          "convention-only -- live walkthrough not performed", run structural proxies
+          only (node-ids, input validation metadata, dead interface nodes), cap all
+          findings at MEDIUM severity. The manifest.md gains a required `App Access:
+          true | false` field (SCHEMA.md section 4 extended); absence = gap.
+          Fixture no-app-access/manifest.md exercises Tier B. Eval scenario 20 is
+          a static contract check: SKILL.md must contain "convention-only",
+          "live walkthrough not performed", and "App Access"; fixture must declare
+          "App Access: false" and "convention-only".
+Rationale: Without a Tier B path, an auditor missing app access would either halt
+          the whole audit or silently omit usability. Both are wrong. The two-tier
+          model ensures usability is ALWAYS reported -- either fully or with an
+          explicit, actionable limitation declaration. The MEDIUM severity cap for
+          Tier B prevents false CRITICALs from structural proxies that are not
+          observed behavior (epistemic honesty, same principle as BR-09/BR-10).
+Alternatives considered: (a) mark usability "not assessable" when no app --
+          rejected: structural proxies do add value; "not assessable" would be
+          a silent skip disguised as honest, which is worse. (b) no severity cap --
+          rejected: a convention-compliance finding is inherently lower-confidence
+          than observed behavior; capping at MEDIUM preserves the trust model.
+Impact: 1 skill extended (pyplan-audit, +usability section), 1 schema updated
+          (SCHEMA.md +App Access field), 1 new fixture (no-app-access/manifest.md),
+          1 new eval scenario (20). Core 20/20 PASS. No CLAUDE.md change.
+QA: Layer 1 -- no security surface (skill doc only). Layer 4 -- ASCII clean
+          (scenario 06 PASS); Tier B severity cap prevents false P0/P1 from
+          convention-only proxies. Layer 5 -- usability sub-protocol distinguishes
+          Tier A (observed) from Tier B (structural), consistent with the
+          not-assessable rule (BR-12 explicitly documents the limitation).
+════════════════════════════════════════════════════════

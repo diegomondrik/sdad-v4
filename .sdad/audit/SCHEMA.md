@@ -83,10 +83,19 @@ does not re-validate structure.
 
 ## 4. manifest.md
 
-Human-readable header for the audit report. Records: acquisition path used,
-timestamp, Pyplan version if known, node count, and every declared gap. Gaps
-are the areas the audit reports as "not assessable" -- they are findings, never
-silent skips.
+Human-readable header for the audit report. Required fields:
+- **Project:** slug
+- **Acquired At:** YYYY-MM-DD
+- **Acquisition Path:** ppl-export | mcp-read | manual
+- **Pyplan Version:** string | unknown
+- **Node Count:** integer
+- **App Access:** true | false (required for usability dimension, BR-12)
+- **Usability:** convention-only (no live walkthrough performed) | live walkthrough performed
+- **Gaps:** table listing un-acquired areas (area, reason, status: not_assessable)
+
+Gaps are the areas the audit reports as "not assessable" -- they are findings, never
+silent skips. `App Access: false` signals Tier B usability (convention-only) and must
+appear explicitly; absent = declare it missing as a gap.
 
 ---
 

@@ -97,6 +97,44 @@ Surface any `agent-run` non-zero exit to the developer; do not proceed silently.
 
 ---
 
+## Usability dimension sub-protocol (dimension 3, BR-12)
+
+Usability is the only dimension that requires **live app access** to assess fully.
+The sub-protocol has two tiers:
+
+### Tier A — Live walkthrough (app accessible)
+1. Request the running Pyplan app URL or instance from the owner.
+2. Walk through each declared user flow (§3 / business objective):
+   - Navigation: does the user reach the right screens without dead ends?
+   - Cognitive load: are filters, indexes, and inputs labeled clearly?
+   - Task success: can the target user complete the declared task end-to-end?
+   - Error handling: do invalid inputs surface a clear message (not a crash/blank)?
+3. For each interface node in the node graph: check it renders data (not empty/error).
+4. Screenshot or describe evidence for each finding. Severity per BR-03.
+
+### Tier B — Convention-compliance only (app NOT accessible, BR-12)
+When the live app is not accessible during the audit:
+1. **Declare the limitation immediately** — do not defer or omit. Use exact wording:
+   `"Usability: convention-only — live walkthrough not performed."`
+2. Run convention checks only (what is inspectable from the node graph + code):
+   - Interface nodes present? (`type: interface` in the node graph)
+   - Input nodes have validation metadata? (range, type in code snippet)
+   - Node identifiers are human-readable? (no `node_12`, no single-letter ids)
+   - No dead interface nodes (declared but 0 dependencies, never referenced)
+3. Every finding is marked `confidence: low` — these are structural proxies, not
+   observed behavior. A convention-compliance finding cannot be CRITICAL or HIGH;
+   cap at MEDIUM (BR-03 override for Tier B findings).
+4. Add to the report backlog: `"Recommend a live-walkthrough session to close the
+   usability gap. Current findings are convention-only."` (LOW band, for the owner).
+
+### Manifest field
+The evidence manifest (`manifest.md`) must declare `App Access: true | false`.
+When `false`, the report automatically applies Tier B and records
+`Usability: convention-only (no live walkthrough performed)` in the evidence
+manifest header. This field is required — absence = declare it missing as a gap.
+
+---
+
 ## Domain detection and loading
 
 `PROJECT_DOMAIN` is declared in `$spec` (developer) or inferred in `$audit` from
