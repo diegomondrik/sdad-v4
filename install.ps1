@@ -1,6 +1,6 @@
-# SDAD v5.2 -- Installer for Windows (PowerShell)
+# SDAD v6.0 -- Installer for Windows (PowerShell)
 # Spec-Driven AI Development -- G7 AI Development Methodology
-# Version: 5.2 | 2026
+# Version: 6.0 | 2026
 #
 # L-01 rule: this file is pure ASCII -- no em-dashes, accents, arrows, or section symbols.
 #
@@ -19,7 +19,7 @@ $REPO = "https://raw.githubusercontent.com/diegomondrik/sdad-v4/main"
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "  SDAD v5.2 -- Installer" -ForegroundColor Cyan
+Write-Host "  SDAD v6.0 -- Installer" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -79,6 +79,10 @@ $folders = @(
     ".claude/skills/pyplan/qa-platform",
     ".claude/skills/pyplan/spec-context",
     ".claude/skills/pyplan/mcp",
+    ".claude/skills/pyplan-audit",
+    ".claude/skills/business-alignment",
+    ".claude/skills/domain-finance",
+    ".claude/skills/domain-supply-chain",
     ".claude/skills/decision-architecture",
     ".claude/skills/data-discovery",
     ".claude/skills/dev-setup",
@@ -93,7 +97,8 @@ $folders = @(
     ".claude/hooks",
     "checks",
     ".sdad/lib",
-    ".sdad/eval"
+    ".sdad/eval",
+    ".sdad/audit/lib"
 )
 
 foreach ($folder in $folders) {
@@ -125,6 +130,11 @@ $files = @(
     ".claude/skills/pyplan/qa-platform/SKILL.md",
     ".claude/skills/pyplan/spec-context/SKILL.md",
     ".claude/skills/pyplan/mcp/SKILL.md",
+    ".claude/skills/pyplan-audit/SKILL.md",
+    ".claude/skills/pyplan-audit/report-template.md",
+    ".claude/skills/business-alignment/SKILL.md",
+    ".claude/skills/domain-finance/SKILL.md",
+    ".claude/skills/domain-supply-chain/SKILL.md",
     ".claude/skills/decision-architecture/SKILL.md",
     ".claude/skills/data-discovery/SKILL.md",
     ".claude/skills/dev-setup/SKILL.md",
@@ -154,10 +164,27 @@ $files = @(
     # Lesson ratchet (checks)
     "checks/ascii-ps1.ps1",
     "checks/ascii-ps1.sh",
+    # v6 ratchet checks
+    "checks/audit-evidence.ps1",
+    "checks/audit-evidence.sh",
+    "checks/mcp-tool-audit.ps1",
+    "checks/mcp-tool-audit.sh",
+    "checks/missing-result-assign.ps1",
+    "checks/missing-result-assign.sh",
+    "checks/circular-deps.ps1",
+    "checks/circular-deps.sh",
+    "checks/spec-gate-policy.ps1",
+    "checks/spec-gate-policy.sh",
+    "checks/audit-report-integrity.ps1",
+    "checks/audit-report-integrity.sh",
     # $agent liveness wrapper
     ".sdad/lib/agent-run.ps1",
     ".sdad/lib/agent-run.sh",
-    # $eval golden-dataset seed
+    # $audit evidence library
+    ".sdad/audit/lib/acquire-evidence.ps1",
+    ".sdad/audit/lib/acquire-evidence.sh",
+    ".sdad/audit/SCHEMA.md",
+    # $eval golden-dataset seed (22 scenarios)
     ".sdad/eval/run-eval.ps1",
     ".sdad/eval/llm-smoke.ps1",
     ".sdad/eval/lib/assert-claude-md.ps1",
@@ -172,7 +199,17 @@ $files = @(
     ".sdad/eval/scenarios/09-eval-detects-regression/run.ps1",
     ".sdad/eval/scenarios/10-agent-timeout/run.ps1",
     ".sdad/eval/scenarios/11-typed-section13/run.ps1",
-    ".sdad/eval/scenarios/12-hold-autocommit/run.ps1"
+    ".sdad/eval/scenarios/12-hold-autocommit/run.ps1",
+    ".sdad/eval/scenarios/13-claude-md-case/run.ps1",
+    ".sdad/eval/scenarios/14-ci-spec-gate-policy/run.ps1",
+    ".sdad/eval/scenarios/15-audit-evidence-schema/run.ps1",
+    ".sdad/eval/scenarios/16-mcp-tool-audit/run.ps1",
+    ".sdad/eval/scenarios/17-missing-result-assign/run.ps1",
+    ".sdad/eval/scenarios/18-circular-deps/run.ps1",
+    ".sdad/eval/scenarios/19-gate-allow-audit/run.ps1",
+    ".sdad/eval/scenarios/20-audit-usability-no-app/run.ps1",
+    ".sdad/eval/scenarios/21-audit-report-integrity/run.ps1",
+    ".sdad/eval/scenarios/22-severity-determinism/run.ps1"
 )
 
 foreach ($dest in $files) {
@@ -299,16 +336,18 @@ _No entries yet. Run `$`qa on your first completed increment._
 # .gitignore
 $gitignoreEntries = @(
     "",
-    "# SDAD v5.2",
+    "# SDAD v6.0",
     ".claude/.session_tmp",
     ".sdad/agent_output.tmp",
     ".sdad/gate.log",
+    ".sdad/AUDIT_ACTIVE",
+    ".sdad/HOLD_AUTOCOMMIT",
     "*.tmp"
 )
 
 if (Test-Path ".gitignore") {
     $gitignoreContent = Get-Content ".gitignore" -Raw
-    if ($gitignoreContent -notmatch "SDAD v") {
+    if ($gitignoreContent -notmatch "SDAD v6") {
         Add-Content ".gitignore" ($gitignoreEntries -join "`n")
         Write-Host "  OK     .gitignore updated" -ForegroundColor Green
     } else {
@@ -344,19 +383,24 @@ Write-Host ""
 Write-Host "[ 7/7 ] Installation complete" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Green
-Write-Host "  SDAD v5.2 installed successfully" -ForegroundColor Green
+Write-Host "  SDAD v6.0 installed successfully" -ForegroundColor Green
 Write-Host "============================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Files installed:" -ForegroundColor White
-Write-Host "  CLAUDE.md                                core instructions (v5.2)" -ForegroundColor White
+Write-Host "  CLAUDE.md                                core instructions (v6.0)" -ForegroundColor White
 Write-Host "  .claude/skills/                          AI Architect, AI Engineer, harness + on-demand skills" -ForegroundColor White
+Write-Host "  .claude/skills/pyplan-audit/             5-dimension audit engine" -ForegroundColor White
+Write-Host "  .claude/skills/business-alignment/       alignment + domain-agnostic core" -ForegroundColor White
+Write-Host "  .claude/skills/domain-finance/           FP&A domain-correctness profile" -ForegroundColor White
+Write-Host "  .claude/skills/domain-supply-chain/      supply-chain domain-correctness profile" -ForegroundColor White
 Write-Host "  .claude/agents/                          code-reviewer, security-auditor, test-generator + HANDOFF" -ForegroundColor White
 Write-Host "  .claude/hooks/                           session hooks + PreToolUse spec-gate (.ps1 + .sh)" -ForegroundColor White
 Write-Host "  .claude/settings.json                    hook registration (if new)" -ForegroundColor White
-Write-Host "  checks/ascii-ps1                         lesson-to-guardrail ratchet (L-01)" -ForegroundColor White
+Write-Host "  checks/                                  lesson ratchet (L-01) + v6 ratchets (8 checks)" -ForegroundColor White
 Write-Host "  .git/hooks/pre-commit                    ASCII ratchet hard stop" -ForegroundColor White
 Write-Host "  .sdad/lib/agent-run                      `$agent liveness wrapper (600s timeout)" -ForegroundColor White
-Write-Host "  .sdad/eval/                              `$eval golden dataset + runner" -ForegroundColor White
+Write-Host "  .sdad/audit/                             evidence + report workspace for `$audit" -ForegroundColor White
+Write-Host "  .sdad/eval/                              `$eval golden dataset + runner (22 scenarios)" -ForegroundColor White
 Write-Host "  Pyplan MCP                               registered globally (dev.pyplan.com)" -ForegroundColor White
 Write-Host "  SPEC.md / LESSON_LIBRARY.md              blank templates (if new)" -ForegroundColor White
 Write-Host ""

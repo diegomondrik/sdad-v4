@@ -1,4 +1,4 @@
-# SDAD v5.0 -- Project Initializer (Windows PowerShell)
+# SDAD v6.0 -- Project Initializer (Windows PowerShell)
 # Run from inside the project repo you want to initialize.
 #
 # L-01 rule: this file is pure ASCII. The section sign used in the generated
@@ -65,7 +65,7 @@ if ($ScaffoldOnly) {
 
 Write-Host ""
 Write-Host "======================================" -ForegroundColor Cyan
-Write-Host "  SDAD v5.0 -- Project Initializer" -ForegroundColor Cyan
+Write-Host "  SDAD v6.0 -- Project Initializer" -ForegroundColor Cyan
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -322,11 +322,15 @@ if (Test-Path "DECISIONS.md") {
 
 # ---- 7. Create .sdad/ structure -------------------------------------------
 
-foreach ($d in @(".sdad", ".sdad\flows")) {
+foreach ($d in @(".sdad", ".sdad\flows", ".sdad\audit")) {
     if (-not (Test-Path $d)) {
         New-Item -ItemType Directory -Path $d | Out-Null
         Write-Host "  $d/ directory created." -ForegroundColor Green
     }
+}
+# Audit workspace placeholder
+if (-not (Test-Path ".sdad\audit\.gitkeep")) {
+    Set-Content -Path ".sdad\audit\.gitkeep" -Value "" -Encoding Ascii
 }
 
 # Pyplan projects: scaffold the model-snapshot folder so it exists and is
@@ -345,7 +349,7 @@ Created: $today
 Developer: $devName
 Client: $clientLine
 Compliance tier: $tier
-SDAD version: 5.0
+SDAD version: 6.0
 
 ## Session log
 
@@ -366,8 +370,23 @@ Write-Host "Seeding the v5 harness layer..." -ForegroundColor Yellow
 $harnessSeed = @(
     "checks/ascii-ps1.ps1",
     "checks/ascii-ps1.sh",
+    "checks/audit-evidence.ps1",
+    "checks/audit-evidence.sh",
+    "checks/mcp-tool-audit.ps1",
+    "checks/mcp-tool-audit.sh",
+    "checks/missing-result-assign.ps1",
+    "checks/missing-result-assign.sh",
+    "checks/circular-deps.ps1",
+    "checks/circular-deps.sh",
+    "checks/spec-gate-policy.ps1",
+    "checks/spec-gate-policy.sh",
+    "checks/audit-report-integrity.ps1",
+    "checks/audit-report-integrity.sh",
     ".sdad/lib/agent-run.ps1",
     ".sdad/lib/agent-run.sh",
+    ".sdad/audit/lib/acquire-evidence.ps1",
+    ".sdad/audit/lib/acquire-evidence.sh",
+    ".sdad/audit/SCHEMA.md",
     ".sdad/eval/run-eval.ps1",
     ".sdad/eval/llm-smoke.ps1",
     ".sdad/eval/lib/assert-claude-md.ps1",
@@ -382,7 +401,17 @@ $harnessSeed = @(
     ".sdad/eval/scenarios/09-eval-detects-regression/run.ps1",
     ".sdad/eval/scenarios/10-agent-timeout/run.ps1",
     ".sdad/eval/scenarios/11-typed-section13/run.ps1",
-    ".sdad/eval/scenarios/12-hold-autocommit/run.ps1"
+    ".sdad/eval/scenarios/12-hold-autocommit/run.ps1",
+    ".sdad/eval/scenarios/13-claude-md-case/run.ps1",
+    ".sdad/eval/scenarios/14-ci-spec-gate-policy/run.ps1",
+    ".sdad/eval/scenarios/15-audit-evidence-schema/run.ps1",
+    ".sdad/eval/scenarios/16-mcp-tool-audit/run.ps1",
+    ".sdad/eval/scenarios/17-missing-result-assign/run.ps1",
+    ".sdad/eval/scenarios/18-circular-deps/run.ps1",
+    ".sdad/eval/scenarios/19-gate-allow-audit/run.ps1",
+    ".sdad/eval/scenarios/20-audit-usability-no-app/run.ps1",
+    ".sdad/eval/scenarios/21-audit-report-integrity/run.ps1",
+    ".sdad/eval/scenarios/22-severity-determinism/run.ps1"
 )
 
 $seeded = 0
