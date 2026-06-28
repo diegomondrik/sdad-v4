@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDAD v5 — User Guide</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #FAFAFA;
+      color: #0F172A;
+      line-height: 1.6;
+      padding: 48px 24px;
+    }
+
+    .page { max-width: 860px; margin: 0 auto; }
+
+    header {
+      border-bottom: 2px solid #2563EB;
+      padding-bottom: 24px;
+      margin-bottom: 48px;
+    }
+
+    header .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #2563EB;
+      margin-bottom: 8px;
+    }
+
+    header h1 { font-size: 32px; font-weight: 700; color: #0F172A; margin-bottom: 8px; }
+    header p { font-size: 16px; color: #475569; }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    h3 { font-size: 15px; font-weight: 700; color: #0F172A; margin: 28px 0 10px; }
+
+    p { margin-bottom: 14px; font-size: 15px; color: #1E293B; }
+
+    ul, ol { margin: 0 0 18px 22px; font-size: 15px; color: #1E293B; }
+    li { margin-bottom: 8px; }
+
+    code {
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      background: #E2E8F0;
+      color: #1E293B;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    pre {
+      background: #1E1E2E;
+      color: #CDD6F4;
+      border-radius: 8px;
+      padding: 20px 24px;
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin: 12px 0 20px;
+    }
+    pre code { background: transparent; color: inherit; padding: 0; font-size: inherit; }
+
+    table { width: 100%; border-collapse: collapse; margin: 16px 0 28px; font-size: 14px; }
+    thead th { background: #1E293B; color: #FFFFFF; font-weight: 600; text-align: left; padding: 10px 14px; }
+    tbody tr:nth-child(odd) { background: #F8FAFC; }
+    tbody tr:nth-child(even) { background: #FFFFFF; }
+    tbody td { padding: 10px 14px; border-bottom: 1px solid #E2E8F0; vertical-align: top; }
+
+    .alert {
+      border-left: 4px solid #2563EB;
+      background: #EFF6FF;
+      padding: 14px 18px;
+      border-radius: 0 6px 6px 0;
+      margin: 20px 0;
+      font-size: 14px;
+      color: #1E293B;
+    }
+    .alert.warn { border-left-color: #D97706; background: #FFFBEB; }
+    .alert.success { border-left-color: #16A34A; background: #F0FDF4; }
+    .alert strong { display: block; margin-bottom: 4px; font-weight: 700; }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #FFFFFF;
+      background: #7C3AED;
+      padding: 2px 8px;
+      border-radius: 999px;
+      vertical-align: middle;
+      margin-left: 6px;
+    }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 8px 0 24px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .flow .node {
+      background: #EFF6FF;
+      color: #2563EB;
+      border: 1px solid #BFDBFE;
+      border-radius: 6px;
+      padding: 6px 12px;
+    }
+    .flow .arrow { color: #94A3B8; }
+
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid #E2E8F0;
+      font-size: 13px;
+      color: #94A3B8;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <p class="eyebrow">G7 AI Development Methodology</p>
+    <h1>SDAD v5 &mdash; User Guide</h1>
+    <p>"Board Edition" &mdash; for everyday use. No programming required: you answer questions and approve steps.</p>
+  </header>
+
+  <div class="alert">
+    <strong>How to read the v5 markers</strong>
+    Behaviors that change daily use in v5 &mdash; the build gate, the lesson ratchet,
+    <code>$eval</code> &mdash; are marked <span class="badge">v5</span>. Everything else carries over
+    from v4.3 unchanged.
+  </div>
+
+  <h2>1. The mental model</h2>
+  <p>
+    You are the director. SDAD (running inside Claude Code) is the engineering team. You decide
+    <em>what</em> and <em>why</em>; it handles <em>how</em>, and shows its work at every step so you
+    can approve or redirect. The whole thing runs as a conversation in your language &mdash; the
+    first question SDAD asks sets English or Spanish for everything that follows.
+  </p>
+  <p>The rhythm is always the same five beats:</p>
+  <div class="flow">
+    <span class="node">Context</span><span class="arrow">&rarr;</span>
+    <span class="node">Requirements</span><span class="arrow">&rarr;</span>
+    <span class="node">Spec</span><span class="arrow">&rarr;</span>
+    <span class="node">Build</span><span class="arrow">&rarr;</span>
+    <span class="node">QA</span>
+  </div>
+
+  <h2>2. A normal session, start to finish</h2>
+  <ul>
+    <li><strong>Start.</strong> Open a terminal in your project folder and run <code>claude</code>. If you used the project before, SDAD restores where you left off automatically &mdash; you do not re-explain anything.</li>
+    <li><strong>Define what you want &mdash; <code>$spec</code>.</strong> SDAD asks one question at a time, always proposing a sensible default, and reads your existing files first so it never asks the obvious. It will ask the deployment context to set a compliance tier (internal tool, customer-facing product, or regulated environment) &mdash; this quietly raises the rigor when the work is riskier. Answer in plain language; say "default" to accept a proposal.</li>
+    <li><strong>Get the contract &mdash; <code>$specout</code>.</strong> SDAD writes a full specification to <code>SPEC.md</code>: vision, users, flows, data, architecture, rules, testing, security, definition of done, and what is explicitly out of scope. Read it. This is the moment to catch a misunderstanding &mdash; it is far cheaper here than after code exists. Nothing is built until you approve it.</li>
+    <li><strong>Build &mdash; <code>$build</code>.</strong> SDAD implements the spec one small, complete piece at a time. Before each piece it announces what it will touch, what it will test, and which model/effort it recommends. After writing, it runs your real tests and reports the actual result, then reviews its own work.</li>
+    <li><strong>Review &mdash; <code>$qa</code>.</strong> Runs automatically after each increment, checking security, structure, efficiency, and best practices (plus a platform layer on Pyplan projects). Security and compliance issues are never fixed silently &mdash; SDAD flags them and waits for your go-ahead.</li>
+    <li><strong>Pause or stop &mdash; <code>$pause</code>.</strong> Shows the current state: phase, spec status, compliance tier, context budget, open findings, decisions logged. <code>$pause compress</code> produces a compact snapshot so a fresh session picks up exactly where this one ended.</li>
+  </ul>
+
+  <h2>3. What changed for you in v5</h2>
+  <p>Three things are different in daily use, all in the direction of safety.</p>
+
+  <h3>The build gate is now real <span class="badge">v5</span></h3>
+  <p>
+    Previously, "don't write code before the spec is approved" was a rule SDAD followed almost all
+    the time. In v5 it is enforced in code: if you (or the agent) try to write code in a project
+    without an approved <code>SPEC.md</code>, the action is simply refused. You will see a clear
+    message telling you to run <code>$spec</code> first. Editing documents, notes, and the spec
+    itself is always allowed &mdash; the gate only guards real code. If you genuinely need to
+    document an existing codebase that has no spec, that path (<code>$docfinal</code>) is recognized
+    and not blocked.
+  </p>
+  <div class="alert">
+    <strong>What to do when you hit the gate</strong>
+    It means you skipped a step. Run <code>$spec</code> &rarr; <code>$specout</code>, approve the
+    spec, and the gate opens. It is protecting you from the most expensive mistake in AI
+    development &mdash; building the wrong thing fast.
+  </div>
+
+  <h3>Lessons now become checks, not just notes <span class="badge">v5</span></h3>
+  <p>
+    When SDAD learns something that can be checked mechanically (for example, an encoding rule that
+    once caused a bug), it now creates an actual automated check, not only a written reminder. You
+    do not have to do anything &mdash; the check runs on its own and prevents that specific mistake
+    from recurring.
+  </p>
+
+  <h3>You can test the methodology itself &mdash; <code>$eval</code> <span class="badge">v5</span></h3>
+  <p>
+    Mostly relevant when SDAD itself is being updated: <code>$eval</code> replays a set of known
+    scenarios and confirms the methodology still behaves correctly. Think of it as a health check
+    you can run after any change to the SDAD configuration.
+  </p>
+
+  <h2>4. Command quick reference</h2>
+  <table>
+    <thead><tr><th>Command</th><th>When</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>$spec</code></td><td>Starting work</td><td>Guided requirements, one question at a time</td></tr>
+      <tr><td><code>$specout</code></td><td>After <code>$spec</code></td><td>Writes the full <code>SPEC.md</code> contract</td></tr>
+      <tr><td><code>$build [feature]</code></td><td>After approving the spec</td><td>Builds one tested increment</td></tr>
+      <tr><td><code>$qa</code></td><td>After each build</td><td>Reviews the increment (auto)</td></tr>
+      <tr><td><code>$qa full</code></td><td>Milestones</td><td>Full-project audit</td></tr>
+      <tr><td><code>$pause</code></td><td>Anytime</td><td>Shows session state</td></tr>
+      <tr><td><code>$pause compress</code></td><td>Before stopping</td><td>Snapshot for the next session</td></tr>
+      <tr><td><code>$lesson</code></td><td>Anytime</td><td>View the Lesson Library</td></tr>
+      <tr><td><code>$verify</code></td><td>New dependency</td><td>Checks library docs are current</td></tr>
+      <tr><td><code>$skills</code></td><td>Anytime</td><td>View/activate specialist skills</td></tr>
+      <tr><td><code>$docfinal</code></td><td>Legacy code</td><td>Documents a project built without SDAD</td></tr>
+      <tr><td><code>$eval</code> <span class="badge">v5</span></td><td>After SDAD changes</td><td>Runs the methodology health check</td></tr>
+    </tbody>
+  </table>
+
+  <h2>5. Compliance tiers (set once per project)</h2>
+  <p>SDAD asks for your deployment context in <code>$spec</code> and recommends a tier:</p>
+  <table>
+    <thead><tr><th>Tier</th><th>For</th><th>Adds</th></tr></thead>
+    <tbody>
+      <tr><td>Tier 1 &mdash; Standard</td><td>Internal tools, prototypes, personal scripts</td><td>No extra overhead</td></tr>
+      <tr><td>Tier 2 &mdash; Business</td><td>Customer-facing products, anything handling user data</td><td>Compliance Reviewer; audit logging, PII handling, auth review</td></tr>
+      <tr><td>Tier 3 &mdash; Enterprise / Regulated</td><td>Healthcare, finance, government, corporate IT</td><td>Threat model + data-flow diagram; blocks the build until the security section is complete and approved</td></tr>
+    </tbody>
+  </table>
+  <p>You confirm or override the recommendation. The rigor scales to the risk automatically.</p>
+
+  <h2>6. Good habits</h2>
+  <p>
+    Read the spec before approving &mdash; it is your main control point. Let increments stay small;
+    resist asking for everything at once. Watch the context-budget bar &mdash; at the 65% mark SDAD
+    will finish the current increment and ask you to start a fresh session, which keeps quality
+    high. When SDAD proposes a lesson worth capturing, accept it; that is how the system gets safer
+    over time. And when the v5 gate stops you, treat it as a reminder, not an obstacle &mdash; it is
+    enforcing the one discipline that matters most.
+  </p>
+
+  <h2>7. If something feels stuck</h2>
+  <table>
+    <thead><tr><th>Symptom</th><th>What it means / what to do</th></tr></thead>
+    <tbody>
+      <tr><td>"It refused to write code." <span class="badge">v5 gate</span></td><td>You are missing an approved spec. Run <code>$spec</code> &rarr; <code>$specout</code>, approve it.</td></tr>
+      <tr><td>A long review seems frozen.</td><td>v5 adds a timeout to delegated sub-agent work; it will surface an error rather than hang silently. Re-run the command.</td></tr>
+      <tr><td>You want to resume an old project.</td><td>Just run <code>claude</code> in the folder &mdash; state restores automatically. If you compressed the last session, the snapshot is picked up.</td></tr>
+      <tr><td>You need to pause autocommit (e.g., an open security finding).</td><td>Create an empty <code>.sdad/HOLD_AUTOCOMMIT</code> file; delete it to resume.</td></tr>
+    </tbody>
+  </table>
+
+  <footer>
+    G7 AI Development Methodology &nbsp;&middot;&nbsp; SDAD v5.2 "Board Edition" &nbsp;&middot;&nbsp; SDAD_v5_USER_GUIDE.html
+  </footer>
+
+</div>
+</body>
+</html>

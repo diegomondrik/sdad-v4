@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SDAD v4.3 — Developer Manual</title>
+<style>
+  :root {
+    --ink: #1a2332; --muted: #5a6678; --accent: #0e7490; --accent2: #b45309;
+    --bg: #fafbfc; --card: #ffffff; --line: #e3e8ee; --code-bg: #f1f5f9;
+    --ok: #15803d; --warn: #b45309; --danger: #b91c1c;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", system-ui, sans-serif; color: var(--ink);
+         background: var(--bg); margin: 0; line-height: 1.65; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+  header { border-bottom: 3px solid var(--accent); padding-bottom: 1.2rem; margin-bottom: 2rem; }
+  h1 { font-size: 1.9rem; margin: 0 0 .3rem; }
+  .sub { color: var(--muted); font-size: 1.05rem; }
+  h2 { font-size: 1.45rem; color: var(--accent); border-bottom: 1px solid var(--line);
+       padding-bottom: .35rem; margin-top: 3rem; }
+  h3 { font-size: 1.12rem; margin-top: 1.8rem; }
+  code { background: var(--code-bg); padding: .12em .4em; border-radius: 4px;
+         font-family: Consolas, monospace; font-size: .92em; }
+  pre { background: #0f172a; color: #e2e8f0; padding: 1rem 1.2rem; border-radius: 8px;
+        overflow-x: auto; font-size: .88rem; line-height: 1.5; }
+  pre code { background: none; padding: 0; color: inherit; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .93rem; }
+  th { background: var(--accent); color: #fff; text-align: left; padding: .5rem .7rem; }
+  td { border: 1px solid var(--line); padding: .45rem .7rem; vertical-align: top; }
+  tr:nth-child(even) td { background: #f6f9fb; }
+  .box { border-left: 4px solid var(--accent); background: var(--card); border-radius: 0 8px 8px 0;
+         padding: .9rem 1.1rem; margin: 1.2rem 0; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .box.warn { border-left-color: var(--warn); }
+  .box.gate { border-left-color: var(--danger); }
+  .box b:first-child { display: block; margin-bottom: .25rem; }
+  .flow { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center;
+          margin: 1.2rem 0; font-weight: 600; font-size: .95rem; }
+  .flow span { background: var(--accent); color: #fff; border-radius: 6px; padding: .35rem .8rem; }
+  .flow em { color: var(--muted); font-style: normal; }
+  .toc { background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+         padding: 1rem 1.5rem; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .pill { display: inline-block; background: var(--accent2); color:#fff; border-radius: 99px;
+          font-size: .72rem; padding: .1rem .6rem; vertical-align: middle; margin-left: .4rem; }
+  footer { margin-top: 4rem; color: var(--muted); font-size: .85rem;
+           border-top: 1px solid var(--line); padding-top: 1rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>SDAD v4.3 — Developer Manual</h1>
+  <div class="sub">Spec-Driven AI Development for Claude Code · G7 AI Development Methodology · 2026</div>
+</header>
+
+<div class="toc">
+  <b>Contents</b>
+  <ol>
+    <li><a href="#what-is">What SDAD is and why it exists</a></li>
+    <li><a href="#phases">The phases: the full cycle</a></li>
+    <li><a href="#commands">Essential commands</a></li>
+    <li><a href="#tiers">Compliance tiers</a></li>
+    <li><a href="#routing">Model &amp; effort routing <span class="pill">new in v4.3</span></a></li>
+    <li><a href="#language">Project language <span class="pill">new in v4.3</span></a></li>
+    <li><a href="#pyplan">SDAD for Pyplan</a></li>
+    <li><a href="#day-to-day">Day-to-day usage</a></li>
+    <li><a href="#context">Context budget, lessons and hooks</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ol>
+</div>
+
+<h2 id="what-is">1 · What SDAD is and why it exists</h2>
+
+<p>SDAD (<b>Spec-Driven AI Development</b>) is a methodology for building software with
+Claude Code as the primary tool. Its founding rule fits in one line:</p>
+
+<div class="box gate"><b>🔒 Golden rule</b>
+Production code is never written before the developer approves a Spec.
+The only exception is <code>$docfinal</code>, which documents already-built projects retroactively.</div>
+
+<p>Why? Because the main risk of AI-assisted development is not that the model writes
+code badly — it is that it writes the <i>wrong</i> code <i>fast</i>. Without an agreed
+specification, every session improvises decisions, scope drifts, and by day three nobody
+knows why the system does what it does. SDAD inverts the order: first we agree on
+<b>what</b> and <b>why</b> (Spec), then the model executes <b>how</b> (Build), and every
+increment closes with quality assurance (QA) and a decision record.</p>
+
+<p>Everything lives in versioned files in the repo — not in chat memory:</p>
+
+<table>
+<tr><th>File</th><th>What it holds</th></tr>
+<tr><td><code>CLAUDE.md</code></td><td>The methodology rules (the "brain" Claude Code reads every session)</td></tr>
+<tr><td><code>SPEC.md</code></td><td>The approved specification: the project contract</td></tr>
+<tr><td><code>DECISIONS.md</code></td><td>Every architectural decision, with date, model and rationale. Entries marked <code>[LOCK]</code> are never reopened</td></tr>
+<tr><td><code>LESSON_LIBRARY.md</code></td><td>Transferable lessons across projects (L-XX)</td></tr>
+<tr><td><code>.claude/</code></td><td>Specialist skills, isolated agents and session hooks</td></tr>
+</table>
+
+<h2 id="phases">2 · The phases: the full cycle</h2>
+
+<div class="flow">
+  <span>0 · Context</span><em>→</em>
+  <span>1 · Requirements ($spec)</span><em>→</em>
+  <span>2 · Spec ($specout)</span><em>→</em>
+  <span>3 · Build ($build)</span><em>→</em>
+  <span>4 · QA ($qa)</span><em>→</em>
+  <span>5 · Docs ($doc)</span>
+</div>
+
+<h3>Phase 0 — Context analysis</h3>
+<p>Automatic at session start. Claude reads the actual repo (it never asks what it can
+infer), detects UI presence, recommends a compliance tier, and surfaces 2–3 relevant
+lessons from the Lesson Library. If the project went more than 30 days without a
+<code>$build</code>, it triggers <code>$verify audit</code> to check for outdated
+dependencies.</p>
+
+<h3>Phase 1 — Guided requirements (<code>$spec</code>)</h3>
+<p>Claude asks <b>one question at a time</b>, always with a proposed default — never a
+questionnaire. It covers: scope, user flows, data model, integrations, business rules,
+performance, security, compliance tier and testing. The tier question is mandatory and
+never skipped. The project language question (English/Spanish) comes first — see
+<a href="#language">section 6</a>.</p>
+
+<div class="box"><b>💡 Document ingestion (MarkItDown)</b>
+When the requirements arrive as binary documents — PDF, Word, Excel, PowerPoint, Outlook
+messages — Claude converts them to Markdown first with Microsoft
+<a href="https://github.com/microsoft/markitdown">MarkItDown</a>
+(<code>pip install 'markitdown[all]'</code> → <code>markitdown file.pdf -o file.md</code>)
+and reads the Markdown: it preserves headings, tables and lists, and consumes far fewer
+tokens. Applies to <code>$spec</code>, §A client diagnosis and <code>$docfinal</code>.
+Converted copies live in <code>.sdad/ingest/</code>. Local trusted files only — MarkItDown
+performs I/O with the privileges of the process.</div>
+
+<h3>Phase 2 — Spec generation (<code>$specout</code>)</h3>
+<p>Generates the full document (§1 Vision … §13 AI Authorship Log) and writes it directly
+to <code>SPEC.md</code>, then asks for your approval. No approval, no <code>$build</code>.</p>
+
+<h3>Phase 3 — Guided development (<code>$build</code>)</h3>
+<p>Work happens in <b>vertical increments</b>: complete slices of functionality with their
+tests. Before each increment, Claude announces which files it touches, which tests it will
+run, which docs it updates, and which model/effort it recommends (see
+<a href="#routing">routing</a>). After writing the code: it runs the real tests, runs
+<code>$qa</code>, records the decision in <code>DECISIONS.md</code> and updates §13 of
+the Spec.</p>
+
+<h3>Phase 4 — QA (<code>$qa</code>)</h3>
+<p>Five layers, in priority order: 🔐 Security → 🏗️ Structure → ⚡ Efficiency →
+✅ Best Practices → 🟠 Platform (Pyplan only). Findings are numbered H-XX with
+severity P0/P1/P2.</p>
+
+<div class="box gate"><b>🔒 Security gate</b>
+Automatic <code>$qa</code> never touches security, compliance or Spec deviations without
+explicit human approval. P0 findings are flagged 🚨 in any phase.</div>
+
+<h3>Phase 5 — Documentation (<code>$doc</code>)</h3>
+<p>Automatically delegated to a sub-agent (it does not consume your context) and written
+to <code>/docs</code>: README, API reference, architecture document, compliance summary.</p>
+
+<h2 id="commands">3 · Essential commands</h2>
+
+<table>
+<tr><th>Command</th><th>Phase</th><th>What it does</th></tr>
+<tr><td><code>$sdad</code></td><td>—</td><td>Methodology and command overview</td></tr>
+<tr><td><code>$spec</code></td><td>1</td><td>Guided requirements, one question at a time</td></tr>
+<tr><td><code>$specout</code></td><td>2</td><td>Generates the full Spec → <code>SPEC.md</code></td></tr>
+<tr><td><code>$build [feature]</code></td><td>3</td><td>Vertical increment with tests (requires approved Spec)</td></tr>
+<tr><td><code>$qa</code> / <code>$qa review</code> / <code>$qa full</code></td><td>4</td><td>Incremental QA / per-finding approval / full audit</td></tr>
+<tr><td><code>$verify</code> / <code>$verify audit</code></td><td>—</td><td>Dependency docs check (reactive / proactive)</td></tr>
+<tr><td><code>$agent review|test|audit</code></td><td>—</td><td>Delegation to an isolated sub-agent (does not spend your context)</td></tr>
+<tr><td><code>$doc</code></td><td>5</td><td>Technical documentation (auto-delegated)</td></tr>
+<tr><td><code>$pause</code> / <code>$pause compress</code></td><td>—</td><td>Session state / snapshot for the next session</td></tr>
+<tr><td><code>$docfinal</code></td><td>—</td><td>Retroactive documentation for non-SDAD projects</td></tr>
+<tr><td><code>$lesson</code> / <code>$skills</code> / <code>$flow</code></td><td>—</td><td>Lesson Library / active skills / project flows</td></tr>
+</table>
+
+<h2 id="tiers">4 · Compliance tiers</h2>
+
+<p>Detected in Phase 0 and confirmed with you in Phase 1 — Claude recommends, you decide.</p>
+
+<table>
+<tr><th>Tier</th><th>For</th><th>What it activates</th></tr>
+<tr><td><b>1 — Standard</b></td><td>Internal tools, POCs, scripts</td><td>Nothing additional</td></tr>
+<tr><td><b>2 — Business</b></td><td>SaaS, user-facing products, customer data</td><td>Compliance Reviewer · audit logging · documented PII handling · reviewed auth</td></tr>
+<tr><td><b>3 — Enterprise</b></td><td>Healthcare, finance, government, corporate IT, ISO/SOC2</td><td>All of the above + threat model + control matrix. <b>§9 blocks <code>$build</code> until approved</b></td></tr>
+</table>
+
+<h2 id="routing">5 · Model &amp; effort routing <span class="pill">new in v4.3</span></h2>
+
+<p>Not every phase needs the same model. Designing a Spec demands the best reasoning
+available; executing an already-specified increment does not. v4.3 formalizes this with a
+per-phase routing table using <b>model-agnostic tiers</b> — so the table survives every
+new model release:</p>
+
+<table>
+<tr><th>Tier</th><th>Means</th><th>Today, for example</th></tr>
+<tr><td><b>FRONTIER</b></td><td>Best reasoning model available</td><td>fable, opus</td></tr>
+<tr><td><b>STANDARD</b></td><td>Cost/capability balance</td><td>sonnet</td></tr>
+<tr><td><b>ECONOMY</b></td><td>Fastest and cheapest</td><td>haiku</td></tr>
+</table>
+
+<table>
+<tr><th>Phase</th><th>Model · Effort</th><th>Why</th></tr>
+<tr><td><code>$spec</code> / <code>$specout</code></td><td>FRONTIER · high</td><td>Open decisions, requirements design</td></tr>
+<tr><td><code>$build</code> (per increment)</td><td>STANDARD · low — or FRONTIER · high when the increment carries risk or an open decision</td><td>Executing what is specified is cheap; deciding is not</td></tr>
+<tr><td><code>$qa</code> incremental</td><td>STANDARD · medium</td><td>Review bounded to one increment</td></tr>
+<tr><td><code>$qa full</code> / <code>$QA</code> / <code>$docfinal</code></td><td>FRONTIER · high</td><td>Whole-codebase judgment</td></tr>
+<tr><td><code>$verify</code> / <code>$doc</code></td><td>ECONOMY–STANDARD · low</td><td>Mechanical, delegable</td></tr>
+<tr><td><code>$agent review/audit</code></td><td>Pinned in frontmatter: opus · high</td><td>Vía B — the sub-agent brings its own model</td></tr>
+<tr><td><code>$agent test</code></td><td>Pinned in frontmatter: sonnet · medium</td><td>Contract-driven generation</td></tr>
+<tr><td><code>$pause</code> / <code>$lesson</code> / <code>$flow</code></td><td>Current model · low</td><td>Never worth switching for these</td></tr>
+</table>
+
+<div class="box warn"><b>⚠️ Important: the session never switches model by itself</b>
+Claude Code does not auto-switch model or effort. The mechanism is: at the start of each
+phase, Claude emits the line <code>🧠 MODEL: [recommended] · effort [level]</code>; if your
+active session differs, it flags it and you run <code>/model</code> and
+<code>/effort</code>. Only <code>$build</code> blocks code writing on a mismatch — all
+other phases flag once and continue.</div>
+
+<h2 id="language">6 · Project language <span class="pill">new in v4.3</span></h2>
+
+<p>The methodology repo and its rules are in English, but each project chooses its
+working language. The very first <code>$spec</code> question asks:
+<b>English or Spanish?</b> The answer is locked in the project declaration
+(<code>PROJECT_LANGUAGE: en | es</code>) and from then on <i>everything</i> follows it:
+the questions Claude asks, SPEC.md, DECISIONS.md entries, lesson candidates, QA reports
+and generated documentation. Code identifiers and comments stay in English regardless
+(industry convention); the language setting governs documents and interaction.</p>
+
+<h2 id="pyplan">7 · SDAD for Pyplan</h2>
+
+<p>When a project declares <code>PROJECT_PLATFORM: pyplan</code> in CLAUDE.md, SDAD
+extends with platform-specific Spec sections, skills and checklists. Nothing in the base
+cycle changes — layers are added on top.</p>
+
+<h3>Extra Spec sections (prepended before §1)</h3>
+
+<table>
+<tr><th>Section</th><th>What it documents</th><th>Gate?</th></tr>
+<tr><td><b>§0 Platform Context</b></td><td>Pyplan version, workspace, permissions, data types, conventions</td><td>No</td></tr>
+<tr><td><b>§A Data Architecture</b></td><td>Client diagnosis, architecture decision, data contract per source</td><td><b>Yes</b> — blocks <code>$build</code> until approved</td></tr>
+<tr><td><b>§B Discovery Log</b></td><td>Initialized empty; records data deltas found during <code>$build</code></td><td>No</td></tr>
+<tr><td><b>§D MCP Tools Catalog</b></td><td>Only if the project exposes <code>@mcp_tool</code> nodes: name, description, typed parameters, serializable return</td><td><b>Yes</b> — when present, blocks <code>$build</code> until approved</td></tr>
+</table>
+
+<div class="box"><b>💡 The logic behind the gates</b>
+In Pyplan projects the most expensive mistake is building the model on data that is not
+what was assumed. §A forces the data contract to be agreed <i>before</i> building — the
+same way §9 Security blocks the build on Tier 3 projects.</div>
+
+<h3>Data deltas: the discovery protocol</h3>
+
+<p>During <code>$build</code>, the client's real data usually deviates from §A. SDAD
+distinguishes two cases:</p>
+
+<table>
+<tr><th>Delta type</th><th>Examples</th><th>What happens</th></tr>
+<tr><td><b>Small</b></td><td>Format error, nulls, field with another name, unexpected volume</td><td>Resolved in the node, recorded in §B, <code>$build</code> continues</td></tr>
+<tr><td><b>Structural</b></td><td>The data does not exist, wrong granularity, the source is something else entirely</td><td>🛑 <code>$build</code> <b>pauses</b>. A data gap report is generated for the consultant to take to the client. A workaround is never improvised</td></tr>
+</table>
+
+<h3>Pyplan increment checklist</h3>
+<p>Every Pyplan increment closes by verifying: all new nodes have <code>result=</code>
+assigned and calculate without error; no circular dependencies; read-node sources match
+the §A data contract; indexes are synchronized; inputs have validations; visualization
+components display calculated data (not empty); and any deltas found were recorded in §B.
+If the increment touches an HTML interface, the HTML interface surface block also runs
+(see below).</p>
+
+<h3>HTML interfaces</h3>
+
+<p>Pyplan supports two interface types. A <b>component interface</b> is the classic grid
+of draggable components, built manually. An <b>HTML interface</b> is a single,
+self-contained web page (HTML, CSS and JavaScript) that replaces the grid entirely and
+talks to the model through Python callbacks. HTML interfaces are designed to be created
+by AI agents — Pyplan's own agents or external AI clients via Pyplan MCP — and they are
+the <b>default type whenever an agent builds a screen</b>.</p>
+
+<p>The anatomy is two parts stored together: the HTML page, and a Python class
+<code>HTMLInterface(HTMLInterfaceBase)</code> whose <code>@callback</code> methods are the
+only ones the page can call. The page reaches Python through the built-in
+<code>window.pyplan</code> bridge (<code>callback</code>, <code>on</code>,
+<code>toast</code>, <code>import</code>). Getters return JSON-friendly data; mutators
+change the model via <code>set_input</code> / <code>set_form_values</code> and return the
+stale-widget list from <code>get_nodes_to_refresh()</code>. Headings backed by nodes carry
+<code>data-pyplan-nodes</code>, which links the number on screen back to the influence
+diagram.</p>
+
+<div class="box gate"><b>🔒 Sandbox — the rules that matter</b>
+The page runs in a sandboxed frame with an isolated origin: no cookies, no
+<code>localStorage</code>, no <code>&lt;iframe&gt;</code> embeds, no authenticated requests
+outside <code>window.pyplan.callback</code>. Consequence: <b>state must persist through
+the model via callbacks</b>. External scripts, styles, fonts and images are allowed (Pyplan
+proxies them same-origin); dynamic JS modules load via
+<code>window.pyplan.import(url)</code>.</div>
+
+<div class="box"><b>💡 How SDAD treats them</b>
+The methodology does not change. An AI-built HTML interface is an <b>increment</b> under
+the Build-via-AI guardrails: approved Spec, announcement, your approval, QA, DECISIONS.md
+entry. The increment closes with the HTML interface surface checklist (CLAUDE.md), and
+<code>$qa</code> Layer 5 re-verifies the same rules. <code>$spec</code> asks which screens
+need a fully custom layout so the interface type is recorded per screen in §3/§5.</div>
+
+<h3>MCP in Pyplan (<code>@mcp_tool</code> nodes)</h3>
+
+<p>Pyplan can expose nodes as MCP tools that other AI clients invoke. SDAD treats that
+surface with extra discipline because it is an outward-facing contract:</p>
+
+<ul>
+<li>A docstring that explains the business action precisely — an external LLM must be able to invoke it correctly just by reading it.</li>
+<li>All parameters typed with <code>Annotated[type, 'description']</code> — nothing untyped.</li>
+<li>Serializable return values: no raw xarray, no DataFrames without <code>.to_dict()</code>.</li>
+<li><code>result = _fn</code> (the function is assigned, not called).</li>
+<li>QA Layer 1 verifies: OAuth tokens never in logs or results (P0), validated parameters (P1), minimum scope (P2).</li>
+</ul>
+
+<div class="box warn"><b>⚠️ Build-via-AI</b>
+The Pyplan MCP lets an AI client modify the application directly. SDAD allows it
+<i>with guardrails</i>: every MCP-driven modification is an increment — it requires an
+approved Spec, a prior announcement, your approval, QA and a DECISIONS.md entry. The MCP
+does not bypass the Spec gate. Also, the Pyplan MCP server is v1: it is documented as an
+external dependency in §7 and pinning the Pyplan version in §5 is recommended.</div>
+
+<h2 id="day-to-day">8 · Day-to-day usage</h2>
+
+<h3>Installation (once per machine + once per project)</h3>
+
+<pre><code># Windows (PowerShell) — from the project repo:
+$install = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/install.ps1" -UseBasicParsing).Content
+Invoke-Expression $install
+
+# Mac / Linux:
+bash &lt;(curl -fsSL https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/install.sh)</code></pre>
+
+<p>The installer checks Node 18+, Claude Code and ccstatusline; creates
+<code>.claude/</code> with skills, agents and hooks (Windows); and initializes
+<code>SPEC.md</code>, <code>LESSON_LIBRARY.md</code> and <code>.gitignore</code>.</p>
+
+<h3>Status bar (once per machine)</h3>
+
+<pre><code>npx ccstatusline@latest   # one-time TUI setup — enable Model, Thinking Effort, Context %, Cost, Git Branch</code></pre>
+
+<p>This writes <code>statusLine</code> into <code>~/.claude/settings.json</code>; the bar then
+renders automatically at the bottom of every Claude Code session (terminal and Code tab).
+After that, just run <code>claude</code> — nothing else to launch per session.</p>
+
+<h3>New project: the happy path</h3>
+
+<ol>
+<li><b><code>$spec</code></b> — you answer one question at a time (starting with project
+language). Claude proposes defaults; you only correct where it differs from your intent.
+You confirm the tier.</li>
+<li><b><code>$specout</code></b> — you review the generated SPEC.md. This is the moment to
+argue: changing the Spec costs minutes, changing built code costs days. You approve.</li>
+<li><b><code>$build [feature]</code></b> — Claude announces the increment (files, tests,
+docs, recommended model). If the 🧠 MODEL line does not match your session, you run
+<code>/model</code> + <code>/effort</code>. You approve and it builds.</li>
+<li><b>Automatic after each increment</b> — real tests, <code>$qa</code>, a DECISIONS.md
+entry, §13 updated, and possibly a lesson candidate (you decide: yes / skip / edit).</li>
+<li><b>At session end</b> — <code>$pause compress</code> generates the snapshot. Paste it
+at the start of the next session and Claude restores the full state without you
+explaining anything.</li>
+</ol>
+
+<h3>Existing project without SDAD</h3>
+
+<p><b><code>$docfinal</code></b> runs 4 steps: a retroactive Spec inferred from the code
+(<code>SPEC_RETROACTIVE.md</code> — it never overwrites your SPEC.md), an authorship log,
+a full QA audit (report only, it fixes nothing without your OK), and up to 3 lesson
+candidates. From there the project follows the normal cycle.</p>
+
+<h3>Common beginner mistakes</h3>
+
+<table>
+<tr><th>Mistake</th><th>Do this instead</th></tr>
+<tr><td>Asking for code directly in chat, skipping <code>$spec</code></td><td>SDAD will block it — by design. Invest 15 minutes in the Spec</td></tr>
+<tr><td>Approving the Spec without reading it</td><td>The Spec is the contract: what is not in it does not exist for <code>$build</code></td></tr>
+<tr><td>Ignoring the 🧠 MODEL line</td><td>FRONTIER for everything burns quota; ECONOMY for design produces weak specs</td></tr>
+<tr><td>Working past 70% context</td><td>At 65% SDAD blocks new <code>$build</code>: close the increment, <code>$pause compress</code>, new session</td></tr>
+<tr><td>Hand-fixing a structural data delta to avoid stopping</td><td>Pausing is the feature, not the bug: the gap report to the client avoids building on sand</td></tr>
+</table>
+
+<h2 id="context">9 · Context budget, lessons and hooks</h2>
+
+<h3>Context budget</h3>
+<p>The context window is the scarce resource of a session. SDAD monitors it constantly:
+at <b>50%</b> it warns (informational); at <b>65%</b> it blocks new <code>$build</code> —
+you finish the current increment cleanly, run <code>$pause compress</code>, and start a
+new session. Sub-agents (<code>$agent</code>, <code>$doc</code>) run in isolated context:
+delegating heavy work to them is free for your session.</p>
+
+<h3>Lesson Library</h3>
+<p>After every <code>$qa</code>, if the increment revealed a transferable pattern (a bug
+likely to recur, an undocumented integration quirk, a pattern that simplified
+everything), Claude proposes <b>one</b> lesson. If nothing valuable emerged, silence —
+an entry is never forced. Lessons are tagged <code>#stack</code> / <code>#phase</code>
+and Phase 0 of every project surfaces the 2–3 relevant ones.</p>
+
+<h3>Hooks (Windows/PowerShell, active since v4.2)</h3>
+<table>
+<tr><th>Hook</th><th>When</th><th>What it does</th></tr>
+<tr><td><code>SessionStart</code></td><td>On session open / resume</td><td>Re-injects the COMPACT ANCHOR ([LOCK] decisions) + guarded git pull (fast-forward only)</td></tr>
+<tr><td><code>PreCompact</code></td><td>Before context compaction</td><td>Writes the anchor to disk so SessionStart can restore it</td></tr>
+<tr><td><code>SessionEnd</code></td><td>On session close</td><td>Autocommit of whitelisted docs (DECISIONS.md, LESSON_LIBRARY.md) — never code</td></tr>
+</table>
+<p>Bash equivalents for Mac/Linux are pending (known v4.3 gap — see
+<code>docs/TASK_HOOKS_MACOS_PORT.md</code>).</p>
+
+<h2 id="faq">10 · FAQ</h2>
+
+<h3>Can I use SDAD with any model?</h3>
+<p>Yes. The methodology is model-agnostic: the routing table speaks in tiers
+(FRONTIER/STANDARD/ECONOMY), not names. When a new model ships, only the tier mapping
+changes.</p>
+
+<h3>What if Claude finds a security issue in the middle of something else?</h3>
+<p>It flags it 🚨 regardless of phase. But it never fixes it alone: security and
+compliance findings always require your explicit approval.</p>
+
+<h3>Does SDAD need Pyplan's Analyst Agent?</h3>
+<p>No. SDAD is self-sufficient — it never depends on Pyplan's native agent.</p>
+
+<h3>Where do I see my project's state?</h3>
+<p><code>$pause</code>: current phase, Spec status, tier, platform, context %, last
+increment with test results, open QA findings, and the recommended next step.</p>
+
+<h3>What is a [LOCK] decision?</h3>
+<p>A decision that is not reopened without your explicit override. They are the only ones
+carried in the COMPACT ANCHOR, so they survive context compaction and session changes.</p>
+
+<footer>
+G7 AI Development Methodology · SDAD v4.3 · Developer Manual ·
+Repo: <code>github.com/diegomondrik/sdad-v4</code> ·
+See also: INSTALL_GUIDE_v4.html · USAGE_AND_SHORTCUTS_v4.html · ONBOARDING_PYPLAN_v4.html
+</footer>
+
+</div>
+</body>
+</html>

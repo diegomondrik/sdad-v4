@@ -1,0 +1,862 @@
+<title>Getting Started — SDAD v6.0</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #0C1B33;
+    --canvas: #F7F6F2;
+    --white:  #FFFFFF;
+    --burnt:  #D96B2D;
+    --steel:  #2C6E8A;
+    --text:   #1E2D3D;
+    --body:   #4A5568;
+    --mist:   #EFF3F7;
+    --line:   #DDE3EA;
+    --burnt-soft: #FDF0E8;
+    --steel-soft: #E8F3F8;
+
+    --font-display: Futura, 'Century Gothic', 'Trebuchet MS', 'Gill Sans MT', sans-serif;
+    --font-body:    'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif;
+    --font-mono:    'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+
+    --r: 6px;
+    --r-lg: 12px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--canvas);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(12,27,51,0.97);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem;
+    height: 56px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .nav-brand {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #fff;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .nav-brand .badge {
+    background: var(--burnt);
+    color: #fff;
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    border-radius: 20px;
+    letter-spacing: 0.06em;
+  }
+  .nav-links {
+    display: flex; gap: 1.5rem; list-style: none;
+  }
+  .nav-links a {
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: #fff; }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--ink);
+    padding: 7rem 2rem 5rem;
+    margin-top: 56px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(44,110,138,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--burnt);
+    margin-bottom: 1.2rem;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.15;
+    text-wrap: balance;
+    max-width: 760px;
+    margin: 0 auto 1.2rem;
+  }
+  .hero-sub {
+    color: rgba(255,255,255,0.6);
+    font-size: 1.05rem;
+    max-width: 540px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.6;
+  }
+  .phase-flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 0.4rem;
+    margin-bottom: 3rem;
+  }
+  .phase-pill {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.85);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+  }
+  .phase-pill.active {
+    background: var(--burnt);
+    border-color: var(--burnt);
+    color: #fff;
+  }
+  .phase-arrow {
+    color: rgba(255,255,255,0.3);
+    font-size: 0.8rem;
+  }
+  .install-block {
+    display: inline-block;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--r-lg);
+    padding: 1.2rem 1.8rem;
+    text-align: left;
+    max-width: 560px;
+    width: 100%;
+  }
+  .install-block .label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .install-block code {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: #7DD3A8;
+    display: block;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .hero-stats {
+    display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap;
+    margin-top: 3.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--burnt);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 0.3rem;
+  }
+
+  /* ── SECTIONS ── */
+  section { padding: 5rem 2rem; }
+  section.alt { background: var(--mist); }
+  section.dark { background: var(--ink); color: #fff; }
+  .section-inner { max-width: 1080px; margin: 0 auto; }
+
+  .section-eyebrow {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--burnt);
+    margin-bottom: 0.8rem;
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 700;
+    line-height: 1.2;
+    text-wrap: balance;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+  section.dark h2 { color: #fff; }
+  .section-lead {
+    color: var(--body);
+    max-width: 580px;
+    margin-bottom: 3rem;
+    font-size: 1.02rem;
+  }
+  section.dark .section-lead { color: rgba(255,255,255,0.6); }
+
+  /* ── PREREQS ── */
+  .prereq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .prereq-card {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 1.4rem 1.2rem;
+    display: flex; flex-direction: column; gap: 0.4rem;
+  }
+  .prereq-icon {
+    font-size: 1.4rem;
+    margin-bottom: 0.2rem;
+  }
+  .prereq-card strong {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    color: var(--text);
+  }
+  .prereq-card span {
+    font-size: 0.82rem;
+    color: var(--body);
+  }
+  .prereq-card .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    margin-top: 0.3rem;
+    width: fit-content;
+  }
+  .tag-required { background: var(--burnt-soft); color: var(--burnt); }
+  .tag-optional { background: var(--steel-soft); color: var(--steel); }
+
+  /* ── TABS ── */
+  .tab-bar {
+    display: flex; gap: 0;
+    border-bottom: 2px solid var(--line);
+    margin-bottom: 0;
+  }
+  .tab-btn {
+    background: none; border: none; cursor: pointer;
+    font-family: var(--font-body); font-size: 0.88rem;
+    color: var(--body);
+    padding: 0.75rem 1.4rem;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn.active { color: var(--burnt); border-color: var(--burnt); font-weight: 600; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .code-block {
+    background: #111827;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 0 var(--r-lg) var(--r-lg) var(--r-lg);
+    padding: 1.4rem 1.6rem;
+    overflow-x: auto;
+  }
+  .code-block code {
+    font-family: var(--font-mono);
+    font-size: 0.83rem;
+    color: #D1FAE5;
+    white-space: pre;
+    display: block;
+    line-height: 1.7;
+  }
+  .code-block code .comment { color: #6B7280; }
+  .code-block code .cmd { color: #93C5FD; }
+
+  /* ── WORKFLOW ── */
+  .workflow {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    position: relative;
+  }
+  @media (max-width: 700px) {
+    .workflow { grid-template-columns: 1fr; }
+  }
+  .workflow-step {
+    position: relative;
+    padding: 2rem 1rem 2rem 1.5rem;
+    border-right: 1px solid var(--line);
+  }
+  .workflow-step:last-child { border-right: none; }
+  @media (max-width: 700px) {
+    .workflow-step { border-right: none; border-bottom: 1px solid var(--line); padding: 1.5rem; }
+    .workflow-step:last-child { border-bottom: none; }
+  }
+  .step-num {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--line);
+    line-height: 1;
+    margin-bottom: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .step-phase {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--burnt);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+  .step-title {
+    font-family: var(--font-display);
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    margin-bottom: 0.6rem;
+  }
+  .step-desc {
+    font-size: 0.82rem;
+    color: var(--body);
+    line-height: 1.55;
+  }
+  .step-deliverable {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    background: var(--burnt-soft);
+    color: var(--burnt);
+    padding: 2px 7px;
+    border-radius: 3px;
+    margin-top: 0.8rem;
+  }
+
+  /* ── COMMANDS ── */
+  .cmd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .cmd-card {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 1.2rem;
+    display: flex; flex-direction: column; gap: 0.5rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .cmd-card:hover {
+    border-color: var(--steel);
+    box-shadow: 0 2px 12px rgba(44,110,138,0.08);
+  }
+  .cmd-card .cmd-name {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--burnt);
+    font-weight: 600;
+  }
+  .cmd-card .cmd-desc {
+    font-size: 0.83rem;
+    color: var(--body);
+    line-height: 1.5;
+  }
+  .cmd-card .cmd-tag {
+    font-size: 0.68rem;
+    color: var(--steel);
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* ── PLATFORM CARDS ── */
+  .platform-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+  .platform-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--r-lg);
+    padding: 2rem;
+  }
+  .platform-card .plat-tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--burnt);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+  .platform-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.8rem;
+    letter-spacing: 0.02em;
+  }
+  .platform-card p {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.6;
+    margin-bottom: 1.2rem;
+  }
+  .platform-features { list-style: none; }
+  .platform-features li {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.7);
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: baseline; gap: 0.5rem;
+  }
+  .platform-features li:last-child { border-bottom: none; }
+  .platform-features li::before {
+    content: '→';
+    color: var(--burnt);
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+  .activate-line {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--r);
+    padding: 0.6rem 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: #7DD3A8;
+    margin-top: 1rem;
+  }
+  .activate-label {
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
+  }
+
+  /* ── VERIFY TABLE ── */
+  .verify-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  .verify-table th {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--body);
+    padding: 0.7rem 1rem;
+    text-align: left;
+    border-bottom: 2px solid var(--line);
+    background: var(--mist);
+  }
+  .verify-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    color: var(--body);
+  }
+  .verify-table td:first-child {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--burnt);
+    white-space: nowrap;
+  }
+  .verify-table tr:last-child td { border-bottom: none; }
+  .verify-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-lg); }
+
+  /* ── STATUSBAR ── */
+  .statusbar-demo {
+    background: #1C1C1E;
+    border-radius: var(--r-lg);
+    padding: 0.7rem 1.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+    border: 1px solid rgba(255,255,255,0.08);
+    margin: 1.5rem 0;
+  }
+  .sb-item { display: flex; flex-direction: column; gap: 0.15rem; }
+  .sb-label { color: rgba(255,255,255,0.35); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; }
+  .sb-val { color: #A3E635; }
+  .sb-val.warn { color: #FCD34D; }
+  .sb-val.neutral { color: #93C5FD; }
+  .sb-val.dim { color: rgba(255,255,255,0.55); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    padding: 2.5rem 2rem;
+    text-align: center;
+  }
+  footer p {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+  }
+  footer span { color: var(--burnt); }
+  footer a { color: rgba(255,255,255,0.4); text-decoration: none; }
+
+  /* ── UTIL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+  .callout {
+    background: var(--burnt-soft);
+    border-left: 3px solid var(--burnt);
+    border-radius: 0 var(--r) var(--r) 0;
+    padding: 1rem 1.2rem;
+    font-size: 0.88rem;
+    color: var(--text);
+    margin: 1.5rem 0;
+  }
+  .callout strong { color: var(--burnt); }
+  inline-code, code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--mist);
+    color: var(--burnt);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+  }
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--line), transparent);
+    margin: 0;
+  }
+</style>
+
+<nav>
+  <div class="nav-brand">
+    SDAD <span class="badge">v6.0</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#install">Install</a></li>
+    <li><a href="#workflow">Workflow</a></li>
+    <li><a href="#commands">Commands</a></li>
+    <li><a href="#platforms">Platforms</a></li>
+    <li><a href="#verify">Verify</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <p class="hero-eyebrow">Getting Started · SDAD v6.0</p>
+  <h1>From first question<br>to production-ready code.</h1>
+  <p class="hero-sub">SDAD turns Claude Code into a disciplined engineering process. Spec first, small verified increments, quality gates at every step.</p>
+
+  <div class="phase-flow">
+    <span class="phase-pill active">$spec</span>
+    <span class="phase-arrow">→</span>
+    <span class="phase-pill active">$specout</span>
+    <span class="phase-arrow">→</span>
+    <span class="phase-pill active">$build</span>
+    <span class="phase-arrow">→</span>
+    <span class="phase-pill active">$qa</span>
+    <span class="phase-arrow">→</span>
+    <span class="phase-pill">ship</span>
+  </div>
+
+  <div class="install-block">
+    <div class="label">Windows (PowerShell) — paste and run</div>
+    <code>$i = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/install.ps1" -UseBasicParsing).Content; Invoke-Expression $i</code>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Phases</div></div>
+    <div class="stat"><div class="stat-num">22</div><div class="stat-label">Eval Scenarios</div></div>
+    <div class="stat"><div class="stat-num">8+</div><div class="stat-label">Ratchet Checks</div></div>
+    <div class="stat"><div class="stat-num">3</div><div class="stat-label">Compliance Tiers</div></div>
+    <div class="stat"><div class="stat-num">v6</div><div class="stat-label">Current Release</div></div>
+  </div>
+</div>
+
+<section id="install">
+  <div class="section-inner">
+    <p class="section-eyebrow">Step 1</p>
+    <h2>Install the methodology</h2>
+    <p class="section-lead">One command installs SDAD globally on your machine. It places the CLAUDE.md core instructions and the full <code>.claude/</code> folder — skills, agents, hooks — so Claude Code picks them up automatically.</p>
+
+    <h3 style="font-family:var(--font-display);font-size:0.85rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--body);margin-bottom:0.8rem;">Prerequisites</h3>
+    <div class="prereq-grid" style="margin-bottom:2.5rem;">
+      <div class="prereq-card">
+        <div class="prereq-icon">⬡</div>
+        <strong>Node.js 18+</strong>
+        <span>Runtime for Claude Code</span>
+        <span class="tag tag-required">Required</span>
+      </div>
+      <div class="prereq-card">
+        <div class="prereq-icon">◈</div>
+        <strong>Claude Code</strong>
+        <span>The AI coding agent</span>
+        <span class="tag tag-required">Required — auto-installed</span>
+      </div>
+      <div class="prereq-card">
+        <div class="prereq-icon">⌥</div>
+        <strong>Git</strong>
+        <span>Version control</span>
+        <span class="tag tag-required">Required — auto-init</span>
+      </div>
+      <div class="prereq-card">
+        <div class="prereq-icon">◫</div>
+        <strong>ccstatusline</strong>
+        <span>Context budget status bar</span>
+        <span class="tag tag-optional">Recommended</span>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab(this,'win')">Windows (PowerShell)</button>
+      <button class="tab-btn" onclick="switchTab(this,'mac')">Mac / Linux</button>
+      <button class="tab-btn" onclick="switchTab(this,'upgrade')">Upgrading from v5</button>
+    </div>
+
+    <div id="tab-win" class="tab-panel active">
+      <div class="code-block">
+        <code><span class="comment"># Paste this in PowerShell — installs SDAD on this machine</span>
+$i = (Invoke-WebRequest -Uri <span class="comment">"https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/install.ps1"</span> -UseBasicParsing).Content
+Invoke-Expression $i</code>
+      </div>
+    </div>
+    <div id="tab-mac" class="tab-panel">
+      <div class="code-block">
+        <code><span class="comment"># Paste this in your terminal</span>
+bash &lt;(curl -fsSL https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/install.sh)</code>
+      </div>
+    </div>
+    <div id="tab-upgrade" class="tab-panel">
+      <div class="code-block">
+        <code><span class="comment"># From the repo root, after pulling v6</span>
+<span class="cmd">git</span> tag v5.2                    <span class="comment"># preserve prior state</span>
+<span class="cmd">git</span> pull                        <span class="comment"># fetch v6</span>
+<span class="comment"># Windows:</span>
+powershell -ExecutionPolicy Bypass -File .\apply-v6.ps1
+<span class="comment"># Mac / Linux:</span>
+bash apply-v6.sh</code>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:1.5rem;">
+      <strong>What gets installed:</strong> CLAUDE.md core instructions · skills (AI Architect, AI Engineer + 15 on-demand) · agents (code reviewer, test generator, security auditor) · hooks (session start/end, spec-gate) · ratchet checks · <code>$eval</code> golden dataset (22 scenarios) · audit library
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="workflow" class="alt">
+  <div class="section-inner">
+    <p class="section-eyebrow">Step 2</p>
+    <h2>Initialize a project and start</h2>
+    <p class="section-lead">After installing the methodology, initialize each new project repo. Then open Claude Code and let SDAD guide you through the five-phase loop.</p>
+
+    <div class="two-col" style="margin-bottom:2.5rem;">
+      <div>
+        <h3 style="font-family:var(--font-display);font-size:0.85rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--body);margin-bottom:0.6rem;">Initialize a project</h3>
+        <div class="code-block" style="border-radius:var(--r-lg);">
+          <code><span class="comment"># Windows</span>
+$init = (Invoke-WebRequest -Uri <span class="comment">"https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/project-init.ps1"</span> -UseBasicParsing).Content
+Invoke-Expression $init
+
+<span class="comment"># Mac / Linux</span>
+bash &lt;(curl -fsSL https://raw.githubusercontent.com/diegomondrik/sdad-v4/main/project-init.sh)</code>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-family:var(--font-display);font-size:0.85rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--body);margin-bottom:0.6rem;">Open Claude Code and start</h3>
+        <div class="code-block" style="border-radius:var(--r-lg);">
+          <code><span class="comment"># From your project folder</span>
+claude
+
+<span class="comment"># Inside the session, run:</span>
+$spec         <span class="comment"># begin requirements</span>
+$specout      <span class="comment"># generate SPEC.md</span>
+$build        <span class="comment"># implement first increment</span>
+$qa           <span class="comment"># quality review</span></code>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--font-display);font-size:1rem;letter-spacing:0.04em;color:var(--text);margin-bottom:1.5rem;">The five-phase loop</h3>
+    <div class="workflow" style="background:var(--white);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;">
+      <div class="workflow-step">
+        <div class="step-num">01</div>
+        <span class="step-phase">$spec</span>
+        <div class="step-title">Context</div>
+        <div class="step-desc">SDAD reads your repo, asks one targeted question at a time, proposes sensible defaults. Sets the project language, domain, and compliance tier.</div>
+        <span class="step-deliverable">Requirements locked</span>
+      </div>
+      <div class="workflow-step">
+        <div class="step-num">02</div>
+        <span class="step-phase">$specout</span>
+        <div class="step-title">Spec</div>
+        <div class="step-desc">Generates a full 13-section SPEC.md: vision, flows, data model, architecture, business rules, security, and definition of done.</div>
+        <span class="step-deliverable">SPEC.md written</span>
+      </div>
+      <div class="workflow-step">
+        <div class="step-num">03</div>
+        <span class="step-phase">$build</span>
+        <div class="step-title">Build</div>
+        <div class="step-desc">One vertical increment at a time. Announces what it will touch, runs real tests after writing, records every decision.</div>
+        <span class="step-deliverable">Tests + DECISIONS.md</span>
+      </div>
+      <div class="workflow-step">
+        <div class="step-num">04</div>
+        <span class="step-phase">$qa</span>
+        <div class="step-title">QA</div>
+        <div class="step-desc">Four mandatory layers: Security (P0/P1/P2) · Structure · Efficiency · Best Practices. Platform layer on Pyplan and Board projects.</div>
+        <span class="step-deliverable">QA report</span>
+      </div>
+      <div class="workflow-step">
+        <div class="step-num">05</div>
+        <span class="step-phase">$lesson / $pause</span>
+        <div class="step-title">Learn</div>
+        <div class="step-desc">Patterns that can recur become Lesson Library entries. Mechanically verifiable ones become ratchet checks that run on every future commit.</div>
+        <span class="step-deliverable">LESSON_LIBRARY.md</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="commands">
+  <div class="section-inner">
+    <p class="section-eyebrow">Reference</p>
+    <h2>Command reference</h2>
+    <p class="section-lead">All SDAD commands run inside a Claude Code session. Type them as natural language prefixed with <code>$</code>.</p>
+
+    <div class="cmd-grid">
+      <div class="cmd-card"><div class="cmd-name">$sdad</div><div class="cmd-desc">Methodology overview: phases, active skills, full command list.</div><div class="cmd-tag">any phase</div></div>
+      <div class="cmd-card"><div class="cmd-name">$spec</div><div class="cmd-desc">Guided requirements — one question at a time with proposed defaults. Reads the repo first.</div><div class="cmd-tag">phase 1</div></div>
+      <div class="cmd-card"><div class="cmd-name">$specout</div><div class="cmd-desc">Generate and write the full 13-section SPEC.md. The build contract.</div><div class="cmd-tag">phase 2</div></div>
+      <div class="cmd-card"><div class="cmd-name">$build [feature]</div><div class="cmd-desc">Implement one increment: announce → confirm → write → test → QA → DECISIONS entry.</div><div class="cmd-tag">phase 3</div></div>
+      <div class="cmd-card"><div class="cmd-name">$qa [mode]</div><div class="cmd-desc">Quality review: auto (last increment) · review (manual) · full (whole project) · $QA standalone.</div><div class="cmd-tag">phase 4</div></div>
+      <div class="cmd-card"><div class="cmd-name">$audit</div><div class="cmd-desc">Five-dimension audit of an existing Pyplan model. No Spec required. New in v6.</div><div class="cmd-tag">pyplan · v6</div></div>
+      <div class="cmd-card"><div class="cmd-name">$pause</div><div class="cmd-desc">Show session state: phase, spec status, context budget, open findings, decisions count.</div><div class="cmd-tag">any phase</div></div>
+      <div class="cmd-card"><div class="cmd-name">$pause compress</div><div class="cmd-desc">Generate a compact snapshot to paste at the start of the next session.</div><div class="cmd-tag">any phase</div></div>
+      <div class="cmd-card"><div class="cmd-name">$docfinal</div><div class="cmd-desc">Retroactive documentation for codebases built without SDAD. Infers the spec from code.</div><div class="cmd-tag">any phase</div></div>
+      <div class="cmd-card"><div class="cmd-name">$eval [-Release]</div><div class="cmd-desc">Run the 22-scenario golden dataset. Catches methodology regressions before they reach clients.</div><div class="cmd-tag">methodology</div></div>
+      <div class="cmd-card"><div class="cmd-name">$lesson</div><div class="cmd-desc">Show, search, or add transferable patterns captured from past QA runs.</div><div class="cmd-tag">any phase</div></div>
+      <div class="cmd-card"><div class="cmd-name">$doc / $agent / $flow</div><div class="cmd-desc">Documentation generation, sub-agent delegation, project flow management.</div><div class="cmd-tag">any phase</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="platforms" class="dark">
+  <div class="section-inner">
+    <p class="section-eyebrow" style="color:var(--burnt);">Platform Modes</p>
+    <h2>Pyplan and Board projects</h2>
+    <p class="section-lead">Set a single line in CLAUDE.md to activate platform-specific spec sections, increment checklists, QA layers, and skills.</p>
+
+    <div class="platform-grid">
+      <div class="platform-card">
+        <div class="plat-tag">PROJECT_PLATFORM: pyplan</div>
+        <h3>Pyplan — Analytics & Planning</h3>
+        <p>For influence-diagram models with nodes, interfaces, and optional MCP tool exposure. Adds data architecture gates, model snapshot versioning, and the $audit lifecycle.</p>
+        <ul class="platform-features">
+          <li>§A (Data Architecture) — build gate</li>
+          <li>§D (MCP Tools Catalog) — build gate when @mcp_tool used</li>
+          <li>§B Discovery Log — tracks data deltas during build</li>
+          <li>QA Layer 5 — node graph, indexes, HTML interface, MCP surface</li>
+          <li>$audit — five-dimension audit of existing models</li>
+          <li>Model snapshots → .sdad/pyplan-snapshots/</li>
+        </ul>
+        <div class="activate-label">Activate in CLAUDE.md</div>
+        <div class="activate-line">PROJECT_PLATFORM: pyplan</div>
+      </div>
+
+      <div class="platform-card">
+        <div class="plat-tag">PROJECT_PLATFORM: board</div>
+        <h3>Board — BI & Planning</h3>
+        <p>For Board BI projects with entities, relationships, cubes, capsules, and procedures. Enforces entity creation order and algorithm syntax at every increment close.</p>
+        <ul class="platform-features">
+          <li>§E (Board Data Model) — build gate</li>
+          <li>§F (Board Capsule Structure) — informational</li>
+          <li>BR-05 — entity creation order enforced (Entities → Relationships → Cubes)</li>
+          <li>BR-03 — algorithm syntax: block letters + Board functions only</li>
+          <li>BR-04 — scheduleable Procedures at Data Model level only</li>
+          <li>QA Layer 5 — 10 named checks (DM-01..06, CP-01..05, SEC-01)</li>
+        </ul>
+        <div class="activate-label">Activate in CLAUDE.md</div>
+        <div class="activate-line">PROJECT_PLATFORM: board</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="verify" class="alt">
+  <div class="section-inner">
+    <p class="section-eyebrow">Step 3</p>
+    <h2>Verify the install</h2>
+    <p class="section-lead">After installing, open Claude Code in any project and run these commands to confirm everything is active.</p>
+
+    <div class="verify-table-wrap" style="margin-bottom:2rem;">
+      <table class="verify-table">
+        <thead><tr><th>Command</th><th>Expected result</th></tr></thead>
+        <tbody>
+          <tr><td>$sdad</td><td>All phases listed, active skills shown, version 6.0</td></tr>
+          <tr><td>$skills</td><td>AI Architect and AI Engineer always-on; 15+ on-demand skills available</td></tr>
+          <tr><td>$spec</td><td>First question asks for project language (English / Spanish)</td></tr>
+          <tr><td>$pause</td><td>Session state including context budget %</td></tr>
+          <tr><td>$eval</td><td>22 scenarios run; all pass; "EVAL PASS" in output</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-family:var(--font-display);font-size:0.95rem;letter-spacing:0.04em;color:var(--text);margin-bottom:1rem;">Context budget status bar</h3>
+    <p style="color:var(--body);font-size:0.9rem;margin-bottom:1rem;">Install <code>ccstatusline</code> once per machine for a real-time status bar inside Claude Code. SDAD monitors context at 50% (soft warning) and 65% (hard warning — blocks $build).</p>
+    <div class="code-block" style="border-radius:var(--r-lg);margin-bottom:1rem;">
+      <code>npx ccstatusline@latest   <span class="comment"># interactive setup — enable Model, Context %, Session Cost, Git Branch</span></code>
+    </div>
+    <div class="statusbar-demo">
+      <div class="sb-item"><div class="sb-label">Model</div><div class="sb-val neutral">sonnet-4-6</div></div>
+      <div class="sb-item"><div class="sb-label">Effort</div><div class="sb-val neutral">low</div></div>
+      <div class="sb-item"><div class="sb-label">Context</div><div class="sb-val">38%</div></div>
+      <div class="sb-item"><div class="sb-label">Session cost</div><div class="sb-val dim">$0.42</div></div>
+      <div class="sb-item"><div class="sb-label">Branch</div><div class="sb-val dim">main</div></div>
+    </div>
+    <p style="color:var(--body);font-size:0.82rem;">The bar renders automatically in every <code>claude</code> session after setup.</p>
+  </div>
+</section>
+
+<footer>
+  <p>G7 AI Development Methodology · <span>SDAD v6.0</span> "Pyplan Audit Edition" · 2026 · <a href="https://github.com/diegomondrik/sdad-v4">github.com/diegomondrik/sdad-v4</a></p>
+</footer>
+
+<script>
+  function switchTab(btn, id) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+</script>

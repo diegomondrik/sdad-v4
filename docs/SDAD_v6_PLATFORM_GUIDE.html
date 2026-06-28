@@ -1,0 +1,1500 @@
+<title>SDAD Platform &amp; Audit Guide — v6.0</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:     #18202C;
+  --canvas:  #F5F7FA;
+  --white:   #FFFFFF;
+  --body:    #434F5F;
+  --muted:   #7A8796;
+  --line:    #DDE2EA;
+  --mist:    #EEF1F6;
+
+  --c-general: #3B5BDB;
+  --c-pyplan:  #065F46;
+  --c-board:   #7B3FA0;
+  --c-audit:   #B84C00;
+
+  --c-general-soft: #EEF2FF;
+  --c-pyplan-soft:  #D1FAE5;
+  --c-board-soft:   #F5F0FD;
+  --c-audit-soft:   #FFF4ED;
+
+  --c-mode: var(--c-general);
+  --c-mode-soft: var(--c-general-soft);
+
+  --font-display: Futura, 'Century Gothic', 'Trebuchet MS', 'Gill Sans MT', sans-serif;
+  --font-body:    'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif;
+  --font-mono:    'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+
+  --r: 5px;
+  --r-lg: 10px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--canvas);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--ink);
+  padding: 0 2rem;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.topbar-brand {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.topbar-brand .v {
+  font-size: 0.62rem;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.06em;
+}
+.topbar-label {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.35);
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── TAB NAV ── */
+.tab-nav {
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tab-nav::-webkit-scrollbar { display: none; }
+
+.tab-btn {
+  flex-shrink: 0;
+  padding: 0 2rem;
+  height: 52px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 3px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  position: relative;
+}
+.tab-btn .tab-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+}
+.tab-btn:hover { color: var(--ink); }
+.tab-btn.active { color: var(--c-mode, var(--c-general)); border-bottom-color: var(--c-mode, var(--c-general)); }
+.tab-btn.active .tab-dot { opacity: 1; }
+
+#tab-general.active  { --c-mode: var(--c-general); color: var(--c-general); border-bottom-color: var(--c-general); }
+#tab-pyplan.active   { --c-mode: var(--c-pyplan);  color: var(--c-pyplan);  border-bottom-color: var(--c-pyplan); }
+#tab-board.active    { --c-mode: var(--c-board);   color: var(--c-board);   border-bottom-color: var(--c-board); }
+#tab-audit.active    { --c-mode: var(--c-audit);   color: var(--c-audit);   border-bottom-color: var(--c-audit); }
+
+/* ── PANELS ── */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── CHAPTER HERO ── */
+.chapter-hero {
+  padding: 3rem 2.5rem 2.5rem;
+  background: var(--ch-bg, var(--c-general-soft));
+  border-bottom: 1px solid var(--ch-line, rgba(59,91,219,0.12));
+  position: relative;
+  overflow: hidden;
+}
+.chapter-hero::after {
+  content: attr(data-mode);
+  position: absolute;
+  right: -0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-display);
+  font-size: 7rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: var(--ch-watermark, rgba(59,91,219,0.06));
+  pointer-events: none;
+  line-height: 1;
+  white-space: nowrap;
+}
+.chapter-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ch-accent, var(--c-general));
+  margin-bottom: 0.6rem;
+}
+.chapter-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.18;
+  text-wrap: balance;
+  margin-bottom: 0.8rem;
+  max-width: 640px;
+}
+.chapter-hero p {
+  font-size: 0.95rem;
+  color: var(--body);
+  max-width: 580px;
+  line-height: 1.65;
+}
+
+/* ── CHAPTER CONTENT ── */
+.chapter-body {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2.5rem 2.5rem 5rem;
+}
+@media (max-width: 640px) {
+  .chapter-body { padding: 1.5rem 1.2rem 4rem; }
+  .chapter-hero { padding: 2rem 1.2rem 1.8rem; }
+}
+
+/* ── SECTION HEADINGS ── */
+.section-block {
+  margin-bottom: 3rem;
+}
+.section-block:last-child { margin-bottom: 0; }
+
+.section-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.section-eyebrow::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+h2 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  margin-bottom: 0.9rem;
+  text-wrap: balance;
+}
+h3 {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+p { color: var(--body); line-height: 1.7; margin-bottom: 0.8rem; }
+p:last-child { margin-bottom: 0; }
+code {
+  font-family: var(--font-mono);
+  font-size: 0.83em;
+  background: var(--mist);
+  color: var(--ink);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+strong { color: var(--ink); }
+
+/* ── GATE INDICATORS ── */
+.gate-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: 0.8rem;
+}
+.gate-label {
+  padding: 0.9rem 1rem;
+  background: var(--mist);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.gate-label .gl-name {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+.gate-label .gl-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+.gate-desc {
+  padding: 0.9rem 1.1rem;
+  background: var(--white);
+  font-size: 0.84rem;
+  color: var(--body);
+  line-height: 1.55;
+  display: flex;
+  align-items: center;
+}
+.gate-block { margin-bottom: 1.2rem; }
+.gate-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+.status-block  { background: #FEF2F2; color: #991B1B; }
+.status-draft  { background: #FFF7ED; color: #92400E; }
+.status-ok     { background: #F0FDF4; color: #166534; }
+
+/* ── CHECKLIST ── */
+.checklist-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.checklist-header {
+  padding: 0.8rem 1.2rem;
+  background: var(--ch-bg, var(--c-general-soft));
+  border-bottom: 1px solid var(--ch-line, rgba(59,91,219,0.1));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.checklist-header .ch-title {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ch-accent, var(--c-general));
+}
+.checklist-header .ch-tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+.checklist-items { padding: 0.5rem 0; }
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 0.55rem 1.2rem;
+  border-bottom: 1px solid var(--mist);
+  cursor: pointer;
+}
+.checklist-item:last-child { border-bottom: none; }
+.checklist-item input[type="checkbox"] {
+  margin-top: 0.2rem;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--ch-accent, var(--c-general));
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.checklist-item label {
+  font-size: 0.84rem;
+  color: var(--body);
+  line-height: 1.5;
+  cursor: pointer;
+  flex: 1;
+}
+.checklist-item input:checked + label {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+/* ── PHASE FLOW ── */
+.phase-flow {
+  display: flex;
+  gap: 0;
+  margin: 1.2rem 0;
+  overflow-x: auto;
+}
+.phase-step {
+  flex: 1;
+  min-width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  padding: 1rem 0.5rem;
+  text-align: center;
+}
+.phase-step::after {
+  content: '→';
+  position: absolute;
+  right: -0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--line);
+  font-size: 1rem;
+  z-index: 1;
+}
+.phase-step:last-child::after { display: none; }
+.ps-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ch-bg, var(--c-general-soft));
+  border: 2px solid var(--ch-accent, var(--c-general));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ch-accent, var(--c-general));
+  font-weight: 700;
+}
+.ps-cmd {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ch-accent, var(--c-general));
+}
+.ps-name {
+  font-size: 0.75rem;
+  color: var(--body);
+  line-height: 1.3;
+  font-family: var(--font-display);
+  letter-spacing: 0.03em;
+}
+
+/* ── INFO GRID ── */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+.info-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 1.2rem;
+  border-left: 3px solid var(--ch-accent, var(--c-general));
+}
+.ic-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+.ic-value {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.3rem;
+}
+.ic-desc {
+  font-size: 0.8rem;
+  color: var(--body);
+  line-height: 1.5;
+}
+
+/* ── CALLOUT ── */
+.callout {
+  border-radius: var(--r-lg);
+  padding: 1rem 1.2rem;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  margin: 1rem 0;
+  border: 1px solid transparent;
+}
+.callout-warn {
+  background: #FFF7ED;
+  border-color: rgba(184,76,0,0.2);
+  color: #7C2D12;
+}
+.callout-info {
+  background: var(--mist);
+  border-color: var(--line);
+  color: var(--body);
+}
+.callout-mode {
+  background: var(--ch-bg, var(--c-general-soft));
+  border-color: rgba(59,91,219,0.15);
+  color: var(--body);
+}
+.callout strong { color: inherit; }
+.callout code { background: rgba(0,0,0,0.06); color: inherit; }
+
+/* ── DELTA TABLE ── */
+.delta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+@media (max-width: 600px) { .delta-grid { grid-template-columns: 1fr; } }
+.delta-card {
+  border-radius: var(--r-lg);
+  padding: 1.2rem;
+  border: 1px solid var(--dc-border);
+  background: var(--dc-bg);
+}
+.delta-card.small { --dc-bg: #F0FDF4; --dc-border: rgba(22,163,74,0.2); }
+.delta-card.structural { --dc-bg: #FEF2F2; --dc-border: rgba(185,28,28,0.2); }
+.dc-label {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+.small .dc-label { color: #166534; }
+.structural .dc-label { color: #991B1B; }
+.dc-body { font-size: 0.82rem; color: var(--body); line-height: 1.55; }
+.dc-body ul { padding-left: 1.1rem; margin-top: 0.5rem; }
+.dc-body li { margin-bottom: 0.3rem; }
+
+/* ── DIMENSION CARDS (audit) ── */
+.dimension-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin: 1rem 0;
+}
+.dim-card {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--white);
+}
+.dim-num {
+  background: var(--ch-bg, var(--c-audit-soft));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--ch-accent, var(--c-audit));
+  border-right: 1px solid var(--line);
+}
+.dim-content { padding: 0.9rem 1.1rem; }
+.dim-title {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--ink);
+  margin-bottom: 0.3rem;
+}
+.dim-body {
+  font-size: 0.82rem;
+  color: var(--body);
+  line-height: 1.5;
+}
+.dim-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  padding: 2px 7px;
+  border-radius: 20px;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+.badge-p0 { background: #FEF2F2; color: #991B1B; }
+.badge-na { background: var(--mist); color: var(--muted); }
+
+/* ── NOT-ASSESSABLE ── */
+.na-block {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--ch-accent, var(--c-audit));
+  border-radius: 0 var(--r-lg) var(--r-lg) 0;
+  padding: 1rem 1.2rem;
+  margin: 1rem 0;
+}
+.na-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ch-accent, var(--c-audit));
+  margin-bottom: 0.5rem;
+}
+.na-quote {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--body);
+  line-height: 1.5;
+  background: var(--mist);
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--r);
+  margin-bottom: 0.5rem;
+}
+.na-explain { font-size: 0.82rem; color: var(--body); line-height: 1.55; }
+
+/* ── SEPARATOR ── */
+.sep {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--line), transparent);
+  margin: 2.5rem 0;
+}
+</style>
+
+<!-- ── TOP BAR ── -->
+<div class="topbar">
+  <div class="topbar-brand">SDAD <span class="v">v6.0</span></div>
+  <div class="topbar-label">Platform &amp; Audit Guide</div>
+</div>
+
+<!-- ── TAB NAV ── -->
+<div class="tab-nav" role="tablist">
+  <button class="tab-btn active" id="tab-general" role="tab" aria-selected="true"  onclick="switchTab('general')">
+    <span class="tab-dot" style="color:var(--c-general)"></span>General
+  </button>
+  <button class="tab-btn"        id="tab-pyplan"  role="tab" aria-selected="false" onclick="switchTab('pyplan')">
+    <span class="tab-dot" style="color:var(--c-pyplan)"></span>Pyplan
+  </button>
+  <button class="tab-btn"        id="tab-board"   role="tab" aria-selected="false" onclick="switchTab('board')">
+    <span class="tab-dot" style="color:var(--c-board)"></span>Board
+  </button>
+  <button class="tab-btn"        id="tab-audit"   role="tab" aria-selected="false" onclick="switchTab('audit')">
+    <span class="tab-dot" style="color:var(--c-audit)"></span>Audit
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL: GENERAL
+════════════════════════════════════════════════════════ -->
+<div class="tab-panel active" id="panel-general">
+  <div class="chapter-hero"
+       data-mode="GENERAL"
+       style="--ch-bg:var(--c-general-soft);--ch-line:rgba(59,91,219,0.12);--ch-accent:var(--c-general);--ch-watermark:rgba(59,91,219,0.05);">
+    <p class="chapter-eyebrow">PROJECT_PLATFORM: generic (default)</p>
+    <h1>General Development</h1>
+    <p>Standard SDAD for any project that isn't Pyplan or Board. All five phases apply, compliance tiers gate the spec, and the increment loop is the core discipline.</p>
+  </div>
+
+  <div class="chapter-body" style="--ch-bg:var(--c-general-soft);--ch-line:rgba(59,91,219,0.12);--ch-accent:var(--c-general);">
+
+    <!-- Phase flow -->
+    <div class="section-block">
+      <div class="section-eyebrow">The Loop</div>
+      <h2>Five-Phase Development Cycle</h2>
+      <p>Every SDAD project follows the same sequence. You cannot $build without an approved SPEC.md. You cannot close an increment without running $qa.</p>
+      <div class="phase-flow">
+        <div class="phase-step">
+          <div class="ps-dot">0</div>
+          <div class="ps-cmd">—</div>
+          <div class="ps-name">Context Analysis</div>
+        </div>
+        <div class="phase-step">
+          <div class="ps-dot">1</div>
+          <div class="ps-cmd">$spec</div>
+          <div class="ps-name">Requirements</div>
+        </div>
+        <div class="phase-step">
+          <div class="ps-dot">2</div>
+          <div class="ps-cmd">$specout</div>
+          <div class="ps-name">Spec Document</div>
+        </div>
+        <div class="phase-step">
+          <div class="ps-dot">3</div>
+          <div class="ps-cmd">$build</div>
+          <div class="ps-name">Build</div>
+        </div>
+        <div class="phase-step">
+          <div class="ps-dot">4</div>
+          <div class="ps-cmd">$qa</div>
+          <div class="ps-name">QA</div>
+        </div>
+        <div class="phase-step">
+          <div class="ps-dot">5</div>
+          <div class="ps-cmd">$lesson</div>
+          <div class="ps-name">Learn</div>
+        </div>
+      </div>
+      <div class="callout callout-info">
+        Phase 0 is silent — Claude reads the repo before asking anything. Tier is detected from the code and proposed to you for confirmation. No questionnaire; one question at a time.
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Increment anatomy -->
+    <div class="section-block">
+      <div class="section-eyebrow">Build Discipline</div>
+      <h2>Increment Anatomy</h2>
+      <p>Every increment follows the same contract. An increment that skips any step is not complete — it reopens risk for the next session.</p>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="ic-label">Step 1</div>
+          <div class="ic-value">Announce</div>
+          <div class="ic-desc">Name the feature, list files to change, tests to run, docs to update, dependencies. Wait for confirmation.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">Step 2</div>
+          <div class="ic-value">Model / Effort</div>
+          <div class="ic-desc">Emit the recommended model + effort. If your session differs, switch before writing any code.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">Step 3</div>
+          <div class="ic-value">Write Code</div>
+          <div class="ic-desc">Write only what the announcement scoped. Expanding scope mid-increment restarts the announcement.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">Step 4</div>
+          <div class="ic-value">Run Tests</div>
+          <div class="ic-desc">Execute the project test command. Report actual results — pass count, failures, errors. Never skip.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">Step 5</div>
+          <div class="ic-value">Run $qa</div>
+          <div class="ic-desc">All 4 layers. Security findings require explicit approval before any fix is applied.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">Step 6</div>
+          <div class="ic-value">Commit</div>
+          <div class="ic-desc">Atomic commit: DECISIONS.md + §13 update + all changed files. One commit per increment.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Compliance tiers -->
+    <div class="section-block">
+      <div class="section-eyebrow">Compliance</div>
+      <h2>Tier Gates</h2>
+      <p>Tier is confirmed in Phase 1. Once locked, it determines which SPEC.md sections are mandatory and which skills auto-activate.</p>
+      <div class="gate-block">
+        <div class="gate-row">
+          <div class="gate-label">
+            <div class="gl-name">Tier 1 — Standard</div>
+            <div class="gl-tag">internal · POC</div>
+          </div>
+          <div class="gate-desc">No mandatory gates. Standard Definition of Done. No auto-activated skills.</div>
+        </div>
+        <div class="gate-row">
+          <div class="gate-label">
+            <div class="gl-name">Tier 2 — Business</div>
+            <div class="gl-tag">SaaS · user data</div>
+          </div>
+          <div class="gate-desc">§9 Security expanded with data classification and retention policy. Compliance Reviewer auto-activates. DoD adds: audit logging, PII documented, auth reviewed, sanitized errors.</div>
+        </div>
+        <div class="gate-row" style="border-left:3px solid var(--c-audit);">
+          <div class="gate-label">
+            <div class="gl-name">Tier 3 — Enterprise</div>
+            <div class="gl-tag">regulated · corporate IT</div>
+          </div>
+          <div class="gate-desc"><strong>$build is blocked</strong> until SPEC.md §9 is complete and approved. Threat model, data flow diagram, and control matrix are mandatory. Full Compliance Reviewer + regulation-specific skills.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Session management -->
+    <div class="section-block">
+      <div class="section-eyebrow">Session Management</div>
+      <h2>Working Across Multiple Sessions</h2>
+      <p>Long projects span many Claude Code sessions. The context budget runs out. SDAD preserves state so the next session picks up exactly where you left off.</p>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="ic-label">At 50% context</div>
+          <div class="ic-value">Soft Warning</div>
+          <div class="ic-desc">Informational. Finish the current increment, then consider starting fresh after it closes.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">At 65% context</div>
+          <div class="ic-value">Hard Warning</div>
+          <div class="ic-desc">$build is blocked after the current increment. Run <code>$pause compress</code> and start a new session.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">$pause compress</div>
+          <div class="ic-value">Session Snapshot</div>
+          <div class="ic-desc">Generates a compact state block. Paste it at the start of the next session — Claude restores all state without re-explanation.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">COMPACT ANCHOR</div>
+          <div class="ic-value">Lock Survival</div>
+          <div class="ic-desc">PreCompact writes locked decisions to disk. SessionStart re-injects them after compaction. Locked decisions never get lost.</div>
+        </div>
+      </div>
+      <div class="callout callout-info" style="margin-top:1rem;">
+        The ccstatusline bar shows context % in real time. Keep it visible — it's the primary context budget indicator for catching the 50% and 65% thresholds before they interrupt work.
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Existing projects -->
+    <div class="section-block">
+      <div class="section-eyebrow">Existing Codebases</div>
+      <h2>$docfinal — When There Is No Spec</h2>
+      <p>For projects built before SDAD was adopted. <code>$docfinal</code> reads the codebase and generates everything retroactively — no existing spec required.</p>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="ic-label">$docfinal spec</div>
+          <div class="ic-value">Retroactive SPEC</div>
+          <div class="ic-desc">Infers §1, §2, §3, §4, §5, §9, §11, §12 from the code. Writes SPEC_RETROACTIVE.md — never overwrites SPEC.md.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">$docfinal log</div>
+          <div class="ic-value">AI Authorship Log</div>
+          <div class="ic-desc">Generates §13 table with one row per detected module or feature. Dates sourced from git log.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">$docfinal qa</div>
+          <div class="ic-value">QA Standalone Audit</div>
+          <div class="ic-desc">Full $QA across all layers. Reports only — no auto-fixes. P0 findings marked with 🚨. Numbered H-01, H-02…</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">$docfinal lessons</div>
+          <div class="ic-value">Lesson Candidates</div>
+          <div class="ic-desc">Up to 3 candidates from findings and codebase. Guided add-to-library flow for each.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL: PYPLAN
+════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panel-pyplan">
+  <div class="chapter-hero"
+       data-mode="PYPLAN"
+       style="--ch-bg:var(--c-pyplan-soft);--ch-line:rgba(6,95,70,0.15);--ch-accent:var(--c-pyplan);--ch-watermark:rgba(6,95,70,0.06);">
+    <p class="chapter-eyebrow">PROJECT_PLATFORM: pyplan</p>
+    <h1>Pyplan Development</h1>
+    <p>Influence-diagram models with data architecture gates, MCP tool catalogs, incremental checklists across six surfaces, and snapshot versioning after every build.</p>
+  </div>
+
+  <div class="chapter-body" style="--ch-bg:var(--c-pyplan-soft);--ch-line:rgba(6,95,70,0.15);--ch-accent:var(--c-pyplan);">
+
+    <!-- Activation -->
+    <div class="section-block">
+      <div class="section-eyebrow">Activation</div>
+      <h2>Enabling Pyplan Mode</h2>
+      <p>Uncomment one line in your project's <code>CLAUDE.md</code>. Everything else activates automatically — skills, gates, checklists, and snapshot scaffold.</p>
+      <div class="callout callout-mode" style="--ch-bg:var(--c-pyplan-soft);">
+        <code style="color:var(--c-pyplan);background:rgba(6,95,70,0.1);">PROJECT_PLATFORM: pyplan</code> — uncomment this in the Project Declaration section of CLAUDE.md. Claude will detect it on SessionStart and activate the full Pyplan stack.
+      </div>
+      <div class="info-grid">
+        <div class="info-card" style="--ch-accent:var(--c-pyplan);">
+          <div class="ic-label">Skills auto-loaded</div>
+          <div class="ic-value">5 Pyplan skills</div>
+          <div class="ic-desc">pyplan-diagram, pyplan-interfaces, pyplan-qa-platform, pyplan-spec-context, pyplan-mcp (when §D present)</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-pyplan);">
+          <div class="ic-label">Also activated</div>
+          <div class="ic-value">decision-architecture, data-discovery</div>
+          <div class="ic-desc">Loaded on-demand by trigger during §A definition and data source verification work.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-pyplan);">
+          <div class="ic-label">Snapshot folder</div>
+          <div class="ic-value">.sdad/pyplan-snapshots/</div>
+          <div class="ic-desc">Created automatically by project-init. Stores .ppl exports named YYYYMMDD-incN-slug.ppl</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Gates -->
+    <div class="section-block">
+      <div class="section-eyebrow">Build Gates</div>
+      <h2>Three Gates Before $build</h2>
+      <p>Pyplan projects have additional gate sections in SPEC.md. $build is blocked until each applicable gate is approved. The gates exist because building against an unvalidated data architecture is the leading cause of structural delta mid-project.</p>
+
+      <div class="gate-block">
+        <div class="gate-row" style="border-left:3px solid var(--c-pyplan);">
+          <div class="gate-label">
+            <div class="gl-name">§A — Data Architecture</div>
+            <div class="gl-tag">always required</div>
+          </div>
+          <div class="gate-desc">Must be complete and approved before $build. Covers: client diagnosis, architecture decision, data contract per source (granularity, refresh cadence, owner, format). §A is filled during $spec before any other section.</div>
+        </div>
+        <div class="gate-row" style="border-left:3px solid var(--c-pyplan);">
+          <div class="gate-label">
+            <div class="gl-name">§D — MCP Tools Catalog</div>
+            <div class="gl-tag">conditional: @mcp_tool nodes only</div>
+          </div>
+          <div class="gate-desc">Only created when the project declares at least one @mcp_tool node. When present, must be approved before $build. Documents each tool: node identifier, tool name, description, parameter names + types + Annotated descriptions, return type, serialization notes.</div>
+        </div>
+        <div class="gate-row">
+          <div class="gate-label">
+            <div class="gl-name">§B — Discovery Log</div>
+            <div class="gl-tag">fills during build</div>
+          </div>
+          <div class="gate-desc">Initialized empty at project start. Fills during $build when data deltas are found. Each entry records: assumption from §A, finding, how resolved, and impact on other nodes.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Increment Checklist -->
+    <div class="section-block">
+      <div class="section-eyebrow">Increment Close</div>
+      <h2>Six-Surface Checklist</h2>
+      <p>Every Pyplan increment runs through each applicable surface before it is marked complete. Check items off as you verify them during the build.</p>
+
+      <div class="checklist-card">
+        <div class="checklist-header" style="--ch-bg:var(--c-pyplan-soft);--ch-line:rgba(6,95,70,0.12);--ch-accent:var(--c-pyplan);">
+          <span class="ch-title">Diagram Surface</span>
+          <span class="ch-tag">always</span>
+        </div>
+        <div class="checklist-items">
+          <div class="checklist-item"><input type="checkbox" id="p1"><label for="p1">All new nodes have <code>result=</code> assigned and calculate without error</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p2"><label for="p2">No circular dependencies introduced</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p3"><label for="p3">Data source of read nodes matches §A data contract</label></div>
+        </div>
+      </div>
+
+      <div class="checklist-card">
+        <div class="checklist-header" style="--ch-bg:var(--c-pyplan-soft);--ch-line:rgba(6,95,70,0.12);--ch-accent:var(--c-pyplan);">
+          <span class="ch-title">Interface Surface</span>
+          <span class="ch-tag">always</span>
+        </div>
+        <div class="checklist-items">
+          <div class="checklist-item"><input type="checkbox" id="p4"><label for="p4">All new indexes are synchronized</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p5"><label for="p5">Inputs have type and range validations configured</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p6"><label for="p6">Visualization components display calculated data (not empty)</label></div>
+        </div>
+      </div>
+
+      <div class="checklist-card">
+        <div class="checklist-header" style="--ch-bg:var(--c-pyplan-soft);--ch-line:rgba(6,95,70,0.12);--ch-accent:var(--c-pyplan);">
+          <span class="ch-title">HTML Interface Surface</span>
+          <span class="ch-tag">when increment touches an HTML interface</span>
+        </div>
+        <div class="checklist-items">
+          <div class="checklist-item"><input type="checkbox" id="p7"><label for="p7">All page↔model traffic goes through <code>window.pyplan.callback</code> — no direct fetch/XHR</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p8"><label for="p8">Getters return JSON-friendly data; mutators return <code>get_nodes_to_refresh(...)</code> lists</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p9"><label for="p9">Model writes use <code>set_input</code> / <code>set_form_values</code> — never touch model internals directly</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p10"><label for="p10">No cookie/localStorage reliance — state persists via callbacks to the model</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p11"><label for="p11">Node-backed headings carry <code>data-pyplan-nodes</code>; in-app navigation uses plain anchors</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p12"><label for="p12">External JS modules load via <code>window.pyplan.import</code> — no &lt;iframe&gt; embeds</label></div>
+        </div>
+      </div>
+
+      <div class="checklist-card">
+        <div class="checklist-header" style="--ch-bg:var(--c-pyplan-soft);--ch-line:rgba(6,95,70,0.12);--ch-accent:var(--c-pyplan);">
+          <span class="ch-title">Discovery Surface</span>
+          <span class="ch-tag">always</span>
+        </div>
+        <div class="checklist-items">
+          <div class="checklist-item"><input type="checkbox" id="p13"><label for="p13">Any data deltas found during this increment recorded in §B and DECISIONS.md</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p14"><label for="p14">If structural delta found: $build paused, data gap report generated for consultant</label></div>
+        </div>
+      </div>
+
+      <div class="checklist-card">
+        <div class="checklist-header" style="--ch-bg:var(--c-pyplan-soft);--ch-line:rgba(6,95,70,0.12);--ch-accent:var(--c-pyplan);">
+          <span class="ch-title">MCP Surface</span>
+          <span class="ch-tag">when project has §D</span>
+        </div>
+        <div class="checklist-items">
+          <div class="checklist-item"><input type="checkbox" id="p15"><label for="p15">Each new <code>@mcp_tool</code> node: docstring explains the business action precisely</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p16"><label for="p16">All parameters use <code>Annotated[type, 'description']</code> — no untyped parameters</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p17"><label for="p17">Return value is serializable — no raw xarray, no bare DataFrames (use <code>.to_dict()</code>)</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p18"><label for="p18"><code>result = _fn</code> assigned — not <code>result = _fn()</code> (function assigned, not called)</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p19"><label for="p19">Tool does not depend on interactive agent behavior or session state</label></div>
+          <div class="checklist-item"><input type="checkbox" id="p20"><label for="p20">§D entry created or updated for this tool (identifier, name, description, parameter schema)</label></div>
+        </div>
+      </div>
+
+      <div class="checklist-card">
+        <div class="checklist-header" style="--ch-bg:var(--c-pyplan-soft);--ch-line:rgba(6,95,70,0.12);--ch-accent:var(--c-pyplan);">
+          <span class="ch-title">Versioning Surface</span>
+          <span class="ch-tag">when increment modified the Pyplan model</span>
+        </div>
+        <div class="checklist-items">
+          <div class="checklist-item"><input type="checkbox" id="p21"><label for="p21">Model exported to <code>.sdad/pyplan-snapshots/</code> named <code>YYYYMMDD-incN-slug.ppl</code></label></div>
+          <div class="checklist-item"><input type="checkbox" id="p22"><label for="p22">Snapshot included in this increment's atomic commit</label></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Data Delta -->
+    <div class="section-block">
+      <div class="section-eyebrow">Data Delta Handling</div>
+      <h2>When Reality Differs From §A</h2>
+      <p>Data sources never perfectly match what was assumed at spec time. SDAD classifies every discrepancy as either a small delta (resolve and continue) or a structural delta (pause the build).</p>
+
+      <div class="delta-grid">
+        <div class="delta-card small">
+          <div class="dc-label">Small Delta — continue building</div>
+          <div class="dc-body">
+            <p>Format errors, nulls, unexpected volume, wrong field name. Resolvable inside the node.</p>
+            <ul>
+              <li>Resolve in the node</li>
+              <li>Record in §B: assumption, finding, resolution, impact</li>
+              <li>$build continues without pause</li>
+            </ul>
+          </div>
+        </div>
+        <div class="delta-card structural">
+          <div class="dc-label">Structural Delta — pause immediately</div>
+          <div class="dc-body">
+            <p>Data does not exist, wrong granularity, source completely different from §A assumption.</p>
+            <ul>
+              <li>Pause $build immediately</li>
+              <li>Generate data gap report: assumption, finding, decision needed</li>
+              <li>Surface to developer — consultant takes report to client</li>
+              <li>$build does not resume until resolution is approved in §B</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="callout callout-warn">
+        <strong>Never improvise a workaround for a structural delta.</strong> A workaround that gets committed becomes technical debt the client discovers during user acceptance testing — at the worst possible moment.
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Build-via-AI -->
+    <div class="section-block">
+      <div class="section-eyebrow">Pyplan MCP</div>
+      <h2>Build-via-AI Guardrails</h2>
+      <p>The Pyplan MCP server allows AI clients to modify application logic and interfaces directly in a running Pyplan instance. SDAD treats each AI-driven modification as an increment — the same rules apply.</p>
+      <div class="info-grid">
+        <div class="info-card" style="--ch-accent:var(--c-pyplan);">
+          <div class="ic-label">Rule 1</div>
+          <div class="ic-value">Spec gate applies</div>
+          <div class="ic-desc">Spec must be approved before any build/modify action. Pyplan MCP does not bypass the spec gate.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-pyplan);">
+          <div class="ic-label">Rule 2</div>
+          <div class="ic-value">Announce first</div>
+          <div class="ic-desc">Each AI-driven modification is announced as an increment before execution. Wait for developer approval.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-pyplan);">
+          <div class="ic-label">Rule 3</div>
+          <div class="ic-value">QA after every change</div>
+          <div class="ic-desc">Run $qa on the modified increment. No increment is complete without QA — including AI-built interfaces.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-pyplan);">
+          <div class="ic-label">Rule 4</div>
+          <div class="ic-value">Snapshot before commit</div>
+          <div class="ic-desc">After $qa passes, export the model to .sdad/pyplan-snapshots/ before committing. Increment is not complete without it.</div>
+        </div>
+      </div>
+      <div class="callout callout-warn">
+        Pyplan MCP is a v1 dependency. Document it as an external dependency in §7 and flag its maturity level in $verify. Recommend locking to a specific Pyplan version in §5 if MCP stability is critical.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL: BOARD
+════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panel-board">
+  <div class="chapter-hero"
+       data-mode="BOARD"
+       style="--ch-bg:var(--c-board-soft);--ch-line:rgba(123,63,160,0.12);--ch-accent:var(--c-board);--ch-watermark:rgba(123,63,160,0.05);">
+    <p class="chapter-eyebrow">PROJECT_PLATFORM: board</p>
+    <h1>Board Development</h1>
+    <p>Enterprise planning and reporting models. A strict entity creation order, an §E gate with three states, algorithm syntax enforcement, and procedure placement rules.</p>
+  </div>
+
+  <div class="chapter-body" style="--ch-bg:var(--c-board-soft);--ch-line:rgba(123,63,160,0.12);--ch-accent:var(--c-board);">
+
+    <!-- Activation -->
+    <div class="section-block">
+      <div class="section-eyebrow">Activation</div>
+      <h2>Enabling Board Mode</h2>
+      <div class="callout callout-mode" style="--ch-bg:var(--c-board-soft);">
+        <code style="color:var(--c-board);background:rgba(123,63,160,0.08);">PROJECT_PLATFORM: board</code> — uncomment this in the Project Declaration section of CLAUDE.md.
+      </div>
+      <div class="info-grid">
+        <div class="info-card" style="--ch-accent:var(--c-board);">
+          <div class="ic-label">Skills auto-loaded</div>
+          <div class="ic-value">4 Board skills</div>
+          <div class="ic-desc">board-spec-context, board-data-model, board-capsule, board-qa-platform</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-board);">
+          <div class="ic-label">$spec adds</div>
+          <div class="ic-value">§E and §F sections</div>
+          <div class="ic-desc">§E Board Data Model (gate), §F Board Capsule Structure. Asked before standard sections.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-board);">
+          <div class="ic-label">$qa adds</div>
+          <div class="ic-value">Platform Layer 5</div>
+          <div class="ic-desc">Board-specific checks: entity order, cube dimensions, algorithm syntax, procedure placement, naming conventions.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- §E gate -->
+    <div class="section-block">
+      <div class="section-eyebrow">Build Gate</div>
+      <h2>§E Data Model — Three States</h2>
+      <p>§E is the Board build gate. Unlike Pyplan's binary gate, §E has three states that determine what $build can do.</p>
+
+      <div class="gate-block">
+        <div class="gate-row" style="border-left:3px solid #991B1B;">
+          <div class="gate-label">
+            <div class="gl-name">Empty / Not present</div>
+            <span class="gate-status status-block">Full block</span>
+          </div>
+          <div class="gate-desc">$build is completely blocked. §E must be at least in Draft state before any code is written.</div>
+        </div>
+        <div class="gate-row" style="border-left:3px solid #92400E;">
+          <div class="gate-label">
+            <div class="gl-name">Draft</div>
+            <span class="gate-status status-draft">Analysis mode</span>
+          </div>
+          <div class="gate-desc">Enables analysis mode for existing projects. Claude can read, audit, and propose changes — but cannot write new Board artefacts. Inferred fields marked [inferred] until developer confirms.</div>
+        </div>
+        <div class="gate-row" style="border-left:3px solid #166534;">
+          <div class="gate-label">
+            <div class="gl-name">Approved</div>
+            <span class="gate-status status-ok">Full $build</span>
+          </div>
+          <div class="gate-desc">Full $build enabled. All Board artefacts (SQL, CSV, Layout XML, Procedure specs) can be generated and committed.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- New vs existing -->
+    <div class="section-block">
+      <div class="section-eyebrow">Project Start</div>
+      <h2>New Project vs. Existing</h2>
+      <p>The first $spec question on Board projects: "New project or existing?" The answer determines the entire onboarding flow.</p>
+      <div class="info-grid">
+        <div class="info-card" style="--ch-accent:var(--c-board);">
+          <div class="ic-label">New project</div>
+          <div class="ic-value">Guided build</div>
+          <div class="ic-desc">Board questions in order: version, cloud/on-prem, entities, relationships, cubes, capsule structure, procedures, data sources, Board API availability.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-board);">
+          <div class="ic-label">Existing project</div>
+          <div class="ic-value">File ingestion flow</div>
+          <div class="ic-desc">Ingest Layout XML, CFG, CSV, screenshots → auto-populate §E/§F. All inferred fields marked [inferred] — developer confirms each before §E is approved.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Creation order -->
+    <div class="section-block">
+      <div class="section-eyebrow">Enforced Rules</div>
+      <h2>Entity Creation Order</h2>
+      <p>Board enforces a dependency chain. Creating objects out of order causes silent failures that are hard to diagnose. SDAD blocks out-of-order creation.</p>
+      <div class="phase-flow" style="--ch-accent:var(--c-board);--ch-bg:var(--c-board-soft);">
+        <div class="phase-step">
+          <div class="ps-dot" style="border-color:var(--c-board);background:var(--c-board-soft);color:var(--c-board);">1</div>
+          <div class="ps-cmd" style="color:var(--c-board);">Entities</div>
+          <div class="ps-name">Base objects — dimensions and master data</div>
+        </div>
+        <div class="phase-step">
+          <div class="ps-dot" style="border-color:var(--c-board);background:var(--c-board-soft);color:var(--c-board);">2</div>
+          <div class="ps-cmd" style="color:var(--c-board);">Relationships</div>
+          <div class="ps-name">Links between Entities — requires step 1 complete</div>
+        </div>
+        <div class="phase-step">
+          <div class="ps-dot" style="border-color:var(--c-board);background:var(--c-board-soft);color:var(--c-board);">3</div>
+          <div class="ps-cmd" style="color:var(--c-board);">Cubes</div>
+          <div class="ps-name">Multidimensional data — references valid Entities only</div>
+        </div>
+      </div>
+      <div class="callout callout-warn" style="margin-top:1.2rem;">
+        <strong>All Cubes must reference only valid Entities as dimensions.</strong> A Cube that references an Entity not yet created, or created in the wrong order, will cause a runtime error that is not always obvious at build time.
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Algorithm syntax -->
+    <div class="section-block">
+      <div class="section-eyebrow">Enforced Rules</div>
+      <h2>Algorithm Syntax</h2>
+      <p>Board algorithm formulas have strict syntax rules. SDAD validates every formula before an increment closes.</p>
+      <div class="info-grid">
+        <div class="info-card" style="--ch-accent:var(--c-board);">
+          <div class="ic-label">Block letters</div>
+          <div class="ic-value">a, b, c… only</div>
+          <div class="ic-desc">Algorithm steps use block letters — never arbitrary variable names. This is a Board platform constraint, not a style preference.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-board);">
+          <div class="ic-label">Valid Board functions</div>
+          <div class="ic-value">dt() rt() gt()</div>
+          <div class="ic-desc">Only Board built-in functions are valid in Algorithm formulas. No Python, no custom functions, no external library calls.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-board);">
+          <div class="ic-label">Date references</div>
+          <div class="ic-value">@DATE @MONTH @YEAR</div>
+          <div class="ic-desc">Use Board's built-in date tokens. No Python datetime imports, no hardcoded date strings in formulas.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Procedure placement -->
+    <div class="section-block">
+      <div class="section-eyebrow">Enforced Rules</div>
+      <h2>Procedure Placement</h2>
+      <p>Procedures in Board have a placement rule that determines whether they can be scheduled. Getting this wrong means a procedure that looks correct but can't be automated.</p>
+      <div class="gate-block">
+        <div class="gate-row" style="border-left:3px solid var(--c-board);">
+          <div class="gate-label">
+            <div class="gl-name">Scheduleable Procedures</div>
+            <div class="gl-tag">must be at Data Model level</div>
+          </div>
+          <div class="gate-desc">Procedures that need to run on a schedule (nightly refresh, month-end close, etc.) must be placed at the Data Model level — never at Capsule level. Only Data Model level procedures can be registered with the Board scheduler.</div>
+        </div>
+        <div class="gate-row">
+          <div class="gate-label">
+            <div class="gl-name">Client-side Steps</div>
+            <div class="gl-tag">never in server-side Procedures</div>
+          </div>
+          <div class="gate-desc">Navigation steps, selection steps, and UI interaction steps are client-side operations. Placing them inside server-side Procedures causes silent failures — the step runs server-side where there is no UI context to act on.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Board Checklist -->
+    <div class="section-block">
+      <div class="section-eyebrow">Increment Close</div>
+      <h2>Board Increment Checklist</h2>
+      <div class="checklist-card">
+        <div class="checklist-header" style="--ch-bg:var(--c-board-soft);--ch-line:rgba(123,63,160,0.1);--ch-accent:var(--c-board);">
+          <span class="ch-title">Data Model Surface</span>
+          <span class="ch-tag">always</span>
+        </div>
+        <div class="checklist-items">
+          <div class="checklist-item"><input type="checkbox" id="b1"><label for="b1">Entity creation order respected: Entities → Relationships → Cubes</label></div>
+          <div class="checklist-item"><input type="checkbox" id="b2"><label for="b2">All Cubes reference only valid Entities as dimensions</label></div>
+          <div class="checklist-item"><input type="checkbox" id="b3"><label for="b3">Algorithm formulas use block letters (a, b, c…) and Board functions only: <code>dt()</code>, <code>rt()</code>, <code>gt()</code>, <code>@DATE</code>, <code>@MONTH</code>, <code>@YEAR</code></label></div>
+          <div class="checklist-item"><input type="checkbox" id="b4"><label for="b4">No circular dependencies in Relationships</label></div>
+        </div>
+      </div>
+
+      <div class="checklist-card">
+        <div class="checklist-header" style="--ch-bg:var(--c-board-soft);--ch-line:rgba(123,63,160,0.1);--ch-accent:var(--c-board);">
+          <span class="ch-title">Capsule Surface</span>
+          <span class="ch-tag">always</span>
+        </div>
+        <div class="checklist-items">
+          <div class="checklist-item"><input type="checkbox" id="b5"><label for="b5">Scheduleable Procedures placed at Data Model level — not Capsule level</label></div>
+          <div class="checklist-item"><input type="checkbox" id="b6"><label for="b6">Client-side Steps (navigation, selection) not placed in server-side Procedures</label></div>
+          <div class="checklist-item"><input type="checkbox" id="b7"><label for="b7">All Screen Data Blocks bound to a valid Data Model</label></div>
+        </div>
+      </div>
+
+      <div class="checklist-card">
+        <div class="checklist-header" style="--ch-bg:var(--c-board-soft);--ch-line:rgba(123,63,160,0.1);--ch-accent:var(--c-board);">
+          <span class="ch-title">Artefact Validation</span>
+          <span class="ch-tag">always</span>
+        </div>
+        <div class="checklist-items">
+          <div class="checklist-item"><input type="checkbox" id="b8"><label for="b8">SQL Data Readers validated against declared source type in §E</label></div>
+          <div class="checklist-item"><input type="checkbox" id="b9"><label for="b9">CSV imports match Entity structure defined in §E</label></div>
+          <div class="checklist-item"><input type="checkbox" id="b10"><label for="b10">Layout XML follows Board element and attribute naming conventions</label></div>
+          <div class="checklist-item"><input type="checkbox" id="b11"><label for="b11">Board API credentials not logged in Procedures (P0 security finding if present)</label></div>
+        </div>
+      </div>
+
+      <div class="checklist-card">
+        <div class="checklist-header" style="--ch-bg:var(--c-board-soft);--ch-line:rgba(123,63,160,0.1);--ch-accent:var(--c-board);">
+          <span class="ch-title">Discovery Surface</span>
+          <span class="ch-tag">always</span>
+        </div>
+        <div class="checklist-items">
+          <div class="checklist-item"><input type="checkbox" id="b12"><label for="b12">Any schema or source deltas found during this increment recorded in §B and DECISIONS.md</label></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL: AUDIT
+════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panel-audit">
+  <div class="chapter-hero"
+       data-mode="AUDIT"
+       style="--ch-bg:var(--c-audit-soft);--ch-line:rgba(184,76,0,0.12);--ch-accent:var(--c-audit);--ch-watermark:rgba(184,76,0,0.05);">
+    <p class="chapter-eyebrow">$audit — Pyplan Audit (v6.0)</p>
+    <h1>Audit Capabilities</h1>
+    <p>Five-dimension judgment of an existing Pyplan model — no SPEC.md required. Evidence-first, not-assessable guarantee, neutrally delivered client report.</p>
+  </div>
+
+  <div class="chapter-body" style="--ch-bg:var(--c-audit-soft);--ch-line:rgba(184,76,0,0.12);--ch-accent:var(--c-audit);">
+
+    <!-- When to use -->
+    <div class="section-block">
+      <div class="section-eyebrow">When to Use</div>
+      <h2>$audit vs $docfinal</h2>
+      <p>Both commands operate without an approved SPEC.md. The difference is purpose: <code>$docfinal</code> documents what a project does; <code>$audit</code> judges how well it does it and recommends improvements.</p>
+      <div class="info-grid">
+        <div class="info-card" style="--ch-accent:var(--c-audit);">
+          <div class="ic-label">Use $audit when</div>
+          <div class="ic-value">Client-facing judgment needed</div>
+          <div class="ic-desc">A consultant is evaluating an existing Pyplan model before delivery, after an incident, or as part of a due-diligence engagement. The output is a five-dimension report addressed to the client.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-audit);">
+          <div class="ic-label">Use $docfinal when</div>
+          <div class="ic-value">Team documentation needed</div>
+          <div class="ic-desc">A project was built without SDAD and now needs a retroactive spec, authorship log, and internal QA report. The output is internal documentation for the development team.</div>
+        </div>
+      </div>
+      <div class="callout callout-mode" style="--ch-bg:var(--c-audit-soft);">
+        <strong>Spec gate:</strong> $audit writes its artifacts via the <code>.sdad/AUDIT_ACTIVE</code> sentinel — allowlisted in the spec-gate policy. The sentinel is created on audit start and removed on completion or abort. Security and compliance findings still require explicit developer approval before any fix.
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Five dimensions -->
+    <div class="section-block">
+      <div class="section-eyebrow">Report Structure</div>
+      <h2>The Five Dimensions</h2>
+      <p>Every $audit report covers these five dimensions in order. Each dimension requires evidence — un-acquirable areas are declared "not assessable," never assumed or fabricated.</p>
+
+      <div class="dimension-list">
+        <div class="dim-card">
+          <div class="dim-num" style="background:var(--c-audit-soft);color:var(--c-audit);border-color:var(--line);">1</div>
+          <div class="dim-content">
+            <div class="dim-title">Development</div>
+            <div class="dim-body">Code quality, node structure, naming conventions, diagram organization, documentation completeness, formula clarity, error handling, and maintainability.</div>
+          </div>
+        </div>
+        <div class="dim-card">
+          <div class="dim-num" style="background:var(--c-audit-soft);color:var(--c-audit);border-color:var(--line);">2</div>
+          <div class="dim-content">
+            <div class="dim-title">Security <span class="dim-badge badge-p0">P0</span></div>
+            <div class="dim-body">OAuth token handling — not logged or exposed in node results. @mcp_tool parameters validated before use — no path to arbitrary code execution. Exposed tools have minimum necessary scope. Data access controls match declared permissions in §A.</div>
+          </div>
+        </div>
+        <div class="dim-card">
+          <div class="dim-num" style="background:var(--c-audit-soft);color:var(--c-audit);border-color:var(--line);">3</div>
+          <div class="dim-content">
+            <div class="dim-title">Usability</div>
+            <div class="dim-body">Interface completeness, input validation coverage, visualization accuracy, user flow coherence, error messaging quality, and whether the model communicates results clearly to its intended users.</div>
+          </div>
+        </div>
+        <div class="dim-card">
+          <div class="dim-num" style="background:var(--c-audit-soft);color:var(--c-audit);border-color:var(--line);">4</div>
+          <div class="dim-content">
+            <div class="dim-title">Quality</div>
+            <div class="dim-body">Calculation correctness, index synchronization, circular dependency check, data source validation against declared contracts, test coverage of critical nodes, and consistency of results across scenarios.</div>
+          </div>
+        </div>
+        <div class="dim-card">
+          <div class="dim-num" style="background:var(--c-audit-soft);color:var(--c-audit);border-color:var(--line);">5</div>
+          <div class="dim-content">
+            <div class="dim-title">Business</div>
+            <div class="dim-body">
+              <strong>5a — Alignment:</strong> does the model's logic serve its declared business objective? Requires owner elicitation.<br>
+              <strong>5b — Domain Correctness:</strong> do calculations follow domain-specific conventions? Requires a matching domain profile (finance, supply-chain).
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Evidence acquisition -->
+    <div class="section-block">
+      <div class="section-eyebrow">Evidence First</div>
+      <h2>Evidence Acquisition</h2>
+      <p>Every finding in an audit report must be traceable to acquired evidence. The evidence contract is defined in <code>.sdad/audit/SCHEMA.md</code> — it specifies what can be acquired and how.</p>
+      <div class="info-grid">
+        <div class="info-card" style="--ch-accent:var(--c-audit);">
+          <div class="ic-label">Pyplan MCP read</div>
+          <div class="ic-value">Primary source</div>
+          <div class="ic-desc">Node definitions, result assignments, parameter types, dependency graph, interface structure — acquired via Pyplan MCP when available.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-audit);">
+          <div class="ic-label">.ppl export</div>
+          <div class="ic-value">Secondary source</div>
+          <div class="ic-desc">When MCP is not available, a .ppl export analyzed in .sdad/pyplan-snapshots/ serves as the evidence base.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-audit);">
+          <div class="ic-label">Manual artifacts</div>
+          <div class="ic-value">Supplementary</div>
+          <div class="ic-desc">Screenshots, business requirement docs, owner interviews, test run outputs — accepted as supplementary evidence for usability and business dimensions.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-audit);">
+          <div class="ic-label">Not acquirable</div>
+          <div class="ic-value">"Not assessable"</div>
+          <div class="ic-desc">If evidence for an area cannot be acquired through any method, the area is declared not assessable. This is a finding — it tells the client what could not be verified and why.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Not assessable -->
+    <div class="section-block">
+      <div class="section-eyebrow">The Guarantee</div>
+      <h2>Not Assessable — Never Fabricated</h2>
+      <p>The not-assessable guarantee is a hard rule. When evidence cannot be acquired — or when the required input for a dimension is absent — SDAD declares the area not assessable. It never fills the gap with a plausible-sounding finding.</p>
+
+      <div class="na-block" style="--ch-accent:var(--c-audit);">
+        <div class="na-label">Business Alignment (5a) — no elicitation input received</div>
+        <div class="na-quote">"not assessable — no elicitation input"</div>
+        <div class="na-explain">Business alignment requires owner input: what is the model supposed to achieve, for whom, measured how? Without that input, SDAD cannot assess alignment. A fabricated alignment finding is a liability — it could give false assurance that a misaligned model is strategically sound.</div>
+      </div>
+
+      <div class="na-block" style="--ch-accent:var(--c-audit);">
+        <div class="na-label">Domain Correctness (5b) — no domain profile for detected domain</div>
+        <div class="na-quote">"not assessable — no domain profile"</div>
+        <div class="na-explain">Domain correctness requires a domain profile that encodes field-specific conventions (finance: discount rates, NPV/IRR, FX; supply-chain: lead times, safety stock, demand aggregation). Without a matching profile, SDAD cannot assess whether the model follows the domain's conventions.</div>
+      </div>
+
+      <div class="callout callout-warn">
+        <strong>Not-assessable is a finding, not a blank.</strong> It tells the client: "we tried to assess this, evidence or input was not available, here is what would be needed to complete the assessment." That is more useful — and more honest — than a fabricated result.
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Domain profiles -->
+    <div class="section-block">
+      <div class="section-eyebrow">Domain Correctness</div>
+      <h2>Domain Profiles</h2>
+      <p>Domain profiles are loaded on-demand when <code>PROJECT_DOMAIN</code> is set. Each profile carries rule-based checks specific to that domain's conventions and common errors.</p>
+      <div class="info-grid">
+        <div class="info-card" style="--ch-accent:var(--c-audit);">
+          <div class="ic-label">domain-finance</div>
+          <div class="ic-value">Financial Models</div>
+          <div class="ic-desc">Checks: discount rate handling, NPV/IRR convention correctness, FX assumptions, period consistency, terminal value treatment, working capital logic.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-audit);">
+          <div class="ic-label">domain-supply-chain</div>
+          <div class="ic-value">Supply Chain Models</div>
+          <div class="ic-desc">Checks: lead-time treatment, demand aggregation patterns, safety stock assumptions, MOQ logic, supplier consolidation rules, seasonality handling.</div>
+        </div>
+      </div>
+      <div class="callout callout-info">
+        <strong>Confidence levels are always stated.</strong> An LLM domain profile raises the floor for domain correctness review — it surfaces likely issues a generalist reviewer would miss. It does not replace the client's Subject Matter Expert for high-stakes validation. Every finding carries an explicit confidence level so the client knows what requires SME sign-off.
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Report neutrality -->
+    <div class="section-block">
+      <div class="section-eyebrow">Report Delivery</div>
+      <h2>Neutrality Requirement</h2>
+      <p>$audit reports are client-facing. They are written for a consultant to hand to a client — often a client whose team built the model being audited. The report communicates <em>intent vs. delivered</em>: here is what the model was likely trying to do, here is what it actually does, here is the gap.</p>
+      <div class="info-grid">
+        <div class="info-card" style="--ch-accent:var(--c-audit);">
+          <div class="ic-label">Evidence-based</div>
+          <div class="ic-value">Only what was found</div>
+          <div class="ic-desc">Every finding cites the specific node, formula, or structure that produced it. No inferences beyond the evidence.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-audit);">
+          <div class="ic-label">Never accusatory</div>
+          <div class="ic-value">Intent vs. delivered</div>
+          <div class="ic-desc">"The node calculates X but the declared objective requires Y" — not "the developer made an error." The gap is the finding; the cause is the client's to interpret.</div>
+        </div>
+        <div class="info-card" style="--ch-accent:var(--c-audit);">
+          <div class="ic-label">Relationship-aware</div>
+          <div class="ic-value">Consultant context</div>
+          <div class="ic-desc">The report is a tool for a consultant conversation, not a public indictment. Severity and language calibrate to the professional relationship.</div>
+        </div>
+      </div>
+      <div class="callout callout-mode" style="--ch-bg:var(--c-audit-soft);">
+        <strong>Targeted runs:</strong> <code>$audit [dimension]</code> runs a single dimension (e.g. <code>$audit security</code>, <code>$audit business</code>). <code>$audit report</code> generates the final client-deliverable document from completed dimension results.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(function(b) {
+    b.classList.remove('active');
+    b.setAttribute('aria-selected', 'false');
+  });
+  document.querySelectorAll('.tab-panel').forEach(function(p) {
+    p.classList.remove('active');
+  });
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('tab-' + name).setAttribute('aria-selected', 'true');
+  document.getElementById('panel-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>

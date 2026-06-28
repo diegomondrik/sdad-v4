@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What is SDAD — and why use it (v5)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #FAFAFA;
+      color: #0F172A;
+      line-height: 1.65;
+      padding: 48px 24px;
+    }
+
+    .page { max-width: 820px; margin: 0 auto; }
+
+    header {
+      border-bottom: 2px solid #2563EB;
+      padding-bottom: 24px;
+      margin-bottom: 40px;
+    }
+
+    header .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #2563EB;
+      margin-bottom: 8px;
+    }
+
+    header h1 { font-size: 32px; font-weight: 700; color: #0F172A; margin-bottom: 8px; }
+    header p { font-size: 16px; color: #475569; }
+
+    .lede {
+      font-size: 17px;
+      color: #1E293B;
+      background: #EFF6FF;
+      border-left: 4px solid #2563EB;
+      padding: 18px 22px;
+      border-radius: 0 8px 8px 0;
+      margin: 0 0 40px;
+    }
+
+    h2 {
+      font-size: 21px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 44px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    h3 { font-size: 16px; font-weight: 700; color: #0F172A; margin: 26px 0 10px; }
+
+    p { margin-bottom: 16px; font-size: 15px; color: #1E293B; }
+
+    ul, ol { margin: 0 0 18px 22px; font-size: 15px; color: #1E293B; }
+    li { margin-bottom: 10px; }
+
+    code {
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      background: #E2E8F0;
+      color: #1E293B;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .formula {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #2563EB;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 8px 0 24px;
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+    }
+
+    .alert {
+      border-left: 4px solid #16A34A;
+      background: #F0FDF4;
+      padding: 16px 20px;
+      border-radius: 0 6px 6px 0;
+      margin: 24px 0;
+      font-size: 15px;
+      color: #14532D;
+    }
+    .alert strong { display: block; margin-bottom: 4px; font-weight: 700; }
+
+    .compare { display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0 24px; }
+    .compare .col {
+      flex: 1;
+      min-width: 260px;
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-size: 14px;
+    }
+    .compare .prompt { background: #FFFBEB; border: 1px solid #FDE68A; }
+    .compare .code   { background: #F0FDF4; border: 1px solid #BBF7D0; }
+    .compare h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+    .compare .prompt h4 { color: #B45309; }
+    .compare .code h4 { color: #15803D; }
+
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid #E2E8F0;
+      font-size: 13px;
+      color: #94A3B8;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <p class="eyebrow">G7 AI Development Methodology</p>
+    <h1>What is SDAD &mdash; and why use it</h1>
+    <p>SDAD v5.2 "Board Edition" &mdash; an extended explainer for developers, analysts, and decision-makers.</p>
+  </header>
+
+  <p class="lede">
+    SDAD (Spec-Driven AI Development) turns Claude Code from a fast but unpredictable code generator
+    into a disciplined engineering process &mdash; spec first, small verified increments, integrated
+    quality assurance, persistent memory across sessions, and, as of v5, hard rules enforced in code
+    rather than merely requested in a prompt.
+  </p>
+
+  <h2>1. The problem SDAD exists to solve</h2>
+  <p>
+    An AI coding agent is extraordinarily capable and extraordinarily willing. Ask it to build
+    something and it will start typing immediately &mdash; before anyone has decided what "done"
+    means, what the data really looks like, what must not happen, or how it will be tested. The
+    result is the failure pattern every team using these tools recognizes: plausible code that
+    solves the wrong problem, silent assumptions baked into a thousand lines, no record of
+    <em>why</em> a decision was made, and a model that cheerfully forgets all of it when the session
+    ends.
+  </p>
+  <p>
+    The instinct is to fix this by writing a better prompt &mdash; "always write tests", "ask before
+    assuming", "don't touch the database". That helps, but it has a ceiling. A prompt is a
+    <em>suggestion to a probabilistic system</em>. On a good day the model follows it. On a long,
+    token-heavy day, under pressure, it drifts. You cannot build reliability on a foundation that is,
+    by construction, optional.
+  </p>
+  <p>
+    SDAD's answer is process plus structure: decide before you build, build in small verifiable
+    steps, review every step, and remember everything. v5 adds the missing half of that answer
+    &mdash; make the rules that matter <em>binding</em>, not optional.
+  </p>
+
+  <h2>2. How SDAD works, in practice</h2>
+  <p>
+    SDAD runs as a set of commands inside Claude Code, structured as phases. You never have to
+    program to use it; you answer questions and approve steps. The core loop is
+    <strong>Context &rarr; Requirements &rarr; Spec &rarr; Build &rarr; QA</strong>.
+  </p>
+  <ul>
+    <li><code>$spec</code> walks you through requirements one question at a time, always proposing a sensible default, and reads your repo first so it never asks what it can already infer. The first question sets the project language (English or Spanish), which then governs every document and every interaction.</li>
+    <li><code>$specout</code> writes a complete, 13-section specification to <code>SPEC.md</code> in your repo. This is the contract. Nothing gets built until you approve it.</li>
+    <li><code>$build</code> implements the spec in <em>vertical increments</em> &mdash; one small, complete feature at a time &mdash; and runs the project's real tests after each one. It announces what it will do before doing it, including which model and reasoning effort it recommends.</li>
+    <li><code>$qa</code> reviews each increment across security, structure, efficiency, and best-practice layers (plus a platform layer for Pyplan projects), and never silently changes security or compliance code without your explicit approval.</li>
+  </ul>
+  <p>
+    Around that loop sit supporting capabilities: compliance tiers that escalate rigor for
+    customer-facing or regulated work; a Lesson Library that captures recurring patterns so the same
+    mistake is not made twice; sub-agents that do expensive reviews in isolated context; and session
+    continuity that lets you stop and resume without re-explaining anything. Specialist "skills"
+    (architecture, security, QA, frontend, Pyplan, and more) load automatically when the work calls
+    for them.
+  </p>
+
+  <h2>3. The architecture behind v5: harness engineering</h2>
+  <p>
+    The intellectual leap in v5 comes from harness engineering &mdash; the discipline that says the
+    <em>harness</em> (the software layer governing an AI agent's execution loop, tools, context, and
+    state) is now the binding constraint on reliability, more than the model's raw intelligence. A
+    frontier model inside a weak harness is a brilliant engine with no guardrails; a modest model
+    inside a strong harness is dependable.
+  </p>
+  <p>Harness engineering decomposes a reliable agent system into six governance functions:</p>
+  <div class="formula">H = ( E, T, C, S, L, V )</div>
+  <ul>
+    <li><strong>E &mdash; Execution Loop:</strong> the observe-think-act cycle and, crucially, what happens when something errors. A loop with undefined error handling can run away forever.</li>
+    <li><strong>T &mdash; Tool Registry:</strong> the typed, validated boundary between the model and the outside world. If an agent must not delete a database, that rule belongs <em>here, in code</em> &mdash; not as a polite sentence in a prompt.</li>
+    <li><strong>C &mdash; Context Manager:</strong> compaction, retrieval, and prioritization so the conversation never blows past the budget and cost stays linear.</li>
+    <li><strong>S &mdash; State Store:</strong> memory that survives across turns and sessions, committed safely so a crash cannot corrupt it.</li>
+    <li><strong>L &mdash; Lifecycle Hooks:</strong> the interception layer &mdash; approvals for dangerous actions, audit trails, and heartbeats that detect an agent stuck making zero progress.</li>
+    <li><strong>V &mdash; Evaluation Interface:</strong> instrumentation that captures what the agent actually did, with success signals, so you can tell whether a change made things better or worse.</li>
+  </ul>
+
+  <h3>Where SDAD already stood (v4.3)</h3>
+  <p>Measured against this framework, SDAD was already strong where it owns the layer:</p>
+  <ul>
+    <li><strong>Context (C):</strong> genuinely well done. A context budget with a soft warning at 50% and a hard block on new builds at 65%; <code>$pause compress</code> that compacts a whole session into a portable snapshot carrying only the locked decisions; sub-agents that run in isolated context so they don't consume the main budget; binary documents converted to compact Markdown before reading.</li>
+    <li><strong>State (S):</strong> the trio of <code>CLAUDE.md</code> + <code>SPEC.md</code> + <code>DECISIONS.md</code> is exactly the "permanent project memory" pattern harness engineering prescribes, backed by git and session hooks.</li>
+    <li><strong>Tools (T):</strong> for Pyplan projects exposing MCP tools, the &sect;D catalog enforces typed, documented, serializable tool contracts &mdash; a real, validated tool registry.</li>
+  </ul>
+  <p>And it correctly <em>delegated</em> the low-level execution loop and generic tool plumbing to Claude Code itself, rather than reinventing them.</p>
+
+  <h3>What v5 fixes</h3>
+  <p>The audit found one philosophical gap and one genuine hole:</p>
+  <ol>
+    <li><strong>Governance by instruction, not by code.</strong> Almost every important rule in SDAD &mdash; "no code before an approved Spec", the build-blocking gates &mdash; lived only as prose in <code>CLAUDE.md</code>. By the field's own central axiom, that makes them suggestions. v5 moves the critical gate into a <code>PreToolUse</code> hook (code), so writing code without an approved spec becomes <em>structurally impossible</em>, not just discouraged.</li>
+    <li><strong>No evaluation of the methodology itself (V).</strong> SDAD revises itself every release, yet had no way to detect whether a change quietly degraded it &mdash; regressions surfaced only when a real project later failed. v5 adds a small golden-dataset evaluation harness (<code>$eval</code>) that replays canonical scenarios and flags regressions before release.</li>
+    <li><strong>A ratchet on the wrong layer.</strong> SDAD's Lesson Library learns from mistakes &mdash; but it encoded each lesson as a <em>sentence</em>. Lesson L-01 (a PowerShell encoding rule) is marked "confirmed twice," meaning the instructional ratchet already failed once. v5 reanchors the ratchet: a lesson with a checkable pattern now generates an actual check in code, so a fixed failure mode cannot recur.</li>
+  </ol>
+  <div class="alert">
+    <strong>Why this is a major version</strong>
+    SDAD stops being <em>a very good prompt</em> and becomes <em>a prompt plus an enforced harness.</em>
+  </div>
+
+  <h2>4. Why governance-by-code beats governance-by-prompt</h2>
+  <p>
+    The distinction is the whole point, so it is worth stating plainly. A prompt rule and a code rule
+    look similar on paper and behave completely differently under stress.
+  </p>
+  <div class="compare">
+    <div class="col prompt">
+      <h4>A prompt rule</h4>
+      "Do not write code before the spec is approved" depends on the model choosing to comply on this
+      particular turn, with this particular context window, after this many tokens. It usually works.
+      "Usually" is the problem.
+    </div>
+    <div class="col code">
+      <h4>A code rule</h4>
+      A hook that refuses the file-write tool unless an approved <code>SPEC.md</code> exists does not
+      depend on the model's mood, context length, or compliance. The action is simply not available.
+      The failure mode is removed from the space of possible outcomes.
+    </div>
+  </div>
+  <p>
+    Harness engineering's governance axiom captures it: <em>structural constraints are
+    non-negotiable; natural-language pleading is merely a suggestion.</em> v5 applies this exactly
+    where it matters (the build gate, the recurring-lesson ratchet) while keeping prompt instructions
+    for everything that is guidance rather than a hard boundary. You don't put everything in code
+    &mdash; only the things that must never happen.
+  </p>
+
+  <h2>5. Why use it &mdash; even if you are not a developer</h2>
+  <p>
+    The most common worry is that a methodology like this is for hardcore engineers. The opposite is
+    true: SDAD exists so that someone who is <em>not</em> a developer can direct serious software work
+    safely.
+  </p>
+  <p>
+    You work by answering questions and approving steps, in your own language. SDAD does the reading,
+    the writing, the testing, and the reviewing. The spec gives you a plain-language contract you can
+    actually evaluate before any code exists. The increments are small enough to follow. The QA layers
+    catch the security and quality issues you wouldn't know to look for. The compliance tiers
+    automatically raise the bar when the work touches user data or regulated environments. And the
+    Lesson Library means the system gets a little smarter and a little safer with every project,
+    without you having to remember anything.
+  </p>
+  <p>
+    v5's enforcement makes this safer still. The build gate means the agent literally cannot skip the
+    spec and start improvising &mdash; the discipline no longer relies on you policing it. For a
+    non-developer automating real work, that is the difference between trusting a process and hoping
+    for one.
+  </p>
+
+  <h2>6. What you get, summarized</h2>
+  <p>
+    A spec-first contract before any code. Small, tested increments instead of large unverifiable
+    dumps. Integrated security and quality review. Persistent, portable memory across sessions.
+    Compliance rigor that scales with risk. A learning loop that prevents repeat mistakes. And, in
+    v5, the rules that matter enforced in code &mdash; plus a way to test the methodology against
+    itself before every release.
+  </p>
+  <p>
+    The short version: SDAD makes AI-assisted development <em>predictable</em>. v5 makes its most
+    important promises <em>binding</em>.
+  </p>
+
+  <footer>
+    G7 AI Development Methodology &nbsp;&middot;&nbsp; SDAD v5.2 "Board Edition" &nbsp;&middot;&nbsp; SDAD_v5_WHAT_IS_SDAD.html
+  </footer>
+
+</div>
+</body>
+</html>
