@@ -595,6 +595,45 @@ strong { color: var(--ink); }
   background: linear-gradient(to right, transparent, var(--line), transparent);
   margin: 2.5rem 0;
 }
+
+/* ── ROUTING TABLE ── */
+.rt-wrap { overflow-x: auto; margin: 1.2rem 0; border-radius: var(--r-lg); border: 1px solid var(--line); }
+.rt-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; min-width: 540px; }
+.rt-table th { font-family: var(--font-display); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.6rem 1rem; background: var(--mist); color: var(--muted); text-align: left; border-bottom: 2px solid var(--line); white-space: nowrap; }
+.rt-table td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--mist); color: var(--body); vertical-align: middle; line-height: 1.4; }
+.rt-table tbody tr:last-child td { border-bottom: none; }
+.rt-table tbody tr:hover td { background: var(--canvas); }
+.tier-badge { display: inline-block; font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
+.tier-f { background: rgba(59,91,219,0.1); color: #3B5BDB; }
+.tier-s { background: rgba(44,110,138,0.1); color: #2C6E8A; }
+.tier-e { background: rgba(100,116,139,0.1); color: #475569; }
+.tier-p { background: rgba(107,114,128,0.08); color: #6B7280; font-style: italic; }
+.effort-pill { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); }
+
+/* ── HUB BLOCK ── */
+.hub-block { background: var(--ink); border-radius: var(--r-lg); padding: 1.4rem 1.6rem; margin: 1rem 0; overflow-x: auto; }
+.hub-sep { font-family: var(--font-mono); font-size: 0.74rem; color: rgba(255,255,255,0.18); display: block; margin: 0.1rem 0; }
+.hub-title { font-family: var(--font-mono); font-size: 0.72rem; color: rgba(255,255,255,0.45); display: block; margin: 0.5rem 0 0.1rem; }
+.hub-row { font-family: var(--font-mono); font-size: 0.76rem; line-height: 1.85; display: block; }
+.hub-row .hk { color: rgba(255,255,255,0.38); }
+.hub-row .hv { color: #FDA97E; }
+
+/* ── DELEGATE GRID ── */
+.delegate-split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+@media (max-width: 580px) { .delegate-split { grid-template-columns: 1fr; } }
+.delegate-card { border-radius: var(--r-lg); padding: 1.2rem; border: 1px solid var(--dc-b); background: var(--dc-bg); }
+.delegate-card.yes { --dc-bg: #F0FDF4; --dc-b: rgba(22,163,74,0.2); }
+.delegate-card.no  { --dc-bg: #FEF2F2; --dc-b: rgba(185,28,28,0.15); }
+.dc-head { font-family: var(--font-display); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.7rem; }
+.yes .dc-head { color: #166534; }
+.no  .dc-head  { color: #991B1B; }
+.dc-list { list-style: none; }
+.dc-list li { font-family: var(--font-mono); font-size: 0.78rem; color: var(--body); padding: 0.3rem 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+.dc-list li:last-child { border-bottom: none; }
+
+/* ── CMD BLOCK ── */
+.cmd-block { background: var(--ink); border-radius: var(--r-lg); padding: 1rem 1.4rem; margin: 0.8rem 0; font-family: var(--font-mono); font-size: 0.78rem; color: #A5F3FC; line-height: 1.9; overflow-x: auto; }
+.cmd-block .cm { color: rgba(255,255,255,0.28); }
 </style>
 
 <!-- ── TOP BAR ── -->
@@ -779,6 +818,216 @@ strong { color: var(--ink); }
       </div>
       <div class="callout callout-info" style="margin-top:1rem;">
         The ccstatusline bar shows context % in real time. Keep it visible — it's the primary context budget indicator for catching the 50% and 65% thresholds before they interrupt work.
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Model & Effort Routing -->
+    <div class="section-block">
+      <div class="section-eyebrow">Model &amp; Effort Routing</div>
+      <h2>Which Model for Which Phase</h2>
+      <p>SDAD uses tier names — not model names — so the routing table survives model releases. The developer switches manually; Claude announces the recommendation and waits at $build if there is a mismatch.</p>
+      <div class="rt-wrap">
+        <table class="rt-table">
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Examples (2026)</th>
+              <th>Phase</th>
+              <th>Effort</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tier-badge tier-f">FRONTIER</span></td>
+              <td>Opus, Fable</td>
+              <td><code>$spec</code> · <code>$specout</code></td>
+              <td><span class="effort-pill">high</span></td>
+              <td>Open decisions, requirements design — needs best judgment</td>
+            </tr>
+            <tr>
+              <td><span class="tier-badge tier-f">FRONTIER</span></td>
+              <td>Opus, Fable</td>
+              <td><code>$qa full</code> · <code>$QA</code> · <code>$docfinal</code></td>
+              <td><span class="effort-pill">high</span></td>
+              <td>Whole-codebase judgment — catches what STANDARD misses</td>
+            </tr>
+            <tr>
+              <td><span class="tier-badge tier-f">FRONTIER</span></td>
+              <td>Opus, Fable</td>
+              <td><code>$build</code> — medium/high risk or open decision</td>
+              <td><span class="effort-pill">high</span></td>
+              <td>Increment has unresolved choice or structural risk</td>
+            </tr>
+            <tr>
+              <td><span class="tier-badge tier-s">STANDARD</span></td>
+              <td>Sonnet</td>
+              <td><code>$build</code> — executing already-specified work</td>
+              <td><span class="effort-pill">low</span></td>
+              <td>Work is defined; low-risk execution</td>
+            </tr>
+            <tr>
+              <td><span class="tier-badge tier-s">STANDARD</span></td>
+              <td>Sonnet</td>
+              <td><code>$qa</code> incremental</td>
+              <td><span class="effort-pill">medium</span></td>
+              <td>Bounded review of one increment</td>
+            </tr>
+            <tr>
+              <td><span class="tier-badge tier-e">ECONOMY</span></td>
+              <td>Haiku</td>
+              <td><code>$verify</code> · <code>$doc</code> · <code>$pause</code> · <code>$lesson</code> · <code>$flow</code></td>
+              <td><span class="effort-pill">low</span></td>
+              <td>Mechanical, delegable, no judgment required</td>
+            </tr>
+            <tr>
+              <td><span class="tier-badge tier-p">pinned</span></td>
+              <td>—</td>
+              <td><code>$agent review</code> · <code>$agent audit</code></td>
+              <td><span class="effort-pill">high</span></td>
+              <td>Pinned in <code>.claude/agents/*.md</code> frontmatter — never overridden</td>
+            </tr>
+            <tr>
+              <td><span class="tier-badge tier-p">pinned</span></td>
+              <td>—</td>
+              <td><code>$agent test</code></td>
+              <td><span class="effort-pill">medium</span></td>
+              <td>Pinned in <code>.claude/agents/*.md</code> frontmatter — never overridden</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout callout-warn">
+        <strong>$build es el único que bloquea.</strong> Si el modelo activo difiere de la recomendación, Claude lo señala y espera a que cambies antes de escribir código. El resto de las fases notifican una sola vez y continúan.
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Document Ingestion -->
+    <div class="section-block">
+      <div class="section-eyebrow">Document Ingestion</div>
+      <h2>Converting Client Docs Before $spec</h2>
+      <p>The first $spec session on a real project almost always involves client documents — requirements in Word, data dictionaries in Excel, process specs in PDF. SDAD reads Markdown, not binary files. Convert first, then feed to $spec.</p>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="ic-label">Install once</div>
+          <div class="ic-value">MarkItDown</div>
+          <div class="ic-desc">Microsoft's open-source converter. Preserves headings, tables, and lists — far more token-efficient than raw binary extraction.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">Supported formats</div>
+          <div class="ic-value">PDF · docx · xlsx · pptx · .msg</div>
+          <div class="ic-desc">Also handles images (OCR) and HTML. One command converts any of these to a clean Markdown file.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">Output location</div>
+          <div class="ic-value">.sdad/ingest/</div>
+          <div class="ic-desc">Working copies — not deliverables. Listed in .gitignore. Claude reads from here; the original file stays untouched.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">Security rule</div>
+          <div class="ic-value">Local trusted files only</div>
+          <div class="ic-desc">Never feed untrusted paths or remote URLs — markitdown performs I/O with process privileges. Only convert files the client sent to you directly.</div>
+        </div>
+      </div>
+      <div class="cmd-block">
+        <span class="cm"># Install once</span><br>
+        pip install 'markitdown[all]'<br><br>
+        <span class="cm"># Convert each client document</span><br>
+        markitdown requirements.docx -o .sdad/ingest/requirements.md<br>
+        markitdown data_dictionary.xlsx -o .sdad/ingest/data_dictionary.md<br>
+        markitdown briefing.pdf -o .sdad/ingest/briefing.md<br><br>
+        <span class="cm"># Then run $spec — Claude reads the converted files automatically</span>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Sub-agent Delegation -->
+    <div class="section-block">
+      <div class="section-eyebrow">Sub-agent Delegation</div>
+      <h2>What Claude Delegates — and Why</h2>
+      <p>Sub-agents run in isolated context — they don't consume the main session budget and can't see session decisions. Claude delegates automatically when all three conditions are met; no manual instruction needed.</p>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="ic-label">Condition 1</div>
+          <div class="ic-value">Committed to filesystem</div>
+          <div class="ic-desc">The task operates on files already written to disk. A sub-agent can read them without needing session history.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">Condition 2</div>
+          <div class="ic-value">No session decisions needed</div>
+          <div class="ic-desc">The task doesn't require knowing what was decided during this session — it's self-contained from the code alone.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">Condition 3</div>
+          <div class="ic-value">Expensive in context</div>
+          <div class="ic-desc">The task is large enough to meaningfully consume main-session context: doc generation, architectural review, test suite generation.</div>
+        </div>
+      </div>
+      <div class="delegate-split">
+        <div class="delegate-card yes">
+          <div class="dc-head">Always delegated</div>
+          <ul class="dc-list">
+            <li>$doc (all variants)</li>
+            <li>$agent review [module]</li>
+            <li>$agent test [module]</li>
+            <li>$agent audit [path]</li>
+          </ul>
+        </div>
+        <div class="delegate-card no">
+          <div class="dc-head">Never delegated</div>
+          <ul class="dc-list">
+            <li>$qa after $build</li>
+            <li>$spec / $specout</li>
+            <li>$build</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout callout-info">
+        Agent files live in <code>.claude/agents/</code>. Output goes to <code>.sdad/agent_output.tmp</code> — read and incorporated silently. If the file is empty or missing, the error surfaces to you; Claude never proceeds on missing agent output.
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- HUB BLOCK -->
+    <div class="section-block">
+      <div class="section-eyebrow">Decision Log</div>
+      <h2>The HUB BLOCK Format</h2>
+      <p>After every completed increment, Claude generates this block and writes it directly to <code>DECISIONS.md</code>. It is the canonical record of architectural choices — not a narrative, not a summary, but a structured entry that can be queried weeks later.</p>
+      <div class="hub-block">
+        <span class="hub-sep">════════════════════════════════════════════════════════</span>
+        <span class="hub-title">📋 HUB BLOCK — DECISIONS_[PROJECT].md</span>
+        <span class="hub-sep">════════════════════════════════════════════════════════</span>
+        <span class="hub-row"><span class="hk">Date:                   </span><span class="hv">[YYYY-MM-DD]</span></span>
+        <span class="hub-row"><span class="hk">Increment:              </span><span class="hv">[N] — [feature name]</span></span>
+        <span class="hub-row"><span class="hk">Model:                  </span><span class="hv">[exact model string used]</span></span>
+        <span class="hub-row"><span class="hk">Decision:               </span><span class="hv">[one-line summary of the main architectural decision]</span></span>
+        <span class="hub-row"><span class="hk">Rationale:              </span><span class="hv">[one-line rationale]</span></span>
+        <span class="hub-row"><span class="hk">Alternatives considered: </span><span class="hv">[brief — or "none"]</span></span>
+        <span class="hub-row"><span class="hk">Impact:                 </span><span class="hv">[files changed, dependencies added, patterns introduced]</span></span>
+        <span class="hub-sep">════════════════════════════════════════════════════════</span>
+      </div>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="ic-label">Model field</div>
+          <div class="ic-value">Reproducibility</div>
+          <div class="ic-desc">Records the exact model string (e.g. <code>claude-sonnet-4-6</code>). Lets the team know which capability tier produced which output — critical for audits and regression analysis.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">Alternatives considered</div>
+          <div class="ic-value">Anti-amnesia</div>
+          <div class="ic-desc">Even if "none" — stating it explicitly prevents the team from re-debating a choice that was already made and deliberately rejected.</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">[LOCK] decisions</div>
+          <div class="ic-value">Survive context resets</div>
+          <div class="ic-desc">Decisions marked [LOCK] in DECISIONS.md are carried into the COMPACT ANCHOR by <code>$pause compress</code> — they survive context compaction and session restarts.</div>
+        </div>
       </div>
     </div>
 

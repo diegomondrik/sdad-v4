@@ -874,8 +874,8 @@
       <div class="principle-card" style="--pc-color:#2C6E8A;">
         <div class="pc-number">Principle 05</div>
         <div class="pc-title">Lessons Compound</div>
-        <div class="pc-body">Each project generates knowledge. SDAD captures transferable patterns after QA, adds them to a shared Lesson Library, and promotes verifiable ones to hard checks. Every project makes the next one better.</div>
-        <div class="pc-rule">Lesson candidate → LESSON_LIBRARY → checks/ ratchet</div>
+        <div class="pc-body">Each project generates knowledge. After every $qa run, SDAD evaluates whether the increment revealed a bug pattern, an integration quirk, or an architectural shortcut worth capturing. If so, it proposes one lesson candidate — the most valuable finding only. The developer approves, skips, or edits it, then it is written directly to LESSON_LIBRARY.md. The library is searchable by #stack and #phase tags. When a lesson describes something mechanically verifiable — a missing assignment, a circular dependency, a non-ASCII character — it is promoted from prose to a check in <code>checks/</code>. That check runs in CI and in git pre-commit, enforcing the lesson on every future project automatically. The pattern cannot recur silently.</div>
+        <div class="pc-rule">$qa finding → lesson candidate → LESSON_LIBRARY → checks/ ratchet → CI enforcement</div>
       </div>
       <div class="principle-card" style="--pc-color:#16A34A;">
         <div class="pc-number">Principle 06</div>
@@ -902,6 +902,7 @@
         <div class="phase-command">$spec</div>
         <h3>Context Analysis & Requirements</h3>
         <p>Claude reads the repo before asking anything. Questions are one at a time, with proposed defaults. The developer is not writing a requirements doc — they are confirming or correcting Claude's inferences.</p>
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-top:0.6rem;border-top:1px solid rgba(255,255,255,0.06);padding-top:0.7rem;"><strong style="color:rgba(255,255,255,0.65);">First question, always:</strong> project language — English or Spanish? The answer is locked as <code>PROJECT_LANGUAGE</code> in CLAUDE.md and governs every document, every interaction, and every generated output for the lifetime of the project. Code identifiers and comments stay in English regardless — only the developer-facing content switches. If the project language is not set, $spec asks it before anything else.</p>
         <div class="phase-rationale">Prevents: building from chat-only requirements that disappear with the context window.</div>
       </div>
       <div class="phase-card">
