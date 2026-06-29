@@ -7,6 +7,56 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [6.1] — 2026-06-29
+
+### Overview
+
+SDAD v6.1 "Documentation Edition" adds an automatic documentation layer that runs after
+every `$build` increment without developer intervention. Three new on-demand skills handle
+the full doc lifecycle: generation per increment, and post-delivery auditing when clients
+edit code without SDAD. v6.0 projects are fully forward-compatible -- no migration needed.
+
+Core theme: documentation debt reaches zero. Every increment that passes `$qa` closes
+with current, committed docs. Post-delivery reconnects use `$doc_audit` to detect gaps
+and flag them with `[REVIEW]` tags for consultant review.
+
+### Added
+
+**pyplan-node-documentation skill**
+- `.claude/skills/pyplan-node-documentation/SKILL.md`: reads Pyplan nodes via MCP
+  (`list_nodes`, `read_node`, `read_node_dependencies`, `read_html_interface`) and generates
+  `docs/pyplan/NODE_REFERENCE.html` (technical catalog), `USER_GUIDE.html` (business guide),
+  and `DASHBOARD_MAP.json` (impact-analysis map). Regenerates every increment.
+- Flags `[UNDOCUMENTED]` nodes (empty description) and `[ORPHAN NODE]` (used in dashboard
+  but absent from catalog).
+
+**generic-documentation skill**
+- `.claude/skills/generic-documentation/SKILL.md`: stack detection (Python / Node+TS / Go)
+  from repo root indicators; extracts docstrings (Google/NumPy), JSDoc, and Go comment blocks.
+- Generates `docs/API_REFERENCE.md` (append-only), `docs/CHANGELOG.md` (append-only,
+  immutable per increment), and `docs/ARCHITECTURE.md` (AUTO-DETECTED blocks only, never
+  overwrites manual content).
+- Auto-detects breaking changes (removed params, type changes, deleted exports); flags
+  `[BREAKING]` + `[REVIEW]` on medium-confidence detections.
+
+**doc-audit skill**
+- `.claude/skills/doc-audit/SKILL.md`: post-delivery documentation audit. Compares current
+  code or live Pyplan model state against last committed docs. On-demand only (`$doc_audit`).
+- Generates gap report with severity tiers (High / Medium / Low); writes `[REVIEW]` tags
+  inline in updated docs. Aborts cleanly when `docs/` is absent (redirects to
+  `$doc_increment full`).
+
+**CLAUDE.md v6.1 updates**
+- `$doc_increment` command: auto after `$qa` passes; or on-demand for full re-scans.
+- `$doc_audit` command: on-demand post-delivery reconnect and gap detection.
+- Pyplan increment checklist: Documentation section added (5 checkboxes).
+- Board/generic increment checklist: Documentation section added (5 checkboxes).
+- Behavior rules: auto-trigger logic, on-demand-only constraint for `$doc_audit`.
+- Active Skills: three new skills registered.
+- Net CLAUDE.md delta: +38 lines (budget: <=+60 per release).
+
+---
+
 ## [6.0] — 2026-06-26
 
 ### Overview

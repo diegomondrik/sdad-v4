@@ -1,4 +1,4 @@
-# SDAD v6.0 -- Installer for Windows (PowerShell)
+# SDAD v6.1 -- Installer for Windows (PowerShell)
 # Spec-Driven AI Development -- G7 AI Development Methodology
 # Version: 6.0 | 2026
 #
@@ -19,7 +19,7 @@ $REPO = "https://raw.githubusercontent.com/diegomondrik/sdad-v4/main"
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "  SDAD v6.0 -- Installer" -ForegroundColor Cyan
+Write-Host "  SDAD v6.1 -- Installer" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -93,6 +93,9 @@ $folders = @(
     ".claude/skills/board/data-model",
     ".claude/skills/board/capsule",
     ".claude/skills/board/qa-platform",
+    ".claude/skills/pyplan-node-documentation",
+    ".claude/skills/generic-documentation",
+    ".claude/skills/doc-audit",
     ".claude/agents",
     ".claude/hooks",
     "checks",
@@ -145,6 +148,10 @@ $files = @(
     ".claude/skills/board/data-model/SKILL.md",
     ".claude/skills/board/capsule/SKILL.md",
     ".claude/skills/board/qa-platform/SKILL.md",
+    # v6.1 documentation skills
+    ".claude/skills/pyplan-node-documentation/SKILL.md",
+    ".claude/skills/generic-documentation/SKILL.md",
+    ".claude/skills/doc-audit/SKILL.md",
     # Agents
     ".claude/agents/code-reviewer.md",
     ".claude/agents/security-auditor.md",
@@ -383,12 +390,15 @@ Write-Host ""
 Write-Host "[ 7/7 ] Installation complete" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Green
-Write-Host "  SDAD v6.0 installed successfully" -ForegroundColor Green
+Write-Host "  SDAD v6.1 installed successfully" -ForegroundColor Green
 Write-Host "============================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Files installed:" -ForegroundColor White
-Write-Host "  CLAUDE.md                                core instructions (v6.0)" -ForegroundColor White
+Write-Host "  CLAUDE.md                                core instructions (v6.1)" -ForegroundColor White
 Write-Host "  .claude/skills/                          AI Architect, AI Engineer, harness + on-demand skills" -ForegroundColor White
+Write-Host "  .claude/skills/pyplan-node-documentation/ v6.1: MCP node catalog generator" -ForegroundColor White
+Write-Host "  .claude/skills/generic-documentation/    v6.1: Python/Node/Go doc extractor" -ForegroundColor White
+Write-Host "  .claude/skills/doc-audit/                v6.1: post-delivery gap detector" -ForegroundColor White
 Write-Host "  .claude/skills/pyplan-audit/             5-dimension audit engine" -ForegroundColor White
 Write-Host "  .claude/skills/business-alignment/       alignment + domain-agnostic core" -ForegroundColor White
 Write-Host "  .claude/skills/domain-finance/           FP&A domain-correctness profile" -ForegroundColor White

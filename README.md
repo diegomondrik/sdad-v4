@@ -1,4 +1,4 @@
-# G7 SDAD v5.2 — "Board Edition"
+# G7 SDAD v6.1 — "Documentation Edition"
 ## Spec-Driven AI Development for Claude Code
 
 SDAD is G7's development methodology for teams using Claude Code as their
@@ -6,6 +6,39 @@ primary AI development tool. It brings spec-first discipline, vertical
 increments, integrated QA, compliance tiers, and a shared Lesson Library
 to AI-assisted development. As of v5, the rules that matter most are enforced
 in code — not merely requested in a prompt.
+
+---
+
+## What's new in v6.1
+
+v6.1 adds an automatic documentation layer that eliminates documentation debt.
+Three new on-demand skills run after every `$build` increment without manual intervention.
+Fully forward-compatible with v6.0 — no migration script needed.
+
+- **`$doc_increment` (auto)** — fires automatically after every `$qa` pass. On Pyplan
+  projects, reads all changed nodes via MCP and regenerates `NODE_REFERENCE.html`,
+  `USER_GUIDE.html`, and `DASHBOARD_MAP.json`. On generic projects (Python/Node/Go),
+  detects stack from repo root, extracts docstrings/JSDoc/Go comments, and appends to
+  `API_REFERENCE.md`, `CHANGELOG.md`, and `ARCHITECTURE.md`. Code + docs committed atomically.
+- **`$doc_audit` (on-demand)** — post-delivery reconnect. Compares current code/model
+  state against last committed docs, detects gaps (new functions, deleted items, signature
+  changes, breaking changes), and flags them `[REVIEW]` inline. Aborts cleanly when no
+  prior docs exist and redirects to `$doc_increment full`.
+- **pyplan-node-documentation skill** — MCP-backed node catalog generator; flags
+  `[UNDOCUMENTED]` and `[ORPHAN NODE]` items for clean-up before increment close.
+- **generic-documentation skill** — multi-stack extractor with append-only `API_REFERENCE.md`
+  and auto-detected breaking change classification (HIGH confidence: type changes; MEDIUM:
+  behavioral — flagged `[REVIEW]` for developer confirmation).
+- **doc-audit skill** — severity-tiered gap report (High/Medium/Low); never auto-applies
+  changes; `[BREAKING]` findings require explicit developer acknowledgment.
+
+---
+
+## What's new in v6.0
+
+See [CHANGELOG.md](CHANGELOG.md) for the full v6.0 entry. Summary: `$audit` lifecycle
+for existing Pyplan models, business-alignment skill, domain profile framework (finance,
+supply-chain), pyplan-mcp skill, 8 new ratchet checks, 22 eval scenarios total.
 
 ---
 
@@ -248,6 +281,8 @@ automatically inside every Claude Code session. After that, just run `claude`.
 | `$agent test [module]` | Any | Test suite generation via isolated agent |
 | `$agent audit [path]` | Any | Security audit via isolated agent |
 | `$verify [lib]` | Any | Check dependency docs before coding |
+| `$doc_increment` | 3 | Auto-documentation per increment (fires after $qa) |
+| `$doc_audit` | Any | Post-delivery doc gap detection (on-demand) |
 | `$skills` | Any | View and activate specialist skills |
 | `$lesson` | Any | View and manage the Lesson Library |
 | `$pause` | Any | Session state — Spec, tier, budget, findings |
@@ -281,7 +316,10 @@ Always on:
 
 On-demand (loaded by trigger): 🔐 Security Reviewer, ✅ QA Engineer,
 🎨 Frontend Engineer (suggested when UI detected in Phase 0), 🖌️ Brand Design,
-Decision Architecture, Data Discovery, Dev Setup.
+Decision Architecture, Data Discovery, Dev Setup,
+📄 Pyplan Node Documentation (auto after Pyplan $qa),
+📄 Generic Documentation (auto after non-Pyplan $qa),
+🔍 Doc Audit (on-demand, `$doc_audit`).
 
 Auto-activated by tier: 🔒 Compliance Reviewer (Tier 2/3).
 
@@ -368,6 +406,9 @@ sdad-v4/
 │   │   │   ├── interfaces/SKILL.md
 │   │   │   ├── qa-platform/SKILL.md
 │   │   │   └── mcp/SKILL.md
+│   │   ├── pyplan-node-documentation/SKILL.md  # v6.1: MCP node catalog generator
+│   │   ├── generic-documentation/SKILL.md      # v6.1: Python/Node/Go doc extractor
+│   │   ├── doc-audit/SKILL.md                  # v6.1: post-delivery gap detector
 │   │   └── board/
 │   │       ├── SKILL.md               # always-on for Board projects
 │   │       ├── spec-context/SKILL.md  # $spec flows, §E/§F, file ingestion
@@ -410,7 +451,7 @@ After installing, start `claude` and verify:
 
 | Command | Expected |
 |---------|----------|
-| `$sdad` | All phases + active skills listed; version 5.2 |
+| `$sdad` | All phases + active skills listed; version 6.1 |
 | `$skills` | AI Architect, AI Engineer always active; on-demand skills available |
 | `$spec` | First requirements question with proposed default (language first) |
 | `$pause` | Session state including context budget |
@@ -438,4 +479,4 @@ The Markdown sources (`SDAD_v5_*.md`) are the machine-readable copies; the
 
 ---
 
-G7 AI Development Methodology | SDAD v5.2 "Board Edition"
+G7 AI Development Methodology | SDAD v6.1 "Documentation Edition"

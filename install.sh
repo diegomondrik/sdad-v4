@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SDAD v6.0 -- Installer for Mac / Linux
+# SDAD v6.1 -- Installer for Mac / Linux
 # Spec-Driven AI Development -- G7 AI Development Methodology
 # Version: 6.0 | 2026
 #
@@ -22,7 +22,7 @@ NC='\033[0m'
 
 echo ""
 echo "============================================"
-echo "  SDAD v6.0 -- Installer"
+echo "  SDAD v6.1 -- Installer"
 echo "============================================"
 echo ""
 
@@ -97,6 +97,9 @@ mkdir -p \
     .claude/skills/board/data-model \
     .claude/skills/board/capsule \
     .claude/skills/board/qa-platform \
+    .claude/skills/pyplan-node-documentation \
+    .claude/skills/generic-documentation \
+    .claude/skills/doc-audit \
     .claude/agents \
     .claude/hooks \
     checks \
@@ -149,6 +152,10 @@ download_skill ".claude/skills/board/spec-context/SKILL.md"
 download_skill ".claude/skills/board/data-model/SKILL.md"
 download_skill ".claude/skills/board/capsule/SKILL.md"
 download_skill ".claude/skills/board/qa-platform/SKILL.md"
+# v6.1 documentation skills
+download_skill ".claude/skills/pyplan-node-documentation/SKILL.md"
+download_skill ".claude/skills/generic-documentation/SKILL.md"
+download_skill ".claude/skills/doc-audit/SKILL.md"
 download_skill ".claude/agents/code-reviewer.md"
 download_skill ".claude/agents/security-auditor.md"
 download_skill ".claude/agents/test-generator.md"
@@ -327,11 +334,14 @@ echo ""
 echo -e "${YELLOW}[ 7/7 ] Installation complete${NC}"
 echo ""
 echo -e "${GREEN}============================================${NC}"
-echo -e "${GREEN}  SDAD v6.0 installed successfully${NC}"
+echo -e "${GREEN}  SDAD v6.1 installed successfully${NC}"
 echo -e "${GREEN}============================================${NC}"
 echo ""
 echo "Files installed:"
-echo "  CLAUDE.md                                -- core instructions (v6.0)"
+echo "  CLAUDE.md                                -- core instructions (v6.1)"
+echo "  .claude/skills/pyplan-node-documentation/ -- v6.1: MCP node catalog generator"
+echo "  .claude/skills/generic-documentation/    -- v6.1: Python/Node/Go doc extractor"
+echo "  .claude/skills/doc-audit/                -- v6.1: post-delivery gap detector"
 echo "  .claude/skills/                          -- all skills including v6 audit + domain profiles"
 echo "  .claude/agents/                          -- code-reviewer, security-auditor, test-generator + HANDOFF"
 echo "  .claude/hooks/                           -- session hooks + PreToolUse spec-gate (.sh + .ps1)"

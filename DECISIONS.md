@@ -1,3 +1,59 @@
+# DECISIONS — SDAD v4.2 → v6.1 Development
+
+---
+
+## SDAD v6.1 — Automatic Documentation System (2026-06-29)
+
+════════════════════════════════════════════════════════
+📋 HUB BLOCK — DECISIONS.md
+════════════════════════════════════════════════════════
+Date: 2026-06-29
+Increment: 1 — pyplan-node-documentation skill
+Model: claude-sonnet-4-6
+Decision: Pyplan doc generation reads nodes via MCP (list_nodes + read_node + read_node_dependencies + read_html_interface) and regenerates all three artefacts every increment.
+Rationale: Always-in-sync beats optimization; confirmed MCP endpoints available.
+Alternatives considered: Regenerate only on node changes (rejected — introduces skew).
+Impact: .claude/skills/pyplan-node-documentation/SKILL.md created; docs/pyplan/ is the output directory.
+════════════════════════════════════════════════════════
+
+════════════════════════════════════════════════════════
+📋 HUB BLOCK — DECISIONS.md
+════════════════════════════════════════════════════════
+Date: 2026-06-29
+Increment: 2 — generic-documentation skill
+Model: claude-sonnet-4-6
+Decision: Stack detection from repo root indicators (requirements.txt / package.json + .ts / go.mod); API_REFERENCE.md is append-only; CHANGELOG.md is immutable per increment; ARCHITECTURE.md gets AUTO-DETECTED blocks only.
+Rationale: Append-only prevents auto-regen from destroying client edits; [REVIEW] tags preserve human judgment on breaking changes.
+Alternatives considered: Full regeneration (rejected — overwrites client edits post-delivery).
+Impact: .claude/skills/generic-documentation/SKILL.md created; docs/ is the output directory.
+════════════════════════════════════════════════════════
+
+════════════════════════════════════════════════════════
+📋 HUB BLOCK — DECISIONS.md
+════════════════════════════════════════════════════════
+Date: 2026-06-29
+Increment: 3 — doc-audit skill
+Model: claude-sonnet-4-6
+Decision: $doc_audit is on-demand only (never auto-triggered); [BREAKING] findings require explicit developer acknowledgment; aborts cleanly when docs/ is absent (redirects to $doc_increment full).
+Rationale: Post-delivery reconnect is a deliberate act — auto-triggering could overwrite client edits unexpectedly.
+Alternatives considered: Webhook trigger (deferred to v6.2).
+Impact: .claude/skills/doc-audit/SKILL.md created.
+════════════════════════════════════════════════════════
+
+════════════════════════════════════════════════════════
+📋 HUB BLOCK — DECISIONS.md
+════════════════════════════════════════════════════════
+Date: 2026-06-29
+Increment: 4 — CLAUDE.md v6.1 updates
+Model: claude-sonnet-4-6
+Decision: $doc_increment auto-triggers after $qa passes (behavior rule); $doc_audit on-demand only; Board increment checklist gets generic-documentation items (not pyplan); three new skills registered in Active Skills section.
+Rationale: Auto-trigger after $qa closes the doc-debt loop without adding a manual step; Board is not Pyplan so pyplan-node-documentation does not apply.
+Alternatives considered: Manual $doc_increment call (rejected — creates doc debt if developer forgets).
+Impact: CLAUDE.md updated — Active Skills, $doc_increment/$doc_audit commands, Pyplan/Board increment checklists, behavior rules. Net line delta: ~40 lines.
+════════════════════════════════════════════════════════
+
+---
+
 # DECISIONS — SDAD v4.2 → v5.0 Development
 
 Decision log for the v4.2 roadmap and the v5.0 "Harness Edition" build

@@ -134,6 +134,9 @@ ANNOUNCEMENT RULE (generalizes the $build 🧠 MODEL line):
 - **Pyplan MCP** — trigger: @mcp_tool, MCP tools, dynamic tools, OAuth MCP, §D, mcp_tool decorator (Pyplan projects)
 - **Decision Architecture** — trigger: data architecture, DW, staging, data sources, §A
 - **Data Discovery** — trigger: data delta, field mismatch, source discrepancy, data gap
+- **Pyplan Node Documentation** — trigger: auto after every Pyplan $build increment ($qa passes); or `$doc_increment`
+- **Generic Documentation** — trigger: auto after every non-Pyplan $build increment ($qa passes); or `$doc_increment`
+- **Doc Audit** — trigger: `$doc_audit`; post-delivery reconnect, client edited code without SDAD
 - **Dev Setup** — trigger: onboarding, dev setup, which Claude Code features complement SDAD (links to live docs)
 - **Harness** — trigger: control layer, harness model, governance axiom, E/T/C/S/L/V, enforcement in code vs prompt, $eval
 - **Pyplan Audit** — trigger: auto-activated by $audit; audit an existing Pyplan model, five-dimension client report (Pyplan projects)
@@ -388,6 +391,12 @@ PYPLAN INCREMENT CHECKLIST (runs after step 4 on Pyplan projects):
   Versioning (only when the increment modified the Pyplan model):
     □ Model exported to .sdad/pyplan-snapshots/ named YYYYMMDD-incN-slug.ppl
     □ Snapshot included in this increment's atomic commit
+  Documentation ($doc_increment — runs automatically after $qa passes):
+    □ NODE_REFERENCE.html updated — all changed nodes present
+    □ USER_GUIDE.html updated — all dashboards represented
+    □ DASHBOARD_MAP.json updated — timestamp and increment match
+    □ No [UNDOCUMENTED] or [ORPHAN NODE] flags left unresolved
+    □ docs/pyplan/ committed atomically with code
 
 BOARD INCREMENT CHECKLIST (runs after step 4 on Board projects):
   Data Model surface:
@@ -405,6 +414,12 @@ BOARD INCREMENT CHECKLIST (runs after step 4 on Board projects):
     □ Layout XML follows Board element and attribute naming conventions
   Discovery:
     □ Any schema or source deltas found during this increment recorded in §B and DECISIONS.md
+  Documentation ($doc_increment — runs automatically after $qa passes):
+    □ API_REFERENCE.md updated — new public functions/endpoints appended
+    □ CHANGELOG.md entry written for this increment
+    □ ARCHITECTURE.md AUTO-DETECTED blocks added for any new modules
+    □ No [UNDOCUMENTED] flags left unresolved
+    □ docs/ committed atomically with code
 
 DATA DELTA HANDLING (Pyplan projects):
   Small delta (format error, nulls, unexpected volume, wrong field name):
@@ -571,6 +586,25 @@ which owns the lifecycle, evidence contract, and severity reconciliation.
 
 All $doc outputs written directly to /docs in the repo.
 
+**$doc_increment** — Auto-Documentation per Increment. Triggered automatically after $qa passes.
+Delegates to pyplan-node-documentation (Pyplan projects) or generic-documentation (all others).
+
+  $doc_increment           → document current increment (git diff scope)
+  $doc_increment full      → full project re-scan (first run or after large gap)
+  $doc_increment [node_list] → Pyplan: document specific nodes only
+
+  Pyplan outputs (docs/pyplan/): NODE_REFERENCE.html · USER_GUIDE.html · DASHBOARD_MAP.json
+  Generic outputs (docs/):       API_REFERENCE.md · CHANGELOG.md · ARCHITECTURE.md (flagged)
+  Committed atomically with increment code.
+
+**$doc_audit** — Post-Delivery Documentation Audit. On-demand. No approved SPEC.md required.
+Compares current code/model state against last committed docs → flags gaps with [REVIEW] tags.
+
+  $doc_audit           → audit current branch
+  $doc_audit [branch]  → audit a specific branch
+  $doc_audit pyplan    → audit live Pyplan model via MCP
+  $doc_audit report    → gap report only (no doc writes)
+
 **$flow** — Project Flow Manager.
 
   $flow [name]       → define a new flow for this project
@@ -660,6 +694,10 @@ If nothing is lesson-worthy: skip silently — never mention it.
 - Mark compliance violations with 🔒 regardless of current phase.
 - Distinguish clearly: "must fix" / "should improve" / "style suggestion".
 - Lesson capture is silent when nothing is worth capturing — never force an entry.
+- After $qa passes on a Pyplan increment, run $doc_increment automatically (pyplan-node-documentation skill).
+- After $qa passes on a non-Pyplan increment, run $doc_increment automatically (generic-documentation skill).
+- $doc_increment is silent on first run if docs/ does not exist — create the directory and generate from scratch.
+- $doc_audit never auto-triggers — on-demand only; requires explicit developer invocation.
 - $qa auto never touches security, compliance, or Spec deviations without human approval.
 - Update SPEC.md §13 after every completed increment.
 - In Phase 0, detect UI presence and suggest frontend skill if applicable.
